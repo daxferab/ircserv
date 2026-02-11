@@ -1,4 +1,4 @@
-#include "../include/irc.h"
+#include "irc.h"
 
 static const char *g_error[] =
 {

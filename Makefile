@@ -9,7 +9,7 @@ MKDIR := mkdir -p
 NAME := ircserv
 
 CXX= c++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -fsanitize=address
 
 #FILES
 
@@ -18,7 +18,7 @@ OBJ_DIR := obj/
 INC_DIR := include/
 HEADER := $(INC_DIR)/irc.h
 
-VPATH :=  $(SRC_DIR) $(addprefix $(SRC_DIR), \
+VPATH := $(SRC_DIR) $(addprefix $(SRC_DIR), \
 # 				mlx\
 			)
 
@@ -48,7 +48,7 @@ RESET := \033[0m
 
 #EXTRA VARIABLES
 
-VALGRIND_DIR := valgrind/
+VALGRIND_DIR := .valgrind/
 
 #RULES
 
@@ -84,20 +84,10 @@ re: fclean all
 
 #EXTRA RULES
 
-.PHONY: e exec axis
+.PHONY: e exec
 e: exec
 exec: all
-	-./$(NAME) scenes/minimalist.rt
-axis: all
-	-./$(NAME) scenes/axis.rt
-
-.PHONY: n norminette normi
-n: norminette
-norminette:
-	@echo "norminette $(SRC_DIR) $(INC_DIR) | grep Error\n"
-	@if norminette $(SRC_DIR) $(INC_DIR) | grep -q "Error"; then echo "$(RED)$$(norminette $(SRC_DIR) $(INC_DIR) | grep "Error" | sed -z 's/\nError/\n\$(YELLOW)  Error/g' | sed -z 's/\n/\n\$(RED)/g')$(RESET)"; else echo "$(GREEN)Everything OK!$(RESET)"; fi
-normi:
-	@if norminette $(SRC_DIR) $(INC_DIR) | grep -q "Error"; then echo "\n$(RED)$$(norminette $(SRC_DIR) $(INC_DIR) | grep "Error" | grep -v -e "TOO_MANY_FUNCS" -e "WRONG_SCOPE_COMMENT" -e "EMPTY_LINE_FUNCTION" -e "LINE_TOO_LONG" -e "TOO_MANY_LINES" -e "CONSECUTIVE_NEWLINES" -e "INVALID_HEADER" | sed -z 's/\nError/\n\$(YELLOW)  Error/g' | sed -z 's/\n/\n\$(RED)/g')$(RESET)"; else echo "$(GREEN)Run full norminette!$(RESET)"; fi
+	-./$(NAME)
 
 .PHONY: v valgrind valgrind_no_flags
 v: valgrind
@@ -106,7 +96,7 @@ valgrind:
 valgrind_no_flags: clean $(OBJECTS) | $(VALGRIND_DIR)
 	@$(CXX) $(CXXFLAGS) $(OBJECTS) -o $(NAME)
 	@-valgrind --leak-check=full --show-leak-kinds=all --log-file=$(VALGRIND_DIR)$$(date +"%y%m%d%H%M%S").txt ././$(NAME) scenes/minimalist.rt
-	@echo "$(BLUE)$$(grep -e "ERROR SUMMARY" -e "lost:" -e "reachable:" $(VALGRIND_DIR)/$$(ls valgrind | tail -1))"
+	@echo "$(BLUE)$$(grep -e "ERROR SUMMARY" -e "lost:" -e "reachable:" $(VALGRIND_DIR)/$$(ls $(VALGRIND_DIR) | tail -1))"
 	@$(MAKE) clean
 
 $(VALGRIND_DIR):
@@ -114,7 +104,7 @@ $(VALGRIND_DIR):
 
 .PHONY: last_valgrind
 last_valgrind:
-	@cat $(VALGRIND_DIR)$$(ls valgrind | tail -1)
+	@cat $(VALGRIND_DIR)$$(ls $(VALGRIND_DIR) | tail -1)
 
 .PHONY: clean_valgrind
 clean_valgrind:

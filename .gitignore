@@ -1,0 +1,10 @@
+ircserv
+
+**/*.o
+**/*.a
+
+.vscode
+.valgrind
+obj
+
+*.pdf
