@@ -15,20 +15,17 @@ CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -fsanitize=address
 
 SRC_DIR := src/
 OBJ_DIR := obj/
-INC_DIR := include/
-HEADER := $(INC_DIR)/irc.h
 
 VPATH := $(SRC_DIR) $(addprefix $(SRC_DIR), \
-# 				mlx\
+ 				socket\
+     			utils\
 			)
 
 SOURCES :=	\
 			main.cpp\
 
-# SOURCES +=	\
-# 			close_hook.c\
-# 			key_hook.c\
-# 			loop_hook.c\
+SOURCES +=	\
+			SetUpServer.cpp\
 
 OBJECTS := $(addprefix $(OBJ_DIR), $(SOURCES:.cpp=.o))
 
@@ -57,7 +54,7 @@ $(NAME): $(OBJECTS)
 	@$(MAKE) msg_credits
 
 $(OBJ_DIR)%.o: %.cpp $(HEADER) | $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -I $(INC_DIR) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(OBJ_DIR):
 	$(MKDIR) $(OBJ_DIR)

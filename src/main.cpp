@@ -1,20 +1,19 @@
-#include "irc.h"
+#include "socket/SetUpServer.hpp"
+#include "utils/colors.h"
+#include <exception>
+#include <iostream>
 
-static const char *g_error[] =
+int	main(int ac, char* av[])
 {
-	"Usage: ./ircserv <port> <password>"
-};
+	if (ac != 3)
+	{
+		std::cerr << RED << "Usage: ./ircserv <port> <password>" << std::endl;
+		return 1;
+	}
 
-int	error(int i)
-{
-	std::cout << g_error[i] << std::endl;
-
-	return 1;
-}
-
-int	main(int argc, char *argv[])
-{
-	if (argc != 3)
-		return(error(0));
-	(void) argv;
+	try {
+		SetUpServer::listen(av[1]);
+	} catch (std::exception &e) {
+		std::cerr << RED << e.what() << std::endl;
+	}
 }
