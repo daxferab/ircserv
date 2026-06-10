@@ -1,4 +1,5 @@
-#include "socket/SetUpServer.hpp"
+#include "server/Server.hpp"
+#include "server/Client.hpp"
 #include "utils/colors.h"
 #include <exception>
 #include <iostream>
@@ -11,8 +12,9 @@ int	main(int ac, char* av[])
 		return 1;
 	}
 
+	Server server;
 	try {
-		SetUpServer::listen(av[1]);
+		server.init(av[1]);
 	} catch (std::exception &e) {
 		std::cerr << RED << e.what() << std::endl;
 	}

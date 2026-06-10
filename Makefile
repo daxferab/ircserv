@@ -17,7 +17,7 @@ SRC_DIR := src/
 OBJ_DIR := obj/
 
 VPATH := $(SRC_DIR) $(addprefix $(SRC_DIR), \
- 				socket\
+ 				server\
      			utils\
 			)
 
@@ -25,7 +25,8 @@ SOURCES :=	\
 			main.cpp\
 
 SOURCES +=	\
-			SetUpServer.cpp\
+			Client.cpp\
+			Server.cpp\
 
 OBJECTS := $(addprefix $(OBJ_DIR), $(SOURCES:.cpp=.o))
 
