@@ -7,7 +7,7 @@
 class Server
 {
 	private:
-		int				_fd;
+		int					_fd;
 		bool				_isRunning;
 		std::vector<Client>	_clients;
 
