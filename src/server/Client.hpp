@@ -4,11 +4,13 @@
 class Client
 {
 	private:
-		// Atributes
+		const int	_fd;
 
 	public:
-		Client();
+		Client(int fd);
 		~Client();
+
+		int	getfd() const;
 };
 
 #endif

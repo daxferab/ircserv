@@ -1,5 +1,4 @@
 #include "server/Server.hpp"
-#include "server/Client.hpp"
 #include "utils/colors.h"
 #include <exception>
 #include <iostream>

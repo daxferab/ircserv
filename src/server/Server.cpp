@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "Client.hpp"
 
 #include <netinet/in.h>
 #include <stdexcept>
@@ -6,12 +7,12 @@
 #include <sys/types.h>
 #include <netdb.h>
 #include <cstring>
-
 #include <unistd.h>
-#include <cstdio>
-#include <cerrno>
+#include <iostream>
+#include <vector>
+
 // ---------------------------------------------------------------- CONSTRUCTORS
-Server::Server() : _fd(-1){}
+Server::Server() : _fd(-1), _isRunning(false){}
 
 Server::~Server() {}
 
@@ -51,13 +52,41 @@ void	Server::init(char* port)
 		close(_fd);
 		throw std::runtime_error("Unable to listen");
 	}
+	_isRunning = true;
+	startListening();
+}
+
+void	Server::startListening()
+{
+	struct sockaddr_storage newConnection;									// Use sockaddr_storage so it works for both IPv4 and IPv6
+	socklen_t				newLength = sizeof(struct sockaddr_storage);	// Set to the max storage "newConnection" can have (will be modified if accept puts less)
+	int						clientfd;
 	
-	// //Once the socket is listening, start accepting connections
+	while (_isRunning)
+	{
+		clientfd = accept(_fd, reinterpret_cast<struct sockaddr *>(&newConnection), &newLength);
+		if (clientfd < 0)
+			throw std::runtime_error("Unable to accept");
+		newClient(clientfd);
+	}
+}
 
-	// struct sockaddr_storage newConnection;									// Use sockaddr_storage so it works for both IPv4 and IPv6
-	// socklen_t				newLength = sizeof(struct sockaddr_storage);	// Set to the max storage "newConnection" can have (will be modified if accept puts less)
+void	Server::newClient(int fd)
+{
+	Client newClient(fd);
+	std::cout << "Connected client with fd: " <<  fd << std::endl;
+	_clients.push_back(newClient);
+}
 
-	// if (accept(_fd, reinterpret_cast<struct sockaddr *>(&newConnection), &newLength) < 0)
-	// 	throw std::runtime_error("Unable to accept");
-	// printf("Connected\n");
+void	Server::disconnectClient(const int fd)
+{
+	close(fd);
+}
+
+void	Server::stop()
+{
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+		disconnectClient(it->getfd());
+	close(_fd);
+	std::cout << "------------ THISCORD SERVER CLOSED! ------------" << std::endl;
 }
