@@ -11,7 +11,7 @@ int	main(int ac, char* av[])
 		return 1;
 	}
 
-	Server server;
+	Server server(av[2]);
 	try {
 		server.init(av[1]);
 	} catch (std::exception &e) {

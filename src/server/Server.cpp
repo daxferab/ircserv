@@ -3,16 +3,21 @@
 
 #include <netinet/in.h>
 #include <stdexcept>
+#include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/epoll.h>
 #include <netdb.h>
 #include <cstring>
 #include <unistd.h>
 #include <iostream>
 #include <vector>
 
+#define MAX_EVENTS 16
+#define MAX_MSG_SIZE 512
+
 // ---------------------------------------------------------------- CONSTRUCTORS
-Server::Server() : _fd(-1), _isRunning(false){}
+Server::Server(std::string password) : _fd(-1), _isRunning(false), _password(password){}
 
 Server::~Server() {}
 
@@ -53,40 +58,72 @@ void	Server::init(char* port)
 		throw std::runtime_error("Unable to listen");
 	}
 	_isRunning = true;
-	startListening();
+	_startListening();
 }
 
-void	Server::startListening()
+void	Server::_startListening()
 {
-	struct sockaddr_storage newConnection;									// Use sockaddr_storage so it works for both IPv4 and IPv6
-	socklen_t				newLength = sizeof(struct sockaddr_storage);	// Set to the max storage "newConnection" can have (will be modified if accept puts less)
-	int						clientfd;
-	
+	int fdepoll = epoll_create1(0);
+	if (fdepoll < 0)
+		throw std::runtime_error("Error creating epoll");
+	struct epoll_event ev[MAX_EVENTS];
+	ev[0].events = EPOLLIN;
+	ev[0].data.fd = _fd;
+	epoll_ctl(fdepoll, EPOLL_CTL_ADD, _fd, ev);
 	while (_isRunning)
 	{
-		clientfd = accept(_fd, reinterpret_cast<struct sockaddr *>(&newConnection), &newLength);
-		if (clientfd < 0)
-			throw std::runtime_error("Unable to accept");
-		newClient(clientfd);
+		int n = epoll_wait(fdepoll, ev, MAX_EVENTS, -1);
+
+		for (int i = 0; i < n; i++)
+		{
+			int fd = ev[i].data.fd;
+			if (fd == _fd)
+			{
+				struct sockaddr_storage addr;
+				socklen_t addrlen = sizeof(addr);
+				int client_fd = accept(_fd, (struct sockaddr *)&addr, &addrlen);
+				struct epoll_event client_ev;
+				client_ev.events = EPOLLIN;
+				client_ev.data.fd = client_fd;
+				epoll_ctl(fdepoll, EPOLL_CTL_ADD, client_fd, &client_ev);
+				_addClient(client_fd);
+			}
+			else
+			{
+				char	message[MAX_MSG_SIZE + 1];
+				int		data = recv(fd, message, MAX_MSG_SIZE, 0);
+				if (data <= 0)
+				{
+					_disconnectClient(fd); //or fail if < 0
+					continue;
+				}
+				message[data] = '\0';
+				std::cout << "bytes: " << data << " msg: ";
+				std::cout.write(message, data);
+				std::cout << std::endl;
+			}
+		}
 	}
 }
 
-void	Server::newClient(int fd)
+void	Server::_addClient(int fd)
 {
-	Client newClient(fd);
+	Client		newClient(fd);
+
 	std::cout << "Connected client with fd: " <<  fd << std::endl;
 	_clients.push_back(newClient);
 }
 
-void	Server::disconnectClient(const int fd)
+void	Server::_disconnectClient(const int fd)
 {
 	close(fd);
 }
 
 void	Server::stop()
 {
+	_isRunning = false;
 	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
-		disconnectClient(it->getfd());
+		_disconnectClient(it->getfd());
 	close(_fd);
 	std::cout << "------------ THISCORD SERVER CLOSED! ------------" << std::endl;
 }

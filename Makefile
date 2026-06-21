@@ -9,7 +9,7 @@ MKDIR := mkdir -p
 NAME := ircserv
 
 CXX= c++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -fsanitize=address
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g3
 
 #FILES
 
@@ -25,6 +25,7 @@ SOURCES :=	\
 			main.cpp\
 
 SOURCES +=	\
+			Channel.cpp\
 			Client.cpp\
 			Server.cpp\
 
