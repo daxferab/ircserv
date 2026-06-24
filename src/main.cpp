@@ -13,7 +13,7 @@ int	main(int ac, char* av[])
 
 	Server server(av[2]);
 	try {
-		server.init(av[1]);
+		server.start(av[1]);
 	} catch (std::exception &e) {
 		std::cerr << RED << e.what() << std::endl;
 	}

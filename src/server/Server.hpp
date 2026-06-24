@@ -3,27 +3,35 @@
 
 #include "Channel.hpp"
 #include "Client.hpp"
+#include "Message.hpp"
 #include <string>
-#include <vector>
+#include <sys/epoll.h>
+#include <map>
 
 class Server
 {
 	private:
-		int						_fd;
-		bool					_isRunning;
-		std::vector<Client>		_clients;
-		std::vector<Channel>	_channels;
-		std::string				_password;
+		int								_fd;
+		int								_epoll;
+		bool							_isRunning;
+		std::map<int, Client>			_clients;
+		std::map<std::string, Channel>	_channels;
+		std::string						_password;
 
-		void	_startListening();
-		void	_addClient(int fd);
-		void	_disconnectClient(int fd);
+		void		_setupSocket(char* port);
+		void		_listenLoop();
+
+		void		_addClient(int fd);
+		void		_handleMessage(int fd);
+		void		_disconnectClient(Client& client);
 		
 	public:
 		Server(std::string password);
 		~Server();
-		void	init(char* port);
-		void	stop();
+		void		start(char* port);
+		void		stop();
 };
+
+epoll_event	newEvent(int fd, int flags);
 
 #endif

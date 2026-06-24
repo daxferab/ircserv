@@ -6,14 +6,23 @@
 class Client
 {
 	private:
-		const std::string	_nick;
-		const int			_fd;
+		const int	_fd;
+		std::string	_buffer;
+		
+		std::string	_nick;
+		std::string	_username;
+		std::string	_realName;
 
 	public:
 		Client(int fd);
 		~Client();
 
-		int	getfd() const;
+		std::string	getnick() const;
+		int			getfd() const;
+		
+		void		appendBuffer(char* msg, int data);
+		bool		hasFullLine() const;
+		std::string	getLine();
 };
 
 #endif

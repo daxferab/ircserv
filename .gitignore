@@ -4,7 +4,9 @@ ircserv
 **/*.a
 
 .vscode
+.github
 .valgrind
 obj
 
 *.pdf
+*.txt

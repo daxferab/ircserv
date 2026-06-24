@@ -27,6 +27,7 @@ SOURCES :=	\
 SOURCES +=	\
 			Channel.cpp\
 			Client.cpp\
+			Message.cpp\
 			Server.cpp\
 
 OBJECTS := $(addprefix $(OBJ_DIR), $(SOURCES:.cpp=.o))
@@ -86,7 +87,7 @@ re: fclean all
 .PHONY: e exec
 e: exec
 exec: all
-	-./$(NAME)
+	-./$(NAME) 6667 pass
 
 .PHONY: v valgrind valgrind_no_flags
 v: valgrind

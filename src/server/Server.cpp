@@ -1,6 +1,10 @@
 #include "Server.hpp"
 #include "Client.hpp"
+#include "Message.hpp"
+#include "../utils/colors.h"
 
+#include <cstdio>
+#include <exception>
 #include <netinet/in.h>
 #include <stdexcept>
 #include <string>
@@ -11,10 +15,11 @@
 #include <cstring>
 #include <unistd.h>
 #include <iostream>
-#include <vector>
+#include <utility>
 
 #define MAX_EVENTS 16
 #define MAX_MSG_SIZE 512
+#define LISTENING_QUEUE 5
 
 // ---------------------------------------------------------------- CONSTRUCTORS
 Server::Server(std::string password) : _fd(-1), _isRunning(false), _password(password){}
@@ -22,7 +27,17 @@ Server::Server(std::string password) : _fd(-1), _isRunning(false), _password(pas
 Server::~Server() {}
 
 // ------------------------------------------------------------ MEMBER FUNCTIONS
-void	Server::init(char* port)
+void	Server::start(char* port)
+{
+	try {
+		_setupSocket(port);
+		_listenLoop();
+	} catch (std::exception& e) {
+		throw;
+	}
+}
+
+void Server::_setupSocket(char* port)
 {
 	struct addrinfo	hints, *info;
 	
@@ -40,8 +55,8 @@ void	Server::init(char* port)
 		_fd = socket(it->ai_family, it->ai_socktype, 0);
 		if (_fd < 0) continue;
 
-		int yes = 1;
-		if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == 0 && bind(_fd, it->ai_addr, it->ai_addrlen) == 0)
+		int val = 1;
+		if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val)) == 0 && bind(_fd, it->ai_addr, it->ai_addrlen) == 0)
 		{
 			success = true;
 			break;
@@ -52,78 +67,106 @@ void	Server::init(char* port)
 	if (!success)
 		throw std::runtime_error("Unable to set up socket");
 
-	if (listen(_fd, 5) < 0)
+	if (listen(_fd, LISTENING_QUEUE) < 0)
 	{
 		close(_fd);
 		throw std::runtime_error("Unable to listen");
 	}
 	_isRunning = true;
-	_startListening();
+	std::cout << BLUE << "---------------- THISCORD RUNNING ----------------" << RESET << std::endl;
 }
 
-void	Server::_startListening()
+void	Server::_listenLoop()
 {
-	int fdepoll = epoll_create1(0);
-	if (fdepoll < 0)
+	_epoll = epoll_create1(0);
+	if (_epoll < 0)
 		throw std::runtime_error("Error creating epoll");
-	struct epoll_event ev[MAX_EVENTS];
-	ev[0].events = EPOLLIN;
-	ev[0].data.fd = _fd;
-	epoll_ctl(fdepoll, EPOLL_CTL_ADD, _fd, ev);
+	struct epoll_event	sock_ev = newEvent(_fd, EPOLLIN);
+	epoll_ctl(_epoll, EPOLL_CTL_ADD, _fd, &sock_ev);
+
 	while (_isRunning)
 	{
-		int n = epoll_wait(fdepoll, ev, MAX_EVENTS, -1);
+		struct epoll_event events[MAX_EVENTS];
+		int n = epoll_wait(_epoll, events, MAX_EVENTS, -1);
 
 		for (int i = 0; i < n; i++)
 		{
-			int fd = ev[i].data.fd;
+			int fd = events[i].data.fd;
 			if (fd == _fd)
 			{
 				struct sockaddr_storage addr;
 				socklen_t addrlen = sizeof(addr);
 				int client_fd = accept(_fd, (struct sockaddr *)&addr, &addrlen);
-				struct epoll_event client_ev;
-				client_ev.events = EPOLLIN;
-				client_ev.data.fd = client_fd;
-				epoll_ctl(fdepoll, EPOLL_CTL_ADD, client_fd, &client_ev);
 				_addClient(client_fd);
+			} else {
+				_handleMessage(fd);
 			}
-			else
-			{
-				char	message[MAX_MSG_SIZE + 1];
-				int		data = recv(fd, message, MAX_MSG_SIZE, 0);
-				if (data <= 0)
-				{
-					_disconnectClient(fd); //or fail if < 0
-					continue;
-				}
-				message[data] = '\0';
-				std::cout << "bytes: " << data << " msg: ";
-				std::cout.write(message, data);
-				std::cout << std::endl;
-			}
+		}
+	}
+}
+
+void	Server::_handleMessage(int fd)
+{
+	char	message[MAX_MSG_SIZE + 1];
+	int		data = recv(fd, message, MAX_MSG_SIZE, 0);
+	std::map<int, Client>::iterator it = _clients.find(fd);
+	if (it == _clients.end())
+		return;
+	if (data < 0)
+		std::cout << RED << "Error reading message from " << fd << RESET << std::endl;
+	else if (data == 0)
+		_disconnectClient(it->second);
+	else
+	{
+		Client& client = it->second;
+		client.appendBuffer(message, data);
+		while (client.hasFullLine())
+		{
+			std::string	line = client.getLine();
+			std::cout << "line: " << line << std::endl;
+			//_handleLine(line);
 		}
 	}
 }
 
 void	Server::_addClient(int fd)
 {
-	Client		newClient(fd);
+	struct epoll_event client_ev = newEvent(fd, EPOLLIN);
+	epoll_ctl(_epoll, EPOLL_CTL_ADD, fd, &client_ev);
 
-	std::cout << "Connected client with fd: " <<  fd << std::endl;
-	_clients.push_back(newClient);
+	std::pair<int, Client>	pair(fd, Client(fd));
+	_clients.insert(pair);
+
+	std::cout << GREEN << "Client " << fd << " connected" << RESET << std::endl;
 }
 
-void	Server::_disconnectClient(const int fd)
+void	Server::_disconnectClient(Client& client)
 {
+	int fd = client.getfd();
+	std::map<int, Client>::iterator it = _clients.find(fd);
+
+	std::cout << RED << "Client <" << client.getnick() << "> disconnected" << RESET << std::endl;
+	epoll_ctl(_epoll, EPOLL_CTL_DEL, fd, NULL);
+	if (it != _clients.end())
+		_clients.erase(it);
 	close(fd);
 }
 
 void	Server::stop()
 {
 	_isRunning = false;
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
-		_disconnectClient(it->getfd());
+	while (!_clients.empty())
+		_disconnectClient(_clients.begin()->second);
+	epoll_ctl(_epoll, EPOLL_CTL_DEL, _fd, NULL);
 	close(_fd);
-	std::cout << "------------ THISCORD SERVER CLOSED! ------------" << std::endl;
+	std::cout << RED << "------------ THISCORD SERVER CLOSED! ------------" << RESET << std::endl;
+}
+
+// ----------------------------------------------------------------------- UTILS
+epoll_event newEvent(int fd, int flags)
+{
+	epoll_event	ev;
+	ev.events = flags;
+	ev.data.fd = fd;
+	return ev;
 }
