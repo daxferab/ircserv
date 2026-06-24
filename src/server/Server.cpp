@@ -1,6 +1,5 @@
 #include "Server.hpp"
 #include "Client.hpp"
-#include "Message.hpp"
 #include "../utils/colors.h"
 
 #include <cstdio>

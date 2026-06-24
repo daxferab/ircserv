@@ -1,6 +1,5 @@
 #include "Message.hpp"
 
-#include <iostream>
 #include <sstream>
 #include <string>
 

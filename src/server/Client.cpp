@@ -1,8 +1,6 @@
 #include "Client.hpp"
 #include <string>
 
-#include <iostream>
-
 //----------------------------------------------------------------- CONSTRUCTORS
 
 Client::Client(int fd) : _fd(fd){}

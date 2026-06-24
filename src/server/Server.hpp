@@ -3,7 +3,6 @@
 
 #include "Channel.hpp"
 #include "Client.hpp"
-#include "Message.hpp"
 #include <string>
 #include <sys/epoll.h>
 #include <map>
