@@ -8,7 +8,9 @@ class Client
 	private:
 		const int	_fd;
 		std::string	_buffer;
-		
+
+		bool		_authenticated;
+		bool		_operator;
 		std::string	_nick;
 		std::string	_username;
 		std::string	_realName;

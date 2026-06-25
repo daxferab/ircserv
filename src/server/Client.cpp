@@ -3,7 +3,7 @@
 
 //----------------------------------------------------------------- CONSTRUCTORS
 
-Client::Client(int fd) : _fd(fd){}
+Client::Client(int fd) : _fd(fd), _authenticated(false) {}
 
 Client::~Client() {}
 
