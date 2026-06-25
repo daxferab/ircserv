@@ -37,7 +37,7 @@ void	Server::start(char* port)
 	}
 }
 
-void Server::_setupSocket(char* port)
+void	Server::_setupSocket(char* port)
 {
 	struct addrinfo	hints, *info;
 	

@@ -1,4 +1,5 @@
 #include "CommandHandler.hpp"
+#include <cstring>
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -7,10 +8,11 @@
 void	CommandHandler::execCommand(std::string line, Client& client)
 {
 	t_command command = _parseCommand(line);
-	std::cout << "line: " << line << std::endl;
-	
-	(void)command;
-	(void)client;
+
+	// switch (command.command)
+	// {
+		
+	// }
 }
 
 //------------------------------------------------------------ PRIVATE FUNCTIONS
@@ -18,21 +20,32 @@ void	CommandHandler::execCommand(std::string line, Client& client)
 t_command	CommandHandler::_parseCommand(const std::string& line)
 {
 	t_command			command;
-	std::stringstream	ss;
+	std::stringstream	ss(line);
+	std::string			word;
 
-	ss << line;
 	command.prefix = "";
-	if (!ss.fail() && ss.str()[0] == ':')
+
+	if (!(ss >> word)) return command;
+
+	if (word[0] == ':')
 	{
-		command.prefix = ss.str();
-		ss << line;
+		command.prefix = word;
+		if (!(ss >> word))
+			return command;
 	}
-	command.command = ss.str();
-	ss << line;
-	// while (!ss.fail())
-	// {
-	// 	command.params.push_back(ss.str());
-	// 	ss << line;
-	// }
+	command.command = word;
+
+	while (ss >> word)
+	{
+		if (word[0] == ':')
+		{
+			command.params.push_back(word.substr(1));
+			std::getline(ss, word);
+			if (!word.empty())
+				command.params.back() += word;
+			break;
+		}
+		command.params.push_back(word);
+	}
 	return command;
 }
