@@ -1,25 +1,38 @@
 #include "CommandHandler.hpp"
+#include <string>
+#include <iostream>
+#include <sstream>
 
 //------------------------------------------------------------- MEMBER FUNCTIONS
-void	CommandHandler::_execCommand(std::string line, Client& client)
+void	CommandHandler::execCommand(std::string line, Client& client)
 {
-	(void)line;
+	t_command command = _parseCommand(line);
+	std::cout << "line: " << line << std::endl;
+	
+	(void)command;
 	(void)client;
-	// std::string			msg = message;
-	// std::stringstream	ss;
+}
 
-	// ss << msg;
-	// _prefix = "";
-	// if (!ss.fail() && ss.str()[0] == ':')
-	// {
-	// 	_prefix = ss.str();
-	// 	ss << msg;
-	// }
-	// _command = ss.str();
-	// ss << msg;
+//------------------------------------------------------------ PRIVATE FUNCTIONS
+
+t_command	CommandHandler::_parseCommand(const std::string& line)
+{
+	t_command			command;
+	std::stringstream	ss;
+
+	ss << line;
+	command.prefix = "";
+	if (!ss.fail() && ss.str()[0] == ':')
+	{
+		command.prefix = ss.str();
+		ss << line;
+	}
+	command.command = ss.str();
+	ss << line;
 	// while (!ss.fail())
 	// {
-	// 	_args.push_back(ss.str());
-	// 	ss << msg;
+	// 	command.params.push_back(ss.str());
+	// 	ss << line;
 	// }
+	return command;
 }

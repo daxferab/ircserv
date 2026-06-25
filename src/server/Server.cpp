@@ -123,8 +123,7 @@ void	Server::_handleMessage(int fd)
 		while (client.hasFullLine())
 		{
 			std::string	line = client.getLine();
-			std::cout << "line: " << line << std::endl;
-			CommandHandler::_execCommand(line, client);
+			CommandHandler::execCommand(line, client);
 		}
 	}
 }
