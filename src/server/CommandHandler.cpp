@@ -3,6 +3,8 @@
 //------------------------------------------------------------- MEMBER FUNCTIONS
 void	CommandHandler::_execCommand(std::string line, Client& client)
 {
+	(void)line;
+	(void)client;
 	// std::string			msg = message;
 	// std::stringstream	ss;
 
