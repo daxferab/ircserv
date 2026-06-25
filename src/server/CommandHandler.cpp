@@ -9,10 +9,21 @@ void	CommandHandler::execCommand(std::string line, Client& client)
 {
 	t_command command = _parseCommand(line);
 
-	// switch (command.command)
-	// {
-		
-	// }
+	switch (command.command)
+	{
+		case PASS:
+			// _pass(command, client);
+			break;
+		case NICK:
+			// _pass(command, client);
+			break;
+		case USER:
+			// _pass(command, client);
+			break;
+		case NONE:
+			;// handle invalid command
+	}
+	(void)client;
 }
 
 //------------------------------------------------------------ PRIVATE FUNCTIONS
@@ -33,7 +44,7 @@ t_command	CommandHandler::_parseCommand(const std::string& line)
 		if (!(ss >> word))
 			return command;
 	}
-	command.command = word;
+	command.command = getCommand(word); // normalize to uppercase
 
 	while (ss >> word)
 	{
@@ -48,4 +59,12 @@ t_command	CommandHandler::_parseCommand(const std::string& line)
 		command.params.push_back(word);
 	}
 	return command;
+}
+
+t_comnum	getCommand(std::string word)
+{
+	if (word == "PASS") return PASS;
+	if (word == "NICK") return NICK;
+	if (word == "USER") return USER;
+	return NONE;
 }
