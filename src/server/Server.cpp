@@ -141,10 +141,10 @@ void	Server::_addClient(int fd)
 
 void	Server::_disconnectClient(Client& client)
 {
-	int fd = client.getfd();
+	int fd = client.getFd();
 	std::map<int, Client>::iterator it = _clients.find(fd);
 
-	std::cout << RED << "Client <" << client.getnick() << "> disconnected" << RESET << std::endl;
+	std::cout << RED << "Client <" << client.getNick() << "> disconnected" << RESET << std::endl;
 	epoll_ctl(_epoll, EPOLL_CTL_DEL, fd, NULL);
 	if (it != _clients.end())
 		_clients.erase(it);

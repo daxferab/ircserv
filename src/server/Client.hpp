@@ -19,8 +19,10 @@ class Client
 		Client(int fd);
 		~Client();
 
-		std::string	getnick() const;
-		int			getfd() const;
+		std::string	getNick() const;
+		int			getFd() const;
+		bool		getAuthenticated() const;
+		void		setAuthenticated(const bool value);
 		
 		void		appendBuffer(char* msg, int data);
 		bool		hasFullLine() const;

@@ -49,3 +49,25 @@ t_command	CommandHandler::_parseCommand(const std::string& line)
 	}
 	return command;
 }
+
+void	CommandHandler::_pass(t_command& command, Client& client)
+{
+	if (command.params.empty())//TODO && server has password
+	{
+		std::cout << "Client " << client.getFd() << " tries a non password\n";//TODO remove when the error return correctly
+		return ;//TODO return ERR_NEEDMOREPARAMS 461
+	}
+	else if (client.getAuthenticated())
+	{
+		std::cout << "Client " << client.getFd() << " is already registered\n";//TODO remove when the error return correctly
+		return ;//TODO return ERR_ALREADYREGISTERED 462
+	}
+/* 	else if (server has password && command.params[0] != server password)
+	{
+		std::cout << "Client " << client.getFd() << " can't register with password " << command.params[0] << std::endl;//TODO remove when the error return correctly
+		return ;//TODO return ERR_PASSWDMISMATCH 464
+	} */
+
+	client.setAuthenticated(true);
+	std::cout << "Client " << client.getFd() << " gets authenticated with password " << command.params[0] << std::endl;
+}

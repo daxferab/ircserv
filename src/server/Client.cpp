@@ -8,14 +8,24 @@ Client::Client(int fd) : _fd(fd), _authenticated(false) {}
 Client::~Client() {}
 
 //------------------------------------------------------------- GETTERS /SETTERS
-std::string Client::getnick() const
+std::string Client::getNick() const
 {
-	return _nick.empty() ? "" : _nick; 
+	return _nick.empty() ? "" : _nick;
 }
 
-int Client::getfd() const
+int Client::getFd() const
 {
 	return _fd;
+}
+
+bool	Client::getAuthenticated() const
+{
+	return _authenticated;
+}
+
+void	Client::setAuthenticated(const bool value)
+{
+	_authenticated = value;
 }
 
 //------------------------------------------------------------- MEMBER FUNCTIONS
