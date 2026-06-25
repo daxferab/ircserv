@@ -1,6 +1,7 @@
 #include "Server.hpp"
 #include "Client.hpp"
 #include "../utils/colors.h"
+#include "CommandHandler.hpp"
 
 #include <cstdio>
 #include <exception>
@@ -123,7 +124,7 @@ void	Server::_handleMessage(int fd)
 		{
 			std::string	line = client.getLine();
 			std::cout << "line: " << line << std::endl;
-			//_handleLine(line);
+			CommandHandler::_execCommand(line, client);
 		}
 	}
 }
