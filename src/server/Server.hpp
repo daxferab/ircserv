@@ -17,7 +17,7 @@ class Server
 		std::map<std::string, Channel>	_channels;
 		const std::string				_password;
 
-		void		_setupSocket(char* port);
+		void		_setup(char* port);
 		void		_listenLoop();
 
 		void		_addClient(const int fd);

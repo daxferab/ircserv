@@ -30,14 +30,14 @@ Server::~Server() {}
 void	Server::start(char* port)
 {
 	try {
-		_setupSocket(port);
+		_setup(port);
 		_listenLoop();
 	} catch (std::exception& e) {
 		throw;
 	}
 }
 
-void	Server::_setupSocket(char* port)
+void	Server::_setup(char* port)
 {
 	struct addrinfo	hints, *info;
 	
