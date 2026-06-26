@@ -24,6 +24,8 @@ class CommandHandler
 {
 	private:
 		static t_command	_parseCommand(const std::string& line);
+		static void			_pass(t_command& command, Client& client);
+
 	public:
 		static void			execCommand(std::string line, Client& client);
 };
