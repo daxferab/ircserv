@@ -19,3 +19,14 @@ int	main(int ac, char* av[])
 		std::cerr << RED << e.what() << std::endl;
 	}
 }
+
+/*  TODO list
+Commands
+Make fds non-blocking
+Insert communication with clients into epoll (send())
+Handle signals
+
+
+Check memory leaks (final)
+Check normi (haha no)
+ */
