@@ -24,6 +24,7 @@ class Server
 		void		_eventLoop();
 
 		void		_readFd(const int fd);
+		void		_handleLine(Client& client, char* line, int data);
 		void		_addClient(const int fd);
 		void		_disconnectClient(Client& client);
 		

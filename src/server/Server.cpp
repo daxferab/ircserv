@@ -121,16 +121,17 @@ void	Server::_readFd(const int fd)
 	else if (data == 0)
 		_disconnectClient(it->second);
 	else
+		_handleLine(it->second, line, data);
+}
+
+void	Server::_handleLine(Client& client, char* line, int data)
+{
+	client.appendBuffer(line, data);
+	while (client.hasFullLine())
 	{
-		//_handleLine()
-		Client& client = it->second;
-		client.appendBuffer(line, data);
-		while (client.hasFullLine())
-		{
-			Message	message(client.getLine());
-			if (message.isValid())
-				CommandHandler::execCommand(message, client);
-		}
+		Message	message(client.getLine());
+		if (message.isValid())
+			CommandHandler::execCommand(message, client);
 	}
 }
 
