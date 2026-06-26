@@ -23,8 +23,8 @@ class Server
 		void		_initEpoll();
 		void		_eventLoop();
 
+		void		_readClientInput(const int fd);
 		void		_addClient(const int fd);
-		void		_handleMessage(const int fd);
 		void		_disconnectClient(Client& client);
 		
 	public:

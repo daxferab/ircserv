@@ -103,13 +103,13 @@ void	Server::_eventLoop()
 				int client_fd = accept(_fd, (struct sockaddr *)&addr, &addrlen);
 				_addClient(client_fd);
 			} else {
-				_handleMessage(fd);
+				_readClientInput(fd);
 			}
 		}
 	}
 }
 
-void	Server::_handleMessage(const int fd)
+void	Server::_readClientInput(const int fd)
 {
 	char	message[MAX_MSG_SIZE + 1];
 	int		data = recv(fd, message, MAX_MSG_SIZE, 0);
