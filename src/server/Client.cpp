@@ -18,7 +18,7 @@ int Client::getFd() const
 	return _fd;
 }
 
-bool	Client::getAuthenticated() const
+bool	Client::isAuthenticated() const
 {
 	return _authenticated;
 }

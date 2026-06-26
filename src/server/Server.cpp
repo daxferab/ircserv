@@ -27,6 +27,7 @@ Server::Server(std::string password) : _fd(-1), _isRunning(false), _password(pas
 Server::~Server() {}
 
 // ------------------------------------------------------------ MEMBER FUNCTIONS
+// --------------------------- PRIVATE FUNCTIONS
 void	Server::start(char* port)
 {
 	try {
@@ -37,6 +38,44 @@ void	Server::start(char* port)
 		throw;
 	}
 }
+
+void	Server::stop()
+{
+	_isRunning = false;
+	while (!_clients.empty())
+		_disconnectClient(_clients.begin()->second);
+	epoll_ctl(_epoll, EPOLL_CTL_DEL, _fd, NULL);
+	close(_fd);
+	std::cout << RED << "------------ THISCORD SERVER CLOSED! ------------" << RESET << std::endl;
+}
+
+bool	Server::authClient(Client& client, std::string pass)
+{
+	std::cout << "user pass: " << pass << ", server pass: " << _password << std::endl;
+	if (client.isAuthenticated())
+	{
+		std::cout << "Client " << client.getFd() << " is already registered\n";//TODO remove when the error return correctly
+		return false;//TODO return ERR_ALREADYREGISTERED 462
+	}
+	else if (pass.empty())
+	{
+		std::cout << "Client " << client.getFd() << " tries a non password\n";//TODO remove when the error return correctly
+		return false;//TODO return ERR_NEEDMOREPARAMS 461
+	}
+	else if (pass != _password)
+	{
+		std::cout << "Client " << client.getFd() << " can't register with password " << pass << std::endl;//TODO remove when the error return correctly
+		return false;//TODO return ERR_PASSWDMISMATCH 464
+	}
+	else
+	{
+		client.setAuthenticated(true);
+		std::cout << "Client " << client.getFd() << " gets authenticated with password " << pass << std::endl;
+		return true;
+	}
+}
+
+// --------------------------- PUBLIC EFUNCTIONS
 
 void	Server::_setup(char* port)
 {
@@ -131,7 +170,7 @@ void	Server::_handleLine(Client& client, char* line, int data)
 	{
 		Message	message(client.getLine());
 		if (message.isValid())
-			CommandHandler::execCommand(message, client);
+			CommandHandler::execCommand(message, client, *this);
 	}
 }
 
@@ -142,7 +181,6 @@ void	Server::_addClient(const int fd)
 
 	std::pair<int, Client>	pair(fd, Client(fd));
 	_clients.insert(pair);
-
 	std::cout << GREEN << "Client " << fd << " connected" << RESET << std::endl;
 }
 
@@ -156,16 +194,6 @@ void	Server::_disconnectClient(Client& client)
 	if (it != _clients.end())
 		_clients.erase(it);
 	close(fd);
-}
-
-void	Server::stop()
-{
-	_isRunning = false;
-	while (!_clients.empty())
-		_disconnectClient(_clients.begin()->second);
-	epoll_ctl(_epoll, EPOLL_CTL_DEL, _fd, NULL);
-	close(_fd);
-	std::cout << RED << "------------ THISCORD SERVER CLOSED! ------------" << RESET << std::endl;
 }
 
 // ----------------------------------------------------------------------- UTILS

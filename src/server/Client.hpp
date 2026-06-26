@@ -21,7 +21,7 @@ class Client
 
 		std::string	getNick() const;
 		int			getFd() const;
-		bool		getAuthenticated() const;
+		bool		isAuthenticated() const;
 		void		setAuthenticated(const bool value);
 		
 		void		appendBuffer(char* msg, int data);

@@ -33,6 +33,8 @@ class Server
 		~Server();
 		void		start(char* port);
 		void		stop();
+
+		bool		authClient(Client& client, std::string pass);
 };
 
 epoll_event	newEvent(int fd, int flags);
