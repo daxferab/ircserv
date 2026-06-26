@@ -1,35 +1,18 @@
 #ifndef COMMANDHANDLER_HPP
 #define COMMANDHANDLER_HPP
 
-#include <string>
-#include <vector>
 #include "Client.hpp"
-
-typedef enum e_comnum
-{
-	PASS,
-	NICK,
-	USER,
-	NONE,
-} t_comnum;
-
-typedef struct s_command
-{
-	std::string					prefix;
-	t_comnum					command;
-	std::vector<std::string>	params;
-} t_command;
+#include "Message.hpp"
 
 class CommandHandler
 {
 	private:
-		static t_command	_parseCommand(const std::string& line);
-		static void			_pass(t_command& command, Client& client);
+		static void			_pass(Message& command, Client& client);
 
 	public:
-		static void			execCommand(std::string line, Client& client);
+		static void			execCommand(Message& command, Client& client);
 };
 
-t_comnum	getCommand(std::string word);
+
 
 #endif

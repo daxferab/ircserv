@@ -28,6 +28,7 @@ SOURCES +=	\
 			Channel.cpp\
 			Client.cpp\
 			CommandHandler.cpp\
+			Message.cpp\
 			Server.cpp\
 
 OBJECTS := $(addprefix $(OBJ_DIR), $(SOURCES:.cpp=.o))

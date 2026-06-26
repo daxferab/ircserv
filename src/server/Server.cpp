@@ -18,7 +18,7 @@
 #include <utility>
 
 #define MAX_EVENTS 16
-#define MAX_MSG_SIZE 512
+#define BUFFERSIZE 512
 #define LISTENING_QUEUE 5
 
 // ---------------------------------------------------------------- CONSTRUCTORS
@@ -111,23 +111,25 @@ void	Server::_eventLoop()
 
 void	Server::_readClientInput(const int fd)
 {
-	char	message[MAX_MSG_SIZE + 1];
-	int		data = recv(fd, message, MAX_MSG_SIZE, 0);
+	char	line[BUFFERSIZE + 1];
+	int		data = recv(fd, line, BUFFERSIZE, 0);
 	std::map<int, Client>::iterator it = _clients.find(fd);
 	if (it == _clients.end())
-		return;
+		return;	
 	if (data < 0)
 		std::cout << RED << "Error reading message from " << fd << RESET << std::endl;
 	else if (data == 0)
 		_disconnectClient(it->second);
 	else
 	{
+		//_handleLine()
 		Client& client = it->second;
-		client.appendBuffer(message, data);
+		client.appendBuffer(line, data);
 		while (client.hasFullLine())
 		{
-			std::string	line = client.getLine();
-			CommandHandler::execCommand(line, client);
+			Message	message(client.getLine());
+			if (message.isValid())
+				CommandHandler::execCommand(message, client);
 		}
 	}
 }
