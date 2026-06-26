@@ -15,13 +15,13 @@ class Server
 		bool							_isRunning;
 		std::map<int, Client>			_clients;
 		std::map<std::string, Channel>	_channels;
-		std::string						_password;
+		const std::string				_password;
 
 		void		_setupSocket(char* port);
 		void		_listenLoop();
 
-		void		_addClient(int fd);
-		void		_handleMessage(int fd);
+		void		_addClient(const int fd);
+		void		_handleMessage(const int fd);
 		void		_disconnectClient(Client& client);
 		
 	public:

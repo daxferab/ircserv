@@ -105,7 +105,7 @@ void	Server::_listenLoop()
 	}
 }
 
-void	Server::_handleMessage(int fd)
+void	Server::_handleMessage(const int fd)
 {
 	char	message[MAX_MSG_SIZE + 1];
 	int		data = recv(fd, message, MAX_MSG_SIZE, 0);
@@ -128,7 +128,7 @@ void	Server::_handleMessage(int fd)
 	}
 }
 
-void	Server::_addClient(int fd)
+void	Server::_addClient(const int fd)
 {
 	struct epoll_event client_ev = newEvent(fd, EPOLLIN);
 	epoll_ctl(_epoll, EPOLL_CTL_ADD, fd, &client_ev);
