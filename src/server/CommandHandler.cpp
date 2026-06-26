@@ -5,6 +5,8 @@
 //------------------------------------------------------------- MEMBER FUNCTIONS
 void	CommandHandler::execCommand(Message& command, Client& client, Server& server)
 {
+	if (command.getCommand() != PASS || !client.isAuthenticated())
+		{}// ERR_NOTREGISTERED 451
 	switch (command.getCommand())
 	{
 		case PASS:
