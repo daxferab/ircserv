@@ -31,7 +31,7 @@ void	Server::start(char* port)
 {
 	try {
 		_setup(port);
-		_listenLoop();
+		_eventLoop();
 	} catch (std::exception& e) {
 		throw;
 	}
@@ -49,23 +49,9 @@ void	Server::_setup(char* port)
 	if (getaddrinfo(NULL, port, &hints, &info) != 0)
 		throw std::runtime_error("Network resolution failed");
 
-	bool	success = false;
-	for(struct addrinfo *it = info;it != NULL; it = it->ai_next)
-	{
-		_fd = socket(it->ai_family, it->ai_socktype, 0);
-		if (_fd < 0) continue;
-
-		int val = 1;
-		if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val)) == 0 && bind(_fd, it->ai_addr, it->ai_addrlen) == 0)
-		{
-			success = true;
-			break;
-		}
-		close(_fd);
-	}
-	freeaddrinfo(info);
-	if (!success)
+	if (!_createSocket(info))
 		throw std::runtime_error("Unable to set up socket");
+	freeaddrinfo(info);
 
 	if (listen(_fd, LISTENING_QUEUE) < 0)
 	{
@@ -76,7 +62,22 @@ void	Server::_setup(char* port)
 	std::cout << BLUE << "---------------- THISCORD RUNNING ----------------" << RESET << std::endl;
 }
 
-void	Server::_listenLoop()
+bool	Server::_createSocket(struct addrinfo *info)
+{
+	for(struct addrinfo *it = info;it != NULL; it = it->ai_next)
+	{
+		_fd = socket(it->ai_family, it->ai_socktype, 0);
+		if (_fd < 0) continue;
+
+		int val = 1;
+		if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val)) == 0 && bind(_fd, it->ai_addr, it->ai_addrlen) == 0)
+			return true;
+		close(_fd);
+	}
+	return false;
+}
+
+void	Server::_eventLoop()
 {
 	_epoll = epoll_create1(0);
 	if (_epoll < 0)

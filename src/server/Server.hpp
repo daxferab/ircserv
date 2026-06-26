@@ -3,6 +3,7 @@
 
 #include "Channel.hpp"
 #include "Client.hpp"
+#include <netdb.h>
 #include <string>
 #include <sys/epoll.h>
 #include <map>
@@ -18,7 +19,8 @@ class Server
 		const std::string				_password;
 
 		void		_setup(char* port);
-		void		_listenLoop();
+		bool		_createSocket(struct addrinfo *info);
+		void		_eventLoop();
 
 		void		_addClient(const int fd);
 		void		_handleMessage(const int fd);
