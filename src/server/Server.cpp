@@ -103,13 +103,13 @@ void	Server::_eventLoop()
 				int client_fd = accept(_fd, (struct sockaddr *)&addr, &addrlen);
 				_addClient(client_fd);
 			} else {
-				_readClientInput(fd);
+				_readFd(fd);
 			}
 		}
 	}
 }
 
-void	Server::_readClientInput(const int fd)
+void	Server::_readFd(const int fd)
 {
 	char	line[BUFFERSIZE + 1];
 	int		data = recv(fd, line, BUFFERSIZE, 0);
