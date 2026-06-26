@@ -31,6 +31,7 @@ void	Server::start(char* port)
 {
 	try {
 		_setup(port);
+		_initEpoll();
 		_eventLoop();
 	} catch (std::exception& e) {
 		throw;
@@ -39,7 +40,7 @@ void	Server::start(char* port)
 
 void	Server::_setup(char* port)
 {
-	struct addrinfo	hints, *info;
+	struct addrinfo	hints, *info; //NOTE: dont know if we need to free hints
 	
 	std::memset(&hints, 0, sizeof(hints));		// remove garbage data
 	hints.ai_family = AF_UNSPEC;				// Allow IPv4 or IPv6
@@ -48,7 +49,6 @@ void	Server::_setup(char* port)
 
 	if (getaddrinfo(NULL, port, &hints, &info) != 0)
 		throw std::runtime_error("Network resolution failed");
-
 	if (!_createSocket(info))
 		throw std::runtime_error("Unable to set up socket");
 	freeaddrinfo(info);
@@ -77,14 +77,17 @@ bool	Server::_createSocket(struct addrinfo *info)
 	return false;
 }
 
-void	Server::_eventLoop()
+void	Server::_initEpoll()
 {
 	_epoll = epoll_create1(0);
 	if (_epoll < 0)
 		throw std::runtime_error("Error creating epoll");
 	struct epoll_event	sock_ev = newEvent(_fd, EPOLLIN);
 	epoll_ctl(_epoll, EPOLL_CTL_ADD, _fd, &sock_ev);
+}
 
+void	Server::_eventLoop()
+{
 	while (_isRunning)
 	{
 		struct epoll_event events[MAX_EVENTS];

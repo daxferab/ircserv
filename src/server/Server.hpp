@@ -20,6 +20,7 @@ class Server
 
 		void		_setup(char* port);
 		bool		_createSocket(struct addrinfo *info);
+		void		_initEpoll();
 		void		_eventLoop();
 
 		void		_addClient(const int fd);
