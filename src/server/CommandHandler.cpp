@@ -8,7 +8,7 @@ void	CommandHandler::execCommand(Message& command, Client& client, Server& serve
 {
 	if (command.getCommand() != PASS || !client.isAuthenticated())
 		{
-			std::cout << "user " << client.getNick() << " not registered" << std::endl;
+			std::cout << "user " << client << " not registered" << std::endl;
 			return;
 		}// ERR_NOTREGISTERED 451
 	switch (command.getCommand())
