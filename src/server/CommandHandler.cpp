@@ -1,16 +1,17 @@
 #include "CommandHandler.hpp"
 #include "Message.hpp"
+#include "Server.hpp"
 #include <cstring>
 #include <iostream>
 
 //------------------------------------------------------------- MEMBER FUNCTIONS
 void	CommandHandler::execCommand(Message& command, Client& client, Server& server)
 {
-	if (command.getCommand() != PASS || !client.isAuthenticated())
-		{
-			std::cout << "user " << client << " not registered" << std::endl;
-			return;
-		}// ERR_NOTREGISTERED 451
+	if (command.getCommand() != PASS && !client.isAuthenticated())
+	{
+		std::cout << "user " << client << " not registered" << std::endl;
+		return;
+	}// ERR_NOTREGISTERED 451
 	switch (command.getCommand())
 	{
 		case PASS:
@@ -34,10 +35,14 @@ void	CommandHandler::_pass(const Message& command, Client& client, const Server&
 {
 	if (command.getParams().empty())
 		server.authClient(client, "");
-	server.authClient(client, command.getParams()[0]);
+	else
+		server.authClient(client, command.getParams()[0]);
 }
 
 void	CommandHandler::_nick(const Message& command, Client& client, const Server& server)
 {
-	
+	if (command.getParams().empty())
+		server.setClientNick(client, "");
+	else
+		server.setClientNick(client, command.getParams()[0]);
 }

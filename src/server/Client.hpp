@@ -20,6 +20,7 @@ class Client
 		~Client();
 
 		std::string	getNick() const;
+		void		setNick(const std::string nick);
 		int			getFd() const;
 		bool		isAuthenticated() const;
 		void		setAuthenticated(const bool value);

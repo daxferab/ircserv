@@ -27,6 +27,8 @@ class Server
 		void		_handleLine(Client& client, char* line, int data);
 		void		_addClient(const int fd);
 		void		_disconnectClient(Client& client);
+
+		bool		_nickInUse(const std::string nick) const;
 		
 	public:
 		Server(std::string password);
@@ -35,6 +37,7 @@ class Server
 		void		stop();
 
 		bool		authClient(Client& client, const std::string pass) const;
+		void		setClientNick(Client& client, const std::string nick) const;
 };
 
 epoll_event	newEvent(int fd, int flags);

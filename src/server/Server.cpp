@@ -5,6 +5,7 @@
 
 #include <cstdio>
 #include <exception>
+#include <map>
 #include <netinet/in.h>
 #include <stdexcept>
 #include <string>
@@ -72,6 +73,17 @@ bool	Server::authClient(Client& client, const std::string pass) const
 		std::cout << "Client " << client << " gets authenticated with password " << pass << std::endl;
 		return true;
 	}
+}
+
+void	Server::setClientNick(Client& client, const std::string nick) const
+{
+	if (nick.empty())
+		return ; // TODO ERR_NONICKNAMEGIVEN (431)
+	// if (/*nick[0] is reserved char  {'#', '=', '&', ' '}*/)
+	// 	return ; // TODO ERR_ERRONEUSNICKNAME (432)
+	if (_nickInUse(nick))
+		return ; // TODO ERR_NICKNAMEINUSE (433)
+	client.setNick(nick);
 }
 
 // --------------------------- PUBLIC EFUNCTIONS
@@ -193,6 +205,13 @@ void	Server::_disconnectClient(Client& client)
 	if (it != _clients.end())
 		_clients.erase(it);
 	close(fd);
+}
+
+bool	Server::_nickInUse(const std::string nick) const
+{
+	for (std::map<int, Client>::const_iterator it = _clients.begin(); it != _clients.end();it++)
+		if (it->second.getNick().compare(nick) == 0) return true;
+	return false;
 }
 
 // ----------------------------------------------------------------------- UTILS
