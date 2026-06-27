@@ -49,9 +49,8 @@ void	Server::stop()
 	std::cout << RED << "------------ THISCORD SERVER CLOSED! ------------" << RESET << std::endl;
 }
 
-bool	Server::authClient(Client& client, std::string pass)
+bool	Server::authClient(Client& client, std::string pass) const
 {
-	std::cout << "user pass: " << pass << ", server pass: " << _password << std::endl;
 	if (client.isAuthenticated())
 	{
 		std::cout << "Client " << client.getFd() << " is already registered\n";//TODO remove when the error return correctly
