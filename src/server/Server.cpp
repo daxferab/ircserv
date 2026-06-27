@@ -49,27 +49,27 @@ void	Server::stop()
 	std::cout << RED << "------------ THISCORD SERVER CLOSED! ------------" << RESET << std::endl;
 }
 
-bool	Server::authClient(Client& client, std::string pass) const
+bool	Server::authClient(Client& client, const std::string pass) const
 {
 	if (client.isAuthenticated())
 	{
-		std::cout << "Client " << client.getFd() << " is already registered\n";//TODO remove when the error return correctly
+		std::cout << "Client " << client << " is already registered\n";//TODO remove when the error return correctly
 		return false;//TODO return ERR_ALREADYREGISTERED 462
 	}
 	else if (pass.empty())
 	{
-		std::cout << "Client " << client.getFd() << " tries a non password\n";//TODO remove when the error return correctly
+		std::cout << "Client " << client << " tries a non password\n";//TODO remove when the error return correctly
 		return false;//TODO return ERR_NEEDMOREPARAMS 461
 	}
 	else if (pass != _password)
 	{
-		std::cout << "Client " << client.getFd() << " can't register with password " << pass << std::endl;//TODO remove when the error return correctly
+		std::cout << "Client " << client << " can't register with password " << pass << std::endl;//TODO remove when the error return correctly
 		return false;//TODO return ERR_PASSWDMISMATCH 464
 	}
 	else
 	{
 		client.setAuthenticated(true);
-		std::cout << "Client " << client.getFd() << " gets authenticated with password " << pass << std::endl;
+		std::cout << "Client " << client << " gets authenticated with password " << pass << std::endl;
 		return true;
 	}
 }

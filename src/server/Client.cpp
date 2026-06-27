@@ -1,4 +1,5 @@
 #include "Client.hpp"
+#include <ostream>
 #include <string>
 
 //----------------------------------------------------------------- CONSTRUCTORS
@@ -48,3 +49,13 @@ std::string	Client::getLine()
 	return (line);
 }
 
+//----------------------------------------------------------- OPERATOR OVERLOADS
+std::ostream&	operator<<(std::ostream& os, const Client& c)
+{
+	std::string	nick = c.getNick();
+	if (nick.empty())
+		os << c.getFd();
+	else
+		os << nick;
+	return os;
+}

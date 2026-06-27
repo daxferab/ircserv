@@ -29,4 +29,6 @@ class Client
 		std::string	getLine();
 };
 
+std::ostream&	operator<<(std::ostream& os, const Client& c);
+
 #endif

@@ -34,7 +34,7 @@ class Server
 		void		start(char* port);
 		void		stop();
 
-		bool		authClient(Client& client, std::string pass) const;
+		bool		authClient(Client& client, const std::string pass) const;
 };
 
 epoll_event	newEvent(int fd, int flags);
