@@ -41,5 +41,6 @@ class Server
 };
 
 epoll_event	newEvent(int fd, int flags);
+bool		isReservedChar(char c);
 
 #endif

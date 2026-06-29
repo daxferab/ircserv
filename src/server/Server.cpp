@@ -79,8 +79,8 @@ void	Server::setClientNick(Client& client, const std::string nick) const
 {
 	if (nick.empty())
 		return ; // TODO ERR_NONICKNAMEGIVEN (431)
-	// if (/*nick[0] is reserved char  {'#', '=', '&', ' '}*/)
-	// 	return ; // TODO ERR_ERRONEUSNICKNAME (432)
+	if (isReservedChar(nick[0]))
+		return ; // TODO ERR_ERRONEUSNICKNAME (432)
 	if (_nickInUse(nick))
 		return ; // TODO ERR_NICKNAMEINUSE (433)
 	client.setNick(nick);
@@ -221,4 +221,10 @@ epoll_event newEvent(int fd, int flags)
 	ev.events = flags;
 	ev.data.fd = fd;
 	return ev;
+}
+
+bool		isReservedChar(char c)
+{
+	std::string reserved = "#& =";
+	return reserved.find(c) != std::string::npos;
 }
