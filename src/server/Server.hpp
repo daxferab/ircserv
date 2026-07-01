@@ -12,6 +12,7 @@ class Server
 {
 	private:
 		int								_fd;
+		std::string						_name;
 		int								_epoll;
 		bool							_isRunning;
 		std::map<int, Client>			_clients;
@@ -25,21 +26,24 @@ class Server
 
 		void		_readFd(const int fd);
 		void		_handleLine(Client& client, char* line, int data);
+		void		_reply(const int clientfd, const std::string& message) const;
+		
 		void		_addClient(const int fd);
 		void		_disconnectClient(Client& client);
 
 		bool		_nickInUse(const std::string nick) const;
 		
 	public:
-		Server(std::string password);
+		Server(std::string name, std::string password);
 		~Server();
 		void		start(char* port);
 		void		stop();
 
-		bool		authClient(Client& client, const std::string pass) const;
-		void		setClientNick(Client& client, const std::string nick) const;
-		bool		setClientUser(Client& client, const std::string user) const;
-		void		setClientName(Client& client, const std::string name) const;
+		std::string	getName() const;
+		void		authClient(Client& client, const std::string& pass) const;
+		void		setClientNick(Client& client, const std::string& nick) const;
+		bool		setClientUser(Client& client, const std::string& user) const;
+		void		setClientName(Client& client, const std::string& name) const;
 };
 
 epoll_event	newEvent(int fd, int flags);

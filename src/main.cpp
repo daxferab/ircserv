@@ -11,7 +11,7 @@ int	main(int ac, char* av[])
 		return 1;
 	}
 
-	Server server(av[2]);
+	Server server("Thiscord", av[2]);
 	try {
 		server.start(av[1]);
 	} catch (std::exception &e) {

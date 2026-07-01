@@ -1,43 +1,36 @@
 #include "AReply.hpp"
 
 #include <sstream>
+#include <string>
 
-std::string	AReply::getReply(int type, int n, const Client& client, const Server& server, const Channel& channel)
+std::string	AReply::getReply(int type, int n, const std::string& clientName, const std::string& servname)
 {
 	if (type == ERR)
-		return _err(n, client, server, channel);
+		return _err(n, clientName, servname);
 	else if (type == RPL)
-		return _rpl(n, client, server, channel);
-	return NULL;
+		return _rpl(n, clientName, servname);
+	return "";
 }
 
-std::string	AReply::_err(int n, const Client& client, const Server& server, const Channel& channel)
+std::string	AReply::_err(int n, const std::string& clientName, const std::string& servname)
 {
 	std::stringstream	reply;
-	std::string			nick =	client.getNick().empty() ? "*" : client.getNick();
+	std::string			cliName =	clientName.empty() ? "*" : clientName;
 
+	reply << ":" << servname;
 	switch (n)
 	{
 		case 401:
-			// reply << ":thiscord.irc 401 " <<  nick << ;
-			break;
-		case 402:
+			reply << " 401 " <<  cliName << " nick " << ": No such nick/channel";
 			break;
 		case 403:
+			reply << " 403 " <<  cliName << " channel " << ": No such channel";
 			break;
 		case 404:
-			break;
-		case 405:
-			break;
-		case 407:
 			break;
 		case 411:
 			break;
 		case 412:
-			break;
-		case 413:
-			break;
-		case 414:
 			break;
 		case 431:
 			break;
@@ -56,6 +49,7 @@ std::string	AReply::_err(int n, const Client& client, const Server& server, cons
 		case 461:
 			break;
 		case 462:
+			reply << " 462 " <<  cliName << " :You may not reregister";
 			break;
 		case 464:
 			break;
@@ -77,44 +71,49 @@ std::string	AReply::_err(int n, const Client& client, const Server& server, cons
 			break;
 	}
 
-	return reply;
+	return reply.str();
 }
 
-std::string	AReply::_rpl(int n, const Client& client, const Server& server, const Channel& channel)
+std::string	AReply::_rpl(int n, const std::string& clientName, const std::string& servname)
 {
-	
+	std::stringstream	reply;
+	std::string			cliName =	clientName.empty() ? "*" : clientName;
+
+	reply << ":" << servname;
+	switch (n)
+	{
+		case 001:
+			reply << " 001 " << cliName << " :Welcome to the " << servname << " Network, " << clientName;
+			break;
+	}
+	return reply.str();
 }
 
 /*
-ERR_NOSUCHNICK (401)
-ERR_NOSUCHSERVER (402)
-ERR_NOSUCHCHANNEL (403)
-ERR_CANNOTSENDTOCHAN (404)
-ERR_TOOMANYCHANNELS (405)
-ERR_TOOMANYTARGETS (407)
-ERR_NORECIPIENT (411)
-ERR_NOTEXTTOSEND (412)
-ERR_NOTOPLEVEL (413)
-ERR_WILDTOPLEVEL (414)
-ERR_NONICKNAMEGIVEN (431)
-ERR_ERRONEUSNICKNAME (432)
-ERR_NICKNAMEINUSE (433)
-ERR_NICKCOLLISION (436)
-ERR_USERNOTINCHANNEL (441)
-ERR_NOTONCHANNEL (442)
-ERR_USERONCHANNEL (443) 
-ERR_NEEDMOREPARAMS (461)
-ERR_ALREADYREGISTERED (462)
-ERR_PASSWDMISMATCH (464)
-ERR_CHANNELISFULL (471)
-ERR_INVITEONLYCHAN (473)
-ERR_BANNEDFROMCHAN (474)
-ERR_BADCHANNELKEY (475)
-ERR_BADCHANMASK (476)
-ERR_CHANOPRIVSNEEDED (482)
-ERR_UMODEUNKNOWNFLAG (501)
-ERR_USERSDONTMATCH (502)
+	All of them have a prefix with the server ¿name? ¿IP?
+ERR_NOSUCHNICK (401)		client, non-existing nick
+ERR_NOSUCHCHANNEL (403)		client, channel name
+ERR_CANNOTSENDTOCHAN (404)	client, channel name
+ERR_NORECIPIENT (411)		client, commandname(i think its always privmsg)
+ERR_NOTEXTTOSEND (412)		client
+ERR_NONICKNAMEGIVEN (431)	client
+ERR_ERRONEUSNICKNAME (432)	client, unavailable nick
+ERR_NICKNAMEINUSE (433)		client, unavailable nick
+ERR_USERNOTINCHANNEL (441)	client, non-existing nick, channel
+ERR_NOTONCHANNEL (442)		client, channel
+ERR_USERONCHANNEL (443)		client, nick thats already in, channel
+ERR_NEEDMOREPARAMS (461)	client, command
+ERR_ALREADYREGISTERED (462)	client
+ERR_PASSWDMISMATCH (464)	client
+ERR_CHANNELISFULL (471)		client, channel
+ERR_INVITEONLYCHAN (473)	client, channel
+ERR_BADCHANNELKEY (475)		client, channel
+ERR_BADCHANMASK (476)		client, channel
+ERR_CHANOPRIVSNEEDED (482)	client, channel
+ERR_UMODEUNKNOWNFLAG (501)	client
+ERR_USERSDONTMATCH (502)	client
 
+RPL_WELCOME (001)
 RPL_UMODEIS (221)
 RPL_AWAY (301)
 RPL_CHANNELMODEIS (324)

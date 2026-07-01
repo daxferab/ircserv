@@ -1,4 +1,6 @@
 #include "Server.hpp"
+#include "AReply.hpp"
+#include "Channel.hpp"
 #include "Client.hpp"
 #include "../utils/colors.h"
 #include "CommandHandler.hpp"
@@ -23,7 +25,7 @@
 #define LISTENING_QUEUE 5
 
 // ---------------------------------------------------------------- CONSTRUCTORS
-Server::Server(std::string password) : _fd(-1), _isRunning(false), _password(password){}
+Server::Server(std::string name, std::string password) : _fd(-1), _name(name), _isRunning(false), _password(password){}
 
 Server::~Server() {}
 
@@ -50,32 +52,24 @@ void	Server::stop()
 	std::cout << RED << "------------ THISCORD SERVER CLOSED! ------------" << RESET << std::endl;
 }
 
-bool	Server::authClient(Client& client, const std::string pass) const
+std::string	Server::getName() const { return _name; }
+
+void	Server::authClient(Client& client, const std::string& pass) const
 {
 	if (client.isAuthenticated())
-	{
-		std::cout << "Client " << client << " is already registered\n";//TODO remove when the error return correctly
-		return false;//TODO return ERR_ALREADYREGISTERED 462
-	}
+		_reply(client.getFd(), AReply::getReply(ERR, 462, client.getNick(), getName()));
 	else if (pass.empty())
-	{
-		std::cout << "Client " << client << " tries a non password\n";//TODO remove when the error return correctly
-		return false;//TODO return ERR_NEEDMOREPARAMS 461
-	}
+		_reply(client.getFd(), AReply::getReply(ERR, 461, client.getNick(), getName()));
 	else if (pass != _password)
-	{
-		std::cout << "Client " << client << " can't register with password " << pass << std::endl;//TODO remove when the error return correctly
-		return false;//TODO return ERR_PASSWDMISMATCH 464
-	}
+		_reply(client.getFd(), AReply::getReply(ERR, 464, client.getNick(), getName()));
 	else
 	{
 		client.setAuthenticated(true);
 		std::cout << "Client " << client << " gets authenticated with password " << pass << std::endl;
-		return true;
 	}
 }
 
-void	Server::setClientNick(Client& client, const std::string nick) const
+void	Server::setClientNick(Client& client, const std::string& nick) const
 {
 	if (nick.empty())
 		return ; // TODO ERR_NONICKNAMEGIVEN (431)
@@ -84,9 +78,10 @@ void	Server::setClientNick(Client& client, const std::string nick) const
 	if (_nickInUse(nick))
 		return ; // TODO ERR_NICKNAMEINUSE (433)
 	client.setNick(nick);
+	_reply(client.getFd(), AReply::getReply(RPL, 001, client.getNick(), getName()));	
 }
 
-bool	Server::setClientUser(Client& client, const std::string user) const
+bool	Server::setClientUser(Client& client, const std::string& user) const
 {
 	if (client.isRegistered())
 		{} //TODO: ERR_ALREADYREGISTERED (462)
@@ -99,7 +94,7 @@ bool	Server::setClientUser(Client& client, const std::string user) const
 	return false;
 }
 
-void	Server::setClientName(Client& client, const std::string name) const
+void	Server::setClientName(Client& client, const std::string& name) const
 {
 	client.setName(name);
 }
@@ -178,12 +173,12 @@ void	Server::_eventLoop()
 }
 
 void	Server::_readFd(const int fd)
-{
+{	
 	char	line[BUFFERSIZE + 1];
 	int		data = recv(fd, line, BUFFERSIZE, 0);
 	std::map<int, Client>::iterator it = _clients.find(fd);
 	if (it == _clients.end())
-		return;	
+		return;		
 	if (data < 0)
 		std::cout << RED << "Error reading message from " << fd << RESET << std::endl;
 	else if (data == 0)
@@ -193,14 +188,20 @@ void	Server::_readFd(const int fd)
 }
 
 void	Server::_handleLine(Client& client, char* line, int data)
-{
+{	
 	client.appendBuffer(line, data);
 	while (client.hasFullLine())
-	{
+	{		
 		Message	message(client.getLine());
 		if (message.isValid())
 			CommandHandler::execCommand(message, client, *this);
 	}
+}
+
+void	Server::_reply(const int clientfd, const std::string& message) const
+{
+	std::cout << "msg: " << message << std::endl;
+	send(clientfd, message.c_str(), message.size(), 0);
 }
 
 void	Server::_addClient(const int fd)

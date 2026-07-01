@@ -25,6 +25,7 @@ SOURCES :=	\
 			main.cpp\
 
 SOURCES +=	\
+			AReply.cpp\
 			Channel.cpp\
 			Client.cpp\
 			CommandHandler.cpp\
