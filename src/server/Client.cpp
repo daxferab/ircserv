@@ -1,4 +1,6 @@
 #include "Client.hpp"
+#include <features.h>
+#include <ostream>
 #include <string>
 
 //----------------------------------------------------------------- CONSTRUCTORS
@@ -8,25 +10,14 @@ Client::Client(int fd) : _fd(fd), _authenticated(false) {}
 Client::~Client() {}
 
 //------------------------------------------------------------- GETTERS /SETTERS
-std::string Client::getNick() const
-{
-	return _nick.empty() ? "" : _nick;
-}
-
-int Client::getFd() const
-{
-	return _fd;
-}
-
-bool	Client::isAuthenticated() const
-{
-	return _authenticated;
-}
-
-void	Client::setAuthenticated(const bool value)
-{
-	_authenticated = value;
-}
+std::string	Client::getNick() const { return _nick.empty() ? "" : _nick; }
+void		Client::setNick(const std::string nick) { _nick = nick; }
+void		Client::setUser(const std::string user) { _username = user; _registered = true; }
+void		Client::setName(const std::string name) { _realName = name; }
+int			Client::getFd() const { return _fd; }
+bool		Client::isAuthenticated() const { return _authenticated; }
+void		Client::setAuthenticated(const bool value) { _authenticated = value; }
+bool		Client::isRegistered() const { return _registered; }
 
 //------------------------------------------------------------- MEMBER FUNCTIONS
 void	Client::appendBuffer(char* msg, int data)
@@ -48,3 +39,13 @@ std::string	Client::getLine()
 	return (line);
 }
 
+//----------------------------------------------------------- OPERATOR OVERLOADS
+std::ostream&	operator<<(std::ostream& os, const Client& c)
+{
+	std::string	nick = c.getNick();
+	if (nick.empty())
+		os << c.getFd();
+	else
+		os << nick;
+	return os;
+}

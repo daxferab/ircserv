@@ -5,6 +5,7 @@
 
 #include <cstdio>
 #include <exception>
+#include <map>
 #include <netinet/in.h>
 #include <stdexcept>
 #include <string>
@@ -49,30 +50,58 @@ void	Server::stop()
 	std::cout << RED << "------------ THISCORD SERVER CLOSED! ------------" << RESET << std::endl;
 }
 
-bool	Server::authClient(Client& client, std::string pass)
+bool	Server::authClient(Client& client, const std::string pass) const
 {
-	std::cout << "user pass: " << pass << ", server pass: " << _password << std::endl;
 	if (client.isAuthenticated())
 	{
-		std::cout << "Client " << client.getFd() << " is already registered\n";//TODO remove when the error return correctly
+		std::cout << "Client " << client << " is already registered\n";//TODO remove when the error return correctly
 		return false;//TODO return ERR_ALREADYREGISTERED 462
 	}
 	else if (pass.empty())
 	{
-		std::cout << "Client " << client.getFd() << " tries a non password\n";//TODO remove when the error return correctly
+		std::cout << "Client " << client << " tries a non password\n";//TODO remove when the error return correctly
 		return false;//TODO return ERR_NEEDMOREPARAMS 461
 	}
 	else if (pass != _password)
 	{
-		std::cout << "Client " << client.getFd() << " can't register with password " << pass << std::endl;//TODO remove when the error return correctly
+		std::cout << "Client " << client << " can't register with password " << pass << std::endl;//TODO remove when the error return correctly
 		return false;//TODO return ERR_PASSWDMISMATCH 464
 	}
 	else
 	{
 		client.setAuthenticated(true);
-		std::cout << "Client " << client.getFd() << " gets authenticated with password " << pass << std::endl;
+		std::cout << "Client " << client << " gets authenticated with password " << pass << std::endl;
 		return true;
 	}
+}
+
+void	Server::setClientNick(Client& client, const std::string nick) const
+{
+	if (nick.empty())
+		return ; // TODO ERR_NONICKNAMEGIVEN (431)
+	if (isReservedChar(nick[0]))
+		return ; // TODO ERR_ERRONEUSNICKNAME (432)
+	if (_nickInUse(nick))
+		return ; // TODO ERR_NICKNAMEINUSE (433)
+	client.setNick(nick);
+}
+
+bool	Server::setClientUser(Client& client, const std::string user) const
+{
+	if (client.isRegistered())
+		{} //TODO: ERR_ALREADYREGISTERED (462)
+	else if (user.empty())
+		{} //TODO: ERR_NEEDMORPARAMS(461)
+	else
+	{
+		client.setUser(user); //TODO: RPL_WELCOME (001)		return true;
+	}
+	return false;
+}
+
+void	Server::setClientName(Client& client, const std::string name) const
+{
+	client.setName(name);
 }
 
 // --------------------------- PUBLIC EFUNCTIONS
@@ -189,11 +218,18 @@ void	Server::_disconnectClient(Client& client)
 	int fd = client.getFd();
 	std::map<int, Client>::iterator it = _clients.find(fd);
 
-	std::cout << RED << "Client <" << client.getNick() << "> disconnected" << RESET << std::endl;
+	std::cout << RED << "Client <" << client << "> disconnected" << RESET << std::endl;
 	epoll_ctl(_epoll, EPOLL_CTL_DEL, fd, NULL);
 	if (it != _clients.end())
 		_clients.erase(it);
 	close(fd);
+}
+
+bool	Server::_nickInUse(const std::string nick) const
+{
+	for (std::map<int, Client>::const_iterator it = _clients.begin(); it != _clients.end();it++)
+		if (it->second.getNick().compare(nick) == 0) return true;
+	return false;
 }
 
 // ----------------------------------------------------------------------- UTILS
@@ -203,4 +239,10 @@ epoll_event newEvent(int fd, int flags)
 	ev.events = flags;
 	ev.data.fd = fd;
 	return ev;
+}
+
+bool		isReservedChar(char c)
+{
+	std::string reserved = "#& =";
+	return reserved.find(c) != std::string::npos;
 }

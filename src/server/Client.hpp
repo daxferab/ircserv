@@ -10,6 +10,7 @@ class Client
 		std::string	_buffer;
 
 		bool		_authenticated;
+		bool		_registered;
 		bool		_operator;
 		std::string	_nick;
 		std::string	_username;
@@ -20,13 +21,19 @@ class Client
 		~Client();
 
 		std::string	getNick() const;
+		void		setNick(const std::string nick);
+		void		setUser(const std::string user);
+		void		setName(const std::string name);
 		int			getFd() const;
 		bool		isAuthenticated() const;
 		void		setAuthenticated(const bool value);
+		bool		isRegistered() const;
 		
 		void		appendBuffer(char* msg, int data);
 		bool		hasFullLine() const;
 		std::string	getLine();
 };
+
+std::ostream&	operator<<(std::ostream& os, const Client& c);
 
 #endif

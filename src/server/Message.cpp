@@ -1,7 +1,7 @@
 #include "Message.hpp"
 
 #include <sstream>
-
+#include <iostream>
 //----------------------------------------------------------------- CONSTRUCTORS
 
 Message::Message(std::string line)
@@ -29,7 +29,6 @@ bool	Message::_parse(std::string& line)
 	std::string			word;
 
 	_prefix = "";
-
 	if (!(ss >> word)) return false;
 
 	if (word[0] == ':')
