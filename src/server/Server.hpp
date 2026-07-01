@@ -38,6 +38,8 @@ class Server
 
 		bool		authClient(Client& client, const std::string pass) const;
 		void		setClientNick(Client& client, const std::string nick) const;
+		bool		setClientUser(Client& client, const std::string user) const;
+		void		setClientName(Client& client, const std::string name) const;
 };
 
 epoll_event	newEvent(int fd, int flags);

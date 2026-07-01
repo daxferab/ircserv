@@ -86,6 +86,24 @@ void	Server::setClientNick(Client& client, const std::string nick) const
 	client.setNick(nick);
 }
 
+bool	Server::setClientUser(Client& client, const std::string user) const
+{
+	if (client.isRegistered())
+		{} //TODO: ERR_ALREADYREGISTERED (462)
+	else if (user.empty())
+		{} //TODO: ERR_NEEDMORPARAMS(461)
+	else
+	{
+		client.setUser(user); //TODO: RPL_WELCOME (001)		return true;
+	}
+	return false;
+}
+
+void	Server::setClientName(Client& client, const std::string name) const
+{
+	client.setName(name);
+}
+
 // --------------------------- PUBLIC EFUNCTIONS
 
 void	Server::_setup(char* port)

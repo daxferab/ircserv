@@ -21,7 +21,7 @@ void	CommandHandler::execCommand(Message& command, Client& client, Server& serve
 			_nick(command, client, server);
 			break;
 		case USER:
-			// _user(command, client);
+			_user(command, client, server);
 			break;
 		case NONE:
 			;// handle invalid command
@@ -45,4 +45,16 @@ void	CommandHandler::_nick(const Message& command, Client& client, const Server&
 		server.setClientNick(client, "");
 	else
 		server.setClientNick(client, command.getParams()[0]);
+}
+
+void	CommandHandler::_user(const Message& command, Client& client, const Server& server)
+{
+	bool	success;
+
+	if (command.getParams().empty())
+		success = server.setClientUser(client, ""); // need more params (false)
+	else
+		success = server.setClientUser(client, command.getParams()[0]); //check if already registered, if it is, return false
+	if (success && command.getParams().size() == 4)
+		server.setClientName(client, command.getParams()[3]);
 }
