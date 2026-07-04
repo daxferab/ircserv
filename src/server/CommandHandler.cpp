@@ -1,17 +1,17 @@
 #include "CommandHandler.hpp"
+#include "AReply.hpp"
 #include "Message.hpp"
 #include "Server.hpp"
 #include <cstring>
-#include <iostream>
 
 //------------------------------------------------------------- MEMBER FUNCTIONS
 void	CommandHandler::execCommand(Message& command, Client& client, Server& server)
 {
 	if (command.getCommand() != PASS && !client.isAuthenticated())
 	{
-		std::cout << "user " << client << " not registered" << std::endl;
+		AReply::getReply(451, client.getNick(), server.getName()); // TODO: call from server?
 		return;
-	}// ERR_NOTREGISTERED 451
+	}
 	switch (command.getCommand())
 	{
 		case PASS:

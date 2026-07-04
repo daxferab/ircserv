@@ -57,28 +57,28 @@ std::string	Server::getName() const { return _name; }
 void	Server::authClient(Client& client, const std::string& pass) const
 {
 	if (client.isAuthenticated())
-		_reply(client.getFd(), AReply::getReply(ERR, 462, client.getNick(), getName()));
+		_reply(client.getFd(), AReply::getReply(462, client.getNick(), getName()));
 	else if (pass.empty())
-		_reply(client.getFd(), AReply::getReply(ERR, 461, client.getNick(), getName()));
+		_reply(client.getFd(), AReply::getReply(461, client.getNick(), getName()));
 	else if (pass != _password)
-		_reply(client.getFd(), AReply::getReply(ERR, 464, client.getNick(), getName()));
+		_reply(client.getFd(), AReply::getReply(464, client.getNick(), getName()));
 	else
-	{
 		client.setAuthenticated(true);
-		std::cout << "Client " << client << " gets authenticated with password " << pass << std::endl;
-	}
 }
 
 void	Server::setClientNick(Client& client, const std::string& nick) const
 {
 	if (nick.empty())
-		return ; // TODO ERR_NONICKNAMEGIVEN (431)
-	if (isReservedChar(nick[0]))
-		return ; // TODO ERR_ERRONEUSNICKNAME (432)
-	if (_nickInUse(nick))
-		return ; // TODO ERR_NICKNAMEINUSE (433)
-	client.setNick(nick);
-	_reply(client.getFd(), AReply::getReply(RPL, 001, client.getNick(), getName()));	
+		std::cout << "a" << std::endl;// return ; // TODO ERR_NONICKNAMEGIVEN (431)
+	else if (isReservedChar(nick[0]))
+		std::cout << "b" << std::endl;//return ; // TODO ERR_ERRONEUSNICKNAME (432)
+	else if (_nickInUse(nick))
+		std::cout << "c" << std::endl;//return ; // TODO ERR_NICKNAMEINUSE (433)
+	else
+	{
+		client.setNick(nick);
+		_reply(client.getFd(), AReply::getReply(001, client.getNick(), getName()));	
+	}
 }
 
 bool	Server::setClientUser(Client& client, const std::string& user) const

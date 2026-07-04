@@ -2,17 +2,9 @@
 
 #include <sstream>
 #include <string>
+#include <iostream>
 
-std::string	AReply::getReply(int type, int n, const std::string& clientName, const std::string& servname)
-{
-	if (type == ERR)
-		return _err(n, clientName, servname);
-	else if (type == RPL)
-		return _rpl(n, clientName, servname);
-	return "";
-}
-
-std::string	AReply::_err(int n, const std::string& clientName, const std::string& servname)
+std::string	AReply::getReply(int n, const std::string& clientName, const std::string& servname)
 {
 	std::stringstream	reply;
 	std::string			cliName =	clientName.empty() ? "*" : clientName;
@@ -20,72 +12,25 @@ std::string	AReply::_err(int n, const std::string& clientName, const std::string
 	reply << ":" << servname;
 	switch (n)
 	{
+	// Replies
+		case 001:
+			reply << " 001 " << cliName << " :Welcome to the " << servname << " Network, " << clientName;
+			break;
+	// Errors
 		case 401:
 			reply << " 401 " <<  cliName << " nick " << ": No such nick/channel";
 			break;
 		case 403:
 			reply << " 403 " <<  cliName << " channel " << ": No such channel";
 			break;
-		case 404:
-			break;
-		case 411:
-			break;
-		case 412:
-			break;
-		case 431:
-			break;
-		case 432:
-			break;
-		case 433:
-			break;
-		case 436:
-			break;
-		case 441:
-			break;
-		case 442:
-			break;
-		case 443:
-			break;
-		case 461:
+		case 451:
+			reply << " 451 " <<  cliName << " :You have not registered";
 			break;
 		case 462:
 			reply << " 462 " <<  cliName << " :You may not reregister";
 			break;
-		case 464:
-			break;
-		case 471:
-			break;
-		case 473:
-			break;
-		case 474:
-			break;
-		case 475:
-			break;
-		case 476:
-			break;
-		case 482:
-			break;
-		case 501:
-			break;
-		case 502:
-			break;
 	}
-
-	return reply.str();
-}
-
-std::string	AReply::_rpl(int n, const std::string& clientName, const std::string& servname)
-{
-	std::stringstream	reply;
-	std::string			cliName =	clientName.empty() ? "*" : clientName;
-
-	reply << ":" << servname;
-	switch (n)
-	{
-		case 001:
-			reply << " 001 " << cliName << " :Welcome to the " << servname << " Network, " << clientName;
-			break;
-	}
+	reply << "\r\n";
 	return reply.str();
 }
 
