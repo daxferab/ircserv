@@ -69,27 +69,31 @@ void	Server::authClient(Client& client, const std::string& pass) const
 void	Server::setClientNick(Client& client, const std::string& nick) const
 {
 	if (nick.empty())
-		std::cout << "a" << std::endl;// return ; // TODO ERR_NONICKNAMEGIVEN (431)
+		_reply(client.getFd(), AReply::getReply(431, client.getNick(), getName()));
 	else if (isReservedChar(nick[0]))
-		std::cout << "b" << std::endl;//return ; // TODO ERR_ERRONEUSNICKNAME (432)
+		_reply(client.getFd(), AReply::getReply(432, client.getNick(), getName()));
 	else if (_nickInUse(nick))
-		std::cout << "c" << std::endl;//return ; // TODO ERR_NICKNAMEINUSE (433)
+		_reply(client.getFd(), AReply::getReply(433, client.getNick(), getName()));
 	else
 	{
 		client.setNick(nick);
 		_reply(client.getFd(), AReply::getReply(001, client.getNick(), getName()));	
+		_reply(client.getFd(), AReply::getReply(002, client.getNick(), getName()));	
+		_reply(client.getFd(), AReply::getReply(003, client.getNick(), getName()));
+		_reply(client.getFd(), AReply::getReply(004, client.getNick(), getName()));	
 	}
 }
 
 bool	Server::setClientUser(Client& client, const std::string& user) const
 {
 	if (client.isRegistered())
-		{} //TODO: ERR_ALREADYREGISTERED (462)
+		_reply(client.getFd(), AReply::getReply(462, client.getNick(), getName()));
 	else if (user.empty())
-		{} //TODO: ERR_NEEDMORPARAMS(461)
+		_reply(client.getFd(), AReply::getReply(461, client.getNick(), getName()));
 	else
 	{
-		client.setUser(user); //TODO: RPL_WELCOME (001)		return true;
+		client.setUser(user);
+		return true;
 	}
 	return false;
 }
@@ -194,7 +198,8 @@ void	Server::_handleLine(Client& client, char* line, int data)
 	{		
 		Message	message(client.getLine());
 		if (message.isValid())
-			CommandHandler::execCommand(message, client, *this);
+			if (!CommandHandler::execCommand(message, client, *this))
+				AReply::getReply(451, client.getNick(), getName());
 	}
 }
 

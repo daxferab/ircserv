@@ -5,13 +5,10 @@
 #include <cstring>
 
 //------------------------------------------------------------- MEMBER FUNCTIONS
-void	CommandHandler::execCommand(Message& command, Client& client, Server& server)
+bool	CommandHandler::execCommand(Message& command, Client& client, Server& server)
 {
 	if (command.getCommand() != PASS && !client.isAuthenticated())
-	{
-		AReply::getReply(451, client.getNick(), server.getName()); // TODO: call from server?
-		return;
-	}
+		return false;
 	switch (command.getCommand())
 	{
 		case PASS:
@@ -26,7 +23,7 @@ void	CommandHandler::execCommand(Message& command, Client& client, Server& serve
 		case NONE:
 			;// handle invalid command
 	}
-	(void)client;
+	return true;
 }
 
 //------------------------------------------------------------ PRIVATE FUNCTIONS

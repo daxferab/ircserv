@@ -13,7 +13,7 @@ class CommandHandler
 		static void	_user(const Message& command, Client& client, const Server& server);
 
 	public:
-		static void	execCommand(Message& command, Client& client, Server& server);
+		static bool	execCommand(Message& command, Client& client, Server& server);
 };
 
 

@@ -29,6 +29,7 @@ bool	Message::_parse(std::string& line)
 	std::string			word;
 
 	_prefix = "";
+	std::cout << line << std::endl;
 	if (!(ss >> word)) return false;
 
 	if (word[0] == ':')
