@@ -54,42 +54,61 @@ void	Server::stop()
 
 std::string	Server::getName() const { return _name; }
 
+void	Server::_fillContext(t_rplContext& context, const Client& client, const std::string& nick, const std::string& channel, const std::string& command) const
+{
+	context.client = client.getNick();
+	context.server = _name;
+	context.nick = nick;
+	context.channel = channel;
+	context.command = command;
+}
+
 void	Server::authClient(Client& client, const std::string& pass) const
 {
+	t_rplContext	context;
+
+	_fillContext(context, client, "", "", "PASS");
+
 	if (client.isAuthenticated())
-		_reply(client.getFd(), AReply::getReply(462, client.getNick(), getName()));
+		_reply(client.getFd(), AReply::getReply(462, context));
 	else if (pass.empty())
-		_reply(client.getFd(), AReply::getReply(461, client.getNick(), getName()));
+		_reply(client.getFd(), AReply::getReply(461, context));
 	else if (pass != _password)
-		_reply(client.getFd(), AReply::getReply(464, client.getNick(), getName()));
+		_reply(client.getFd(), AReply::getReply(464, context));
 	else
 		client.setAuthenticated(true);
 }
 
 void	Server::setClientNick(Client& client, const std::string& nick) const
 {
+	t_rplContext	context;
+
+	_fillContext(context, client, nick, "", "NICK");
+
 	if (nick.empty())
-		_reply(client.getFd(), AReply::getReply(431, client.getNick(), getName()));
+		_reply(client.getFd(), AReply::getReply(431, context));
 	else if (isReservedChar(nick[0]))
-		_reply(client.getFd(), AReply::getReply(432, client.getNick(), getName()));
+		_reply(client.getFd(), AReply::getReply(432, context));
 	else if (_nickInUse(nick))
-		_reply(client.getFd(), AReply::getReply(433, client.getNick(), getName()));
+		_reply(client.getFd(), AReply::getReply(433, context));
 	else
 	{
 		client.setNick(nick);
-		_reply(client.getFd(), AReply::getReply(001, client.getNick(), getName()));	
-		_reply(client.getFd(), AReply::getReply(002, client.getNick(), getName()));	
-		_reply(client.getFd(), AReply::getReply(003, client.getNick(), getName()));
-		_reply(client.getFd(), AReply::getReply(004, client.getNick(), getName()));	
+		_fillContext(context, client, "", "", "");
+		_reply(client.getFd(), AReply::getReply(001, context));
 	}
 }
 
 bool	Server::setClientUser(Client& client, const std::string& user) const
 {
+	t_rplContext	context;
+
+	_fillContext(context, client, "", "", "USER");
+
 	if (client.isRegistered())
-		_reply(client.getFd(), AReply::getReply(462, client.getNick(), getName()));
+		_reply(client.getFd(), AReply::getReply(462, context));
 	else if (user.empty())
-		_reply(client.getFd(), AReply::getReply(461, client.getNick(), getName()));
+		_reply(client.getFd(), AReply::getReply(461, context));
 	else
 	{
 		client.setUser(user);
@@ -199,7 +218,12 @@ void	Server::_handleLine(Client& client, char* line, int data)
 		Message	message(client.getLine());
 		if (message.isValid())
 			if (!CommandHandler::execCommand(message, client, *this))
-				AReply::getReply(451, client.getNick(), getName());
+			{
+				t_rplContext	context;
+
+				_fillContext(context, client, "", "", "");
+				_reply(client.getFd(), AReply::getReply(451, context));
+			}
 	}
 }
 

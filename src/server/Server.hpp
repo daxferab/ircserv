@@ -1,6 +1,7 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
+#include "AReply.hpp"
 #include "Channel.hpp"
 #include "Client.hpp"
 #include <netdb.h>
@@ -27,6 +28,7 @@ class Server
 		void		_readFd(const int fd);
 		void		_handleLine(Client& client, char* line, int data);
 		void		_reply(const int clientfd, const std::string& message) const;
+		void		_fillContext(t_rplContext& context, const Client& client, const std::string& nick, const std::string& channel, const std::string& command) const;
 		
 		void		_addClient(const int fd);
 		void		_disconnectClient(Client& client);

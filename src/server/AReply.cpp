@@ -3,42 +3,42 @@
 #include <sstream>
 #include <string>
 
-std::string	AReply::getReply(int n, const std::string& clientName, const std::string& servname)
+std::string	AReply::getReply(int n, const t_rplContext& context)
 {
 	std::stringstream	reply;
-	std::string			cliName =	clientName.empty() ? "*" : clientName;
+	std::string			cliName =	context.client.empty() ? "*" : context.client;
 
-	reply << ":" << servname;
+	reply << ":" << context.server;
 	switch (n)
 	{
 	// Replies
 		case 001:
-			reply << " 001 " << cliName << " :Welcome to the " << servname << " Network, " << cliName;
+			reply << " 001 " << cliName << " :Welcome to the " << context.server << " Network, " << cliName;
 			break;
 		case 002:
-			reply << " 002 " << cliName << " :Your host is " << servname << " running version 1.0";
+			reply << " 002 " << cliName << " :Your host is " << context.server << " running version 1.0";
 			break;
 	// Errors
 		case 401:
-			reply << " 401 " <<  cliName << " " << "nick" << " :No such nick/channel"; //TODO: nick
+			reply << " 401 " <<  cliName << " " << context.nick << " :No such nick/channel";
 			break;
 		case 403:
-			reply << " 403 " <<  cliName << " " << "channel" << " :No such channel";//TODO: channel
+			reply << " 403 " <<  cliName << " " << context.channel << " :No such channel";
 			break;
 		case 431:
 			reply << " 431 " <<  cliName  << " :No nickname given";
 			break;
 		case 432:
-			reply << " 432 " <<  cliName  << " " << "nick" << " :Erroneus nickname"; //TODO: nick
+			reply << " 432 " <<  cliName  << " " << context.nick << " :Erroneus nickname";
 			break;
 		case 433:
-			reply << " 433 " <<  cliName  << " " << "nick" << " :Nickname is already in use"; //TODO: nick
+			reply << " 433 " <<  cliName  << " " << context.nick << " :Nickname is already in use";
 			break;
 		case 451:
 			reply << " 451 " <<  cliName << " :You have not registered";
 			break;
 		case 461:
-			reply << " 461 " <<  cliName << " " << "command" << " :You may not reregister";
+			reply << " 461 " <<  cliName << " " << context.command << " :Not enough parameters";
 			break;
 		case 462:
 			reply << " 462 " <<  cliName << " :You may not reregister";
