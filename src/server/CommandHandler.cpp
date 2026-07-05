@@ -1,5 +1,4 @@
 #include "CommandHandler.hpp"
-#include "AReply.hpp"
 #include "Message.hpp"
 #include "Server.hpp"
 #include <cstring>

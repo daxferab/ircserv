@@ -1,6 +1,5 @@
 #include "Server.hpp"
 #include "AReply.hpp"
-#include "Channel.hpp"
 #include "Client.hpp"
 #include "../utils/colors.h"
 #include "CommandHandler.hpp"
