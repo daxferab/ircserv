@@ -1,5 +1,6 @@
 #include "AReply.hpp"
 
+#include <iomanip>
 #include <sstream>
 #include <string>
 
@@ -9,42 +10,43 @@ std::string	AReply::getReply(int n, const t_rplContext& context)
 	std::string			cliName =	context.client.empty() ? "*" : context.client;
 
 	reply << ":" << context.server;
+	reply << " " << std::setfill('0') << std::setw(3) << n << " ";
 	switch (n)
 	{
 	// Replies
 		case 001:
-			reply << " 001 " << cliName << " :Welcome to the " << context.server << " Network, " << cliName;
+			reply << cliName << " :Welcome to the " << context.server << " Network, " << cliName;
 			break;
 		case 002:
-			reply << " 002 " << cliName << " :Your host is " << context.server << " running version 1.0";
+			reply << cliName << " :Your host is " << context.server << " running version 1.0";
 			break;
 	// Errors
 		case 401:
-			reply << " 401 " <<  cliName << " " << context.nick << " :No such nick/channel";
+			reply << cliName << " " << context.nick << " :No such nick/channel";
 			break;
 		case 403:
-			reply << " 403 " <<  cliName << " " << context.channel << " :No such channel";
+			reply << cliName << " " << context.channel << " :No such channel";
 			break;
 		case 431:
-			reply << " 431 " <<  cliName  << " :No nickname given";
+			reply << cliName << " :No nickname given";
 			break;
 		case 432:
-			reply << " 432 " <<  cliName  << " " << context.nick << " :Erroneus nickname";
+			reply << cliName << " " << context.nick << " :Erroneus nickname";
 			break;
 		case 433:
-			reply << " 433 " <<  cliName  << " " << context.nick << " :Nickname is already in use";
+			reply << cliName << " " << context.nick << " :Nickname is already in use";
 			break;
 		case 451:
-			reply << " 451 " <<  cliName << " :You have not registered";
+			reply << cliName << " :You have not registered";
 			break;
 		case 461:
-			reply << " 461 " <<  cliName << " " << context.command << " :Not enough parameters";
+			reply << cliName << " " << context.command << " :Not enough parameters";
 			break;
 		case 462:
-			reply << " 462 " <<  cliName << " :You may not reregister";
+			reply << cliName << " :You may not reregister";
 			break;
 		case 464:
-			reply << " 464 " <<  cliName << " :Password incorrect";
+			reply << cliName << " :Password incorrect";
 			break;
 	}
 	reply << "\r\n";
