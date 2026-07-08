@@ -8,6 +8,7 @@
 #include <string>
 #include <sys/epoll.h>
 #include <map>
+#include <signal.h>
 
 class Server
 {
@@ -24,6 +25,9 @@ class Server
 		bool		_createSocket(struct addrinfo *info);
 		void		_initEpoll();
 		void		_eventLoop();
+	
+		void		_createSignal(int signo, void (*handler)(int));
+		static void	_handlesigint(int signo);
 
 		void		_readFd(const int fd);
 		void		_handleLine(Client& client, char* line, int data);

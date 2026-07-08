@@ -48,7 +48,7 @@ void	Server::stop()
 		_disconnectClient(_clients.begin()->second);
 	epoll_ctl(_epoll, EPOLL_CTL_DEL, _fd, NULL);
 	close(_fd);
-	std::cout << RED << "------------ THISCORD SERVER CLOSED! ------------" << RESET << std::endl;
+	std::cout << std::endl << RED << "------------ THISCORD SERVER CLOSED! ------------" << RESET << std::endl;
 }
 
 std::string	Server::getName() const { return _name; }
@@ -126,6 +126,9 @@ void	Server::setClientName(Client& client, const std::string& name) const
 void	Server::_setup(char* port)
 {
 	struct addrinfo	hints, *info; //NOTE: dont know if we need to free hints
+
+	_createSignal(SIGINT, _handlesigint);
+	_createSignal(SIGQUIT, SIG_IGN);
 	
 	std::memset(&hints, 0, sizeof(hints));		// remove garbage data
 	hints.ai_family = AF_UNSPEC;				// Allow IPv4 or IPv6
@@ -192,6 +195,24 @@ void	Server::_eventLoop()
 			}
 		}
 	}
+}
+
+void Server::_createSignal(int signo, void (*handler)(int))
+{
+	struct sigaction sa;
+	memset(&sa, 0, sizeof(sa));
+
+	sa.sa_handler = handler;
+	sigemptyset(&sa.sa_mask);
+
+	if (sigaction(signo, &sa, NULL) == -1)
+		throw std::runtime_error("Sigaction failed");
+}
+
+void Server::_handlesigint(int signo)
+{
+	(void)signo;
+	throw std::runtime_error("");
 }
 
 void	Server::_readFd(const int fd)
