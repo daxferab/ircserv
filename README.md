@@ -6,7 +6,7 @@ IRC is a communication protocol that allows messaging between clients through a 
 The server will have a socket that waits for client connections, binded to localhost and the port given.
 
 When a new connection arrives, it will be added to the server and will be able to perform the allowed commands (register, send messages, join or create channels...).\
-There can be normal and operator users (operators are users that create a channel/are given privileges by another channel operator). Operators are allowed to use certain commands like KICK, INVITE, TOPIC or MODE within their channel/s).
+There can be normal and operator users (operators are users that create a channel/are given privileges by another channel operator). Operators are allowed to use certain commands like KICK, INVITE, TOPIC or MODE within their channel/s.
 
 ## Instructions
 Compile the code using `make`.\

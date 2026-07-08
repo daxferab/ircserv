@@ -18,7 +18,7 @@ OBJ_DIR := obj/
 
 VPATH := $(SRC_DIR) $(addprefix $(SRC_DIR), \
  				server\
-     			utils\
+	 			utils\
 			)
 
 SOURCES :=	\
