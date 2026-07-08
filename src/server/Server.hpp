@@ -25,6 +25,9 @@ class Server
 		void		_initEpoll();
 		void		_eventLoop();
 		void		_acceptClient();
+	
+		void		_createSignal(int signo, void (*handler)(int));
+		static void	_handlesigint(int signo);
 
 		void		_readFd(const int fd);
 		void		_handleLine(Client& client, char* line, int data);
