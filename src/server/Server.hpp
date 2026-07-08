@@ -46,6 +46,7 @@ class Server
 		void		setClientNick(Client& client, const std::string& nick) const;
 		bool		setClientUser(Client& client, const std::string& user) const;
 		void		setClientName(Client& client, const std::string& name) const;
+		void		joinChannel(Client& client, const std::string& channel, const std::string& key) const;
 };
 
 epoll_event	newEvent(int fd, int flags);

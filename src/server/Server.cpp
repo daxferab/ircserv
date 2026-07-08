@@ -121,6 +121,17 @@ void	Server::setClientName(Client& client, const std::string& name) const
 	client.setName(name);
 }
 
+void	Server::joinChannel(Client& client, const std::string& channel, const std::string& key) const
+{
+	t_rplContext	context;
+
+	_fillContext(context, client, "", "", "USER");
+
+	std::cout << BLUE << "JOIN START" << RESET << std::endl;
+	std::cout << "channel " << channel << ", key: " << key << std::endl;
+	_reply(client.getFd(), ":" + client.getNick() + " JOIN " + channel + "\r\n");
+}
+
 // --------------------------- PUBLIC EFUNCTIONS
 
 void	Server::_setup(char* port)

@@ -60,5 +60,6 @@ t_comnum	getCommand(std::string word)
 	if (word == "PASS") return PASS;
 	if (word == "NICK") return NICK;
 	if (word == "USER") return USER;
+	if (word == "JOIN") return JOIN;
 	return NONE;
 }

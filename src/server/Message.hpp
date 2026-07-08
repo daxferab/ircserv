@@ -9,6 +9,7 @@ typedef enum e_comnum
 	PASS,
 	NICK,
 	USER,
+	JOIN,
 	NONE,
 } t_comnum;
 

@@ -19,6 +19,9 @@ bool	CommandHandler::execCommand(Message& command, Client& client, Server& serve
 		case USER:
 			_user(command, client, server);
 			break;
+		case JOIN:
+			_join(command, client, server);
+			break;
 		case NONE:
 			;// handle invalid command
 	}
@@ -53,4 +56,9 @@ void	CommandHandler::_user(const Message& command, Client& client, const Server&
 		success = server.setClientUser(client, command.getParams()[0]); //check if already registered, if it is, return false
 	if (success && command.getParams().size() == 4)
 		server.setClientName(client, command.getParams()[3]);
+}
+
+void	CommandHandler::_join(const Message& command, Client& client, const Server& server)
+{
+	server.joinChannel(client, command.getParams()[0], command.getParams()[1]);
 }
