@@ -156,6 +156,7 @@ bool	Server::_createSocket(struct addrinfo *info)
 			return true;
 		close(_fd);
 	}
+	freeaddrinfo(info);
 	return false;
 }
 
@@ -186,9 +187,8 @@ void	Server::_eventLoop()
 			try
 			{
 				if (fd == _fd)
-				{
 					_acceptClient();
-				} else {
+				else {
 					if (ev & (EPOLLERR | EPOLLHUP | EPOLLRDHUP)) {
 						std::map<int, Client>::iterator it = _clients.find(fd);
 						if (it != _clients.end()) _disconnectClient(it->second);
@@ -237,16 +237,11 @@ void	Server::_readFd(const int fd)
 	{
 		ssize_t n = recv(fd, buf, BUFFERSIZE, 0);
 		if (n > 0)
-		{
 			_handleLine(it->second, buf, n);
-		}
-		else if (n == 0)
-		{
+		else if (n == 0) {
 			_disconnectClient(it->second);
 			break;
-		}
-		else
-		{
+		} else {
 			if (errno == EAGAIN || errno == EWOULDBLOCK)
 				break;
 			_disconnectClient(it->second);
@@ -361,7 +356,6 @@ bool		isReservedChar(char c)
 	std::string reserved = "#& =";
 	return reserved.find(c) != std::string::npos;
 }
-
 
 bool		setFdNonBlocking(int fd)
 {
