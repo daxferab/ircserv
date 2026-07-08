@@ -24,10 +24,12 @@ class Server
 		bool		_createSocket(struct addrinfo *info);
 		void		_initEpoll();
 		void		_eventLoop();
+		void		_acceptClient();
 
 		void		_readFd(const int fd);
 		void		_handleLine(Client& client, char* line, int data);
-		void		_reply(const int clientfd, const std::string& message) const;
+		void		_handleReply(Client& client, const std::string& message);
+		void		_writeFd(const int fd);
 		void		_fillContext(t_rplContext& context, const Client& client, const std::string& nick, const std::string& channel, const std::string& command) const;
 		
 		void		_addClient(const int fd);
@@ -42,13 +44,14 @@ class Server
 		void		stop();
 
 		std::string	getName() const;
-		void		authClient(Client& client, const std::string& pass) const;
-		void		setClientNick(Client& client, const std::string& nick) const;
-		bool		setClientUser(Client& client, const std::string& user) const;
-		void		setClientName(Client& client, const std::string& name) const;
+		void		authClient(Client& client, const std::string& pass);
+		void		setClientNick(Client& client, const std::string& nick);
+		bool		setClientUser(Client& client, const std::string& user);
+		void		setClientName(Client& client, const std::string& name);
 };
 
 epoll_event	newEvent(int fd, int flags);
 bool		isReservedChar(char c);
+bool		setFdNonBlocking(int fd);
 
 #endif

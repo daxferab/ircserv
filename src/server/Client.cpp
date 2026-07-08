@@ -15,27 +15,52 @@ void		Client::setNick(const std::string nick) { _nick = nick; }
 void		Client::setUser(const std::string user) { _username = user; _registered = true; }
 void		Client::setName(const std::string name) { _realName = name; }
 int			Client::getFd() const { return _fd; }
+const std::string& Client::getOutBuffer() const { return _outBuffer; }
 bool		Client::isAuthenticated() const { return _authenticated; }
 void		Client::setAuthenticated(const bool value) { _authenticated = value; }
 bool		Client::isRegistered() const { return _registered; }
 
-//------------------------------------------------------------- MEMBER FUNCTIONS
-void	Client::appendBuffer(char* msg, int data)
+void		Client::consumeOut(size_t count)
 {
-	_buffer.append(msg, data);
+	if (count >= _outBuffer.size())
+		_outBuffer.clear();
+	else
+		_outBuffer.erase(0, count);
 }
 
-bool		Client::hasFullLine() const
+//------------------------------------------------------------- MEMBER FUNCTIONS
+void	Client::appendBuffer(const char* msg, int data, int type)
 {
-	return _buffer.find("\r\n") != std::string::npos;
+	if (type == OUT)
+		_outBuffer.append(msg, data);
+	if (type == IN)
+		_inBuffer.append(msg, data);
+}
+
+bool		Client::hasFullLine(int type) const
+{
+	if (type == OUT)
+		return _outBuffer.find("\r\n") != std::string::npos;
+	return _inBuffer.find("\r\n") != std::string::npos;
+}
+
+void		Client::consumeLine(int type, size_t end)
+{
+	if (type == OUT)
+		_outBuffer.erase(0, end);
+	else
+	{
+		size_t end = _inBuffer.find("\r\n") + 2;
+		_inBuffer.erase(0, end);
+	}
 }
 
 std::string	Client::getLine()
 {
-	size_t		pos = _buffer.find("\r\n");
-	std::string	line = _buffer.substr(0, pos);
+	size_t		pos = _inBuffer.find("\r\n");
+	std::string	line = _inBuffer.substr(0, pos);
 
-	_buffer.erase(0, pos + 2);
+	_inBuffer.erase(0, pos + 2);
 	return (line);
 }
 

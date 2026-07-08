@@ -4,6 +4,7 @@
 #include "../utils/colors.h"
 #include "CommandHandler.hpp"
 
+#include <cerrno>
 #include <cstdio>
 #include <exception>
 #include <map>
@@ -13,6 +14,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/epoll.h>
+#include <fcntl.h>
 #include <netdb.h>
 #include <cstring>
 #include <unistd.h>
@@ -46,68 +48,63 @@ void	Server::stop()
 	_isRunning = false;
 	while (!_clients.empty())
 		_disconnectClient(_clients.begin()->second);
-	epoll_ctl(_epoll, EPOLL_CTL_DEL, _fd, NULL);
-	close(_fd);
+	if (_epoll >= 0)
+	{
+		epoll_ctl(_epoll, EPOLL_CTL_DEL, _fd, NULL);
+		close(_epoll);
+	}
+	if (_fd >= 0) close(_fd);
 	std::cout << RED << "------------ THISCORD SERVER CLOSED! ------------" << RESET << std::endl;
 }
 
 std::string	Server::getName() const { return _name; }
 
-void	Server::_fillContext(t_rplContext& context, const Client& client, const std::string& nick, const std::string& channel, const std::string& command) const
-{
-	context.client = client.getNick();
-	context.server = _name;
-	context.nick = nick;
-	context.channel = channel;
-	context.command = command;
-}
-
-void	Server::authClient(Client& client, const std::string& pass) const
+void	Server::authClient(Client& client, const std::string& pass)
 {
 	t_rplContext	context;
 
 	_fillContext(context, client, "", "", "PASS");
 
 	if (client.isAuthenticated())
-		_reply(client.getFd(), AReply::getReply(462, context));
+		_handleReply(client, AReply::getReply(462, context));
 	else if (pass.empty())
-		_reply(client.getFd(), AReply::getReply(461, context));
+		_handleReply(client, AReply::getReply(461, context));
 	else if (pass != _password)
-		_reply(client.getFd(), AReply::getReply(464, context));
+		_handleReply(client, AReply::getReply(464, context));
 	else
 		client.setAuthenticated(true);
 }
 
-void	Server::setClientNick(Client& client, const std::string& nick) const
+void	Server::setClientNick(Client& client, const std::string& nick)
 {
 	t_rplContext	context;
 
 	_fillContext(context, client, nick, "", "NICK");
 
 	if (nick.empty())
-		_reply(client.getFd(), AReply::getReply(431, context));
+		_handleReply(client, AReply::getReply(431, context));
 	else if (isReservedChar(nick[0]))
-		_reply(client.getFd(), AReply::getReply(432, context));
+		_handleReply(client, AReply::getReply(432, context));
 	else if (_nickInUse(nick))
-		_reply(client.getFd(), AReply::getReply(433, context));
+		_handleReply(client, AReply::getReply(433, context));
 	else
 	{
 		client.setNick(nick);
 		_fillContext(context, client, "", "", "");
-		_reply(client.getFd(), AReply::getReply(001, context));
+		_handleReply(client, AReply::getReply(001, context));
 	}
 }
 
-bool	Server::setClientUser(Client& client, const std::string& user) const
+bool	Server::setClientUser(Client& client, const std::string& user)
 {
 	t_rplContext	context;
 
 	_fillContext(context, client, "", "", "USER");
 
 	if (client.isRegistered())
-		_reply(client.getFd(), AReply::getReply(462, context));
+		_handleReply(client, AReply::getReply(462, context));
 	else if (user.empty())
-		_reply(client.getFd(), AReply::getReply(461, context));
+		_handleReply(client, AReply::getReply(461, context));
 	else
 	{
 		client.setUser(user);
@@ -116,7 +113,7 @@ bool	Server::setClientUser(Client& client, const std::string& user) const
 	return false;
 }
 
-void	Server::setClientName(Client& client, const std::string& name) const
+void	Server::setClientName(Client& client, const std::string& name)
 {
 	client.setName(name);
 }
@@ -165,8 +162,12 @@ bool	Server::_createSocket(struct addrinfo *info)
 void	Server::_initEpoll()
 {
 	_epoll = epoll_create1(0);
-	if (_epoll < 0)
-		throw std::runtime_error("Error creating epoll");
+	if (_epoll < 0) throw std::runtime_error("Error creating epoll");
+	if (!setFdNonBlocking(_fd))
+	{
+		close(_fd);
+		throw std::runtime_error("Error setting socket as non-blocking");
+	}
 	struct epoll_event	sock_ev = newEvent(_fd, EPOLLIN);
 	epoll_ctl(_epoll, EPOLL_CTL_ADD, _fd, &sock_ev);
 }
@@ -181,55 +182,140 @@ void	Server::_eventLoop()
 		for (int i = 0; i < n; i++)
 		{
 			int fd = events[i].data.fd;
-			if (fd == _fd)
+			unsigned int ev = events[i].events;
+			try
 			{
-				struct sockaddr_storage addr;
-				socklen_t addrlen = sizeof(addr);
-				int client_fd = accept(_fd, (struct sockaddr *)&addr, &addrlen);
-				_addClient(client_fd);
-			} else {
-				_readFd(fd);
+				if (fd == _fd)
+				{
+					_acceptClient();
+				} else {
+					if (ev & (EPOLLERR | EPOLLHUP | EPOLLRDHUP)) {
+						std::map<int, Client>::iterator it = _clients.find(fd);
+						if (it != _clients.end()) _disconnectClient(it->second);
+						continue;
+					}
+					if (ev & EPOLLIN) _readFd(fd);
+					if (ev & EPOLLOUT) _writeFd(fd);
+				}
+			} catch (std::exception& e) {
+				throw;
 			}
 		}
 	}
 }
 
+void	Server::_acceptClient()
+{
+	struct sockaddr_storage	addr;
+	socklen_t				addrlen = sizeof(addr);
+	int						client_fd;
+
+	while (true)
+	{
+		client_fd = accept(_fd, (struct sockaddr *)&addr, &addrlen);
+		if (client_fd < 0)
+		{
+			if (errno == EAGAIN || errno == EWOULDBLOCK) break;
+			throw std::runtime_error("Error accepting client");
+		}
+		if (!setFdNonBlocking(client_fd))
+		{
+			close(client_fd);
+			throw std::runtime_error("Error setting socket as non-blocking");
+		}
+		_addClient(client_fd);
+	}
+}
+
 void	Server::_readFd(const int fd)
-{	
-	char	line[BUFFERSIZE + 1];
-	int		data = recv(fd, line, BUFFERSIZE, 0);
+{
+	char	buf[BUFFERSIZE];
 	std::map<int, Client>::iterator it = _clients.find(fd);
 	if (it == _clients.end())
-		return;		
-	if (data < 0)
-		std::cout << RED << "Error reading message from " << fd << RESET << std::endl;
-	else if (data == 0)
-		_disconnectClient(it->second);
-	else
-		_handleLine(it->second, line, data);
+		return;
+	while (true)
+	{
+		ssize_t n = recv(fd, buf, BUFFERSIZE, 0);
+		if (n > 0)
+		{
+			_handleLine(it->second, buf, n);
+		}
+		else if (n == 0)
+		{
+			_disconnectClient(it->second);
+			break;
+		}
+		else
+		{
+			if (errno == EAGAIN || errno == EWOULDBLOCK)
+				break;
+			_disconnectClient(it->second);
+			break;
+		}
+	}
 }
 
 void	Server::_handleLine(Client& client, char* line, int data)
-{	
-	client.appendBuffer(line, data);
-	while (client.hasFullLine())
+{
+	client.appendBuffer(line, data, IN);
+	while (client.hasFullLine(IN))
 	{		
 		Message	message(client.getLine());
 		if (message.isValid())
 			if (!CommandHandler::execCommand(message, client, *this))
 			{
 				t_rplContext	context;
-
 				_fillContext(context, client, "", "", "");
-				_reply(client.getFd(), AReply::getReply(451, context));
+				_handleReply(client, AReply::getReply(451, context));
 			}
 	}
 }
 
-void	Server::_reply(const int clientfd, const std::string& message) const
+void	Server::_handleReply(Client& client, const std::string& message)
 {
-	std::cout << "msg: " << message << std::endl;
-	send(clientfd, message.c_str(), message.size(), 0);
+	client.appendBuffer(message.c_str(), message.size(), OUT);
+	struct epoll_event client_ev = newEvent(client.getFd(), EPOLLOUT | EPOLLIN);
+	epoll_ctl(_epoll, EPOLL_CTL_MOD, client.getFd(), &client_ev);
+}
+
+void	Server::_writeFd(const int fd)
+{
+	std::map<int, Client>::iterator it = _clients.find(fd);
+	if (it == _clients.end()) return;
+	Client &client = it->second;
+
+	while (true)
+	{
+		const std::string &out = client.getOutBuffer();
+		if (out.empty())
+		{
+			struct epoll_event ev = newEvent(fd, EPOLLIN);
+			epoll_ctl(_epoll, EPOLL_CTL_MOD, fd, &ev);
+			break;
+		}
+		ssize_t s = send(fd, out.c_str(), out.size(), 0);
+		if (s > 0)
+		{
+			client.consumeOut((size_t)s);
+			continue;
+		}
+		else if (s == -1 && (errno == EAGAIN || errno == EWOULDBLOCK))
+			break;
+		else
+		{
+			_disconnectClient(client);
+			break;
+		}
+	}
+}
+
+void	Server::_fillContext(t_rplContext& context, const Client& client, const std::string& nick, const std::string& channel, const std::string& command) const
+{
+	context.client = client.getNick();
+	context.server = _name;
+	context.nick = nick;
+	context.channel = channel;
+	context.command = command;
 }
 
 void	Server::_addClient(const int fd)
@@ -242,7 +328,7 @@ void	Server::_addClient(const int fd)
 	std::cout << GREEN << "Client " << fd << " connected" << RESET << std::endl;
 }
 
-void	Server::_disconnectClient(Client& client)
+void	Server::_disconnectClient(Client& client) //TODO: send QUIT reply
 {
 	int fd = client.getFd();
 	std::map<int, Client>::iterator it = _clients.find(fd);
@@ -274,4 +360,13 @@ bool		isReservedChar(char c)
 {
 	std::string reserved = "#& =";
 	return reserved.find(c) != std::string::npos;
+}
+
+
+bool		setFdNonBlocking(int fd)
+{
+	int flags = fcntl(fd, F_GETFL);
+	if (flags < 0 || fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0)
+		return false;
+	return true;
 }
