@@ -18,6 +18,8 @@ int	main(int ac, char* av[])
 		server.stop();
 		std::cerr << RED << e.what() << std::endl;
 	}
+
+	return (0);
 }
 
 /*  TODO list
