@@ -14,9 +14,9 @@ class Channel
 		std::set<int>		_users;
 		std::set<int>		_operators;
 		
-		// bool				_inviteOnly;
-		// bool				_topicRestrict;
-		// int					_userLimit;
+		bool				_inviteOnly;
+		bool				_topicRestrict;
+		int					_userLimit;
 
 	public:
 		Channel();
@@ -24,7 +24,21 @@ class Channel
 		~Channel();
 
 		const std::string&	getName() const;
+		const std::string&	getTopic() const;
+		const std::string&	getKey() const;
+		bool				isInviteOnly() const;
+		bool				isTopicRestricted() const;
+		int					getUserLimit() const;
+		int					getUserCount() const;
 
+		void				setTopic(std::string topic);
+		void				setInviteOnly(bool opt);
+		void				setTopicRestricted(bool opt);
+		void				setUserLimit(int num);
+
+		bool				isMember(int fd) const;
+		void				addUser(int fd);
+		void				removeUser(int fd);
 };
 
 #endif
