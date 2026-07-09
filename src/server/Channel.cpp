@@ -30,4 +30,8 @@ bool				Channel::isMember(int fd) const
 }
 
 void				Channel::addUser(int fd) { _users.insert(fd); }
-void				Channel::removeUser(int fd) { _users.erase(fd); }
+void				Channel::removeUser(int fd)
+{
+	_users.erase(fd);
+	_operators.erase(fd);
+}
