@@ -35,3 +35,16 @@ void				Channel::removeUser(int fd)
 	_users.erase(fd);
 	_operators.erase(fd);
 }
+
+const bool Channel::setOperator(int clientFd)
+{
+	return (_operators.insert(clientFd).second);
+}
+
+const bool Channel::unsetOperator(int clientFd)
+{
+	return (_operators.erase(_operators.find(clientFd)) != _operators.end());
+}
+
+/***************************** MEMBER FUNCTIONS *******************************/
+
