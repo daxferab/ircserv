@@ -1,4 +1,5 @@
 #include "Message.hpp"
+#include "../utils/colors.h"
 
 #include <sstream>
 #include <iostream>
@@ -29,9 +30,9 @@ bool	Message::_parse(std::string& line)
 	std::string			word;
 
 	_prefix = "";
-	std::cout << line << std::endl;
 	if (!(ss >> word)) return false;
 
+	std::cout << CYAN << line << RESET << std::endl;
 	if (word[0] == ':')
 	{
 		_prefix = word;

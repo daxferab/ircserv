@@ -14,9 +14,9 @@ class Channel
 		std::set<int>		_users;
 		std::set<int>		_operators;
 		
-		bool				_inviteonly;
-		bool				_topicRestrict;
-		int					_userLimit;
+		// bool				_inviteOnly;
+		// bool				_topicRestrict;
+		// int					_userLimit;
 
 	public:
 		Channel();

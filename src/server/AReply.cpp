@@ -1,8 +1,10 @@
 #include "AReply.hpp"
+#include "../utils/colors.h"
 
 #include <iomanip>
 #include <sstream>
 #include <string>
+#include <iostream>
 
 std::string	AReply::getReply(int n, const t_rplContext& context)
 {
@@ -50,6 +52,7 @@ std::string	AReply::getReply(int n, const t_rplContext& context)
 			break;
 	}
 	reply << "\r\n";
+	std::cout << MAGENTA << reply.str() << RESET << std::endl;
 	return reply.str();
 }
 

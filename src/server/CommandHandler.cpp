@@ -30,7 +30,7 @@ bool	CommandHandler::execCommand(Message& command, Client& client, Server& serve
 
 //------------------------------------------------------------ PRIVATE FUNCTIONS
 
-void	CommandHandler::_pass(const Message& command, Client& client, const Server& server)
+void	CommandHandler::_pass(const Message& command, Client& client, Server& server)
 {
 	if (command.getParams().empty())
 		server.authClient(client, "");
@@ -38,7 +38,7 @@ void	CommandHandler::_pass(const Message& command, Client& client, const Server&
 		server.authClient(client, command.getParams()[0]);
 }
 
-void	CommandHandler::_nick(const Message& command, Client& client, const Server& server)
+void	CommandHandler::_nick(const Message& command, Client& client, Server& server)
 {
 	if (command.getParams().empty())
 		server.setClientNick(client, "");
@@ -46,7 +46,7 @@ void	CommandHandler::_nick(const Message& command, Client& client, const Server&
 		server.setClientNick(client, command.getParams()[0]);
 }
 
-void	CommandHandler::_user(const Message& command, Client& client, const Server& server)
+void	CommandHandler::_user(const Message& command, Client& client, Server& server)
 {
 	bool	success;
 
