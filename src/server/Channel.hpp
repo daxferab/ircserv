@@ -14,7 +14,7 @@ class Channel
 
 		std::map<int, Client>	_users;
 		std::map<int, Client>	_operators;
-		
+
 		bool					_inviteonly;
 		bool					_topicRestrict;
 		int						_userLimit;
