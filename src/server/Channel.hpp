@@ -24,6 +24,8 @@ class Channel
 		~Channel();
 
 		const std::string&	getName() const;
+		const bool			setOperator(int clientFd);
+		const bool			unsetOperator(int clientFd);
 
 };
 
