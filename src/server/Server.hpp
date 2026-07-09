@@ -51,6 +51,7 @@ class Server
 		std::string	getName() const;
 		void		joinChannel(Client& client, const std::string& channel, const std::string& key);
 		void		authClient(Client& client, const std::string& pass);
+		void		quitClient(Client& client, const std::string& msg);
 		void		setClientNick(Client& client, const std::string& nick);
 		bool		setClientUser(Client& client, const std::string& user);
 		void		setClientName(Client& client, const std::string& name);

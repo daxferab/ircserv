@@ -24,12 +24,8 @@ void				Channel::setInviteOnly(bool opt) { _inviteOnly = opt; }
 void				Channel::setTopicRestricted(bool opt) { _topicRestrict = opt; }
 void				Channel::setUserLimit(int num) { _userLimit = num; }
 
-bool				Channel::isMember(int fd) const
-{
-	return _users.find(fd) != _users.end();
-}
-
 void				Channel::addUser(int fd) { _users.insert(fd); }
+bool				Channel::isMember(int fd) const { return _users.find(fd) != _users.end(); }
 void				Channel::removeUser(int fd)
 {
 	_users.erase(fd);

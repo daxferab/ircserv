@@ -36,8 +36,8 @@ class Channel
 		void				setTopicRestricted(bool opt);
 		void				setUserLimit(int num);
 
-		bool				isMember(int fd) const;
 		void				addUser(int fd);
+		bool				isMember(int fd) const;
 		void				removeUser(int fd);
 };
 

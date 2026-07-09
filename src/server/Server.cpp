@@ -60,6 +60,18 @@ void	Server::stop()
 
 std::string	Server::getName() const { return _name; }
 
+void	Server::joinChannel(Client& client, const std::string& name, const std::string& key)
+{
+	t_rplContext	context;
+
+	_fillContext(context, client, "", "", "USER");
+
+	std::cout << BLUE << "JOIN START" << RESET << std::endl;
+	std::cout << "channel " << name << ", key: " << key << std::endl;
+	_handleReply(client, ":" + client.getNick() + " JOIN " + name + "\r\n");
+	_addChannel(Channel(name, client.getFd()));
+}
+
 void	Server::authClient(Client& client, const std::string& pass)
 {
 	t_rplContext	context;
@@ -74,6 +86,13 @@ void	Server::authClient(Client& client, const std::string& pass)
 		_handleReply(client, AReply::getReply(464, context));
 	else
 		client.setAuthenticated(true);
+}
+
+void	Server::quitClient(Client& client, const std::string& msg)
+{
+	//TODO: sendMessage
+	(void) msg;
+	_disconnectClient(client);
 }
 
 void	Server::setClientNick(Client& client, const std::string& nick)
@@ -117,18 +136,6 @@ bool	Server::setClientUser(Client& client, const std::string& user)
 void	Server::setClientName(Client& client, const std::string& name)
 {
 	client.setName(name);
-}
-
-void	Server::joinChannel(Client& client, const std::string& name, const std::string& key)
-{
-	t_rplContext	context;
-
-	_fillContext(context, client, "", "", "USER");
-
-	std::cout << BLUE << "JOIN START" << RESET << std::endl;
-	std::cout << "channel " << name << ", key: " << key << std::endl;
-	_handleReply(client, ":" + client.getNick() + " JOIN " + name + "\r\n");
-	_addChannel(Channel(name, client.getFd()));
 }
 
 // --------------------------- PUBLIC EFUNCTIONS
@@ -243,7 +250,7 @@ void	Server::_acceptClient()
 	}
 }
 
-void Server::_createSignal(int signo, void (*handler)(int))
+void 	Server::_createSignal(int signo, void (*handler)(int))
 {
 	struct sigaction sa;
 	memset(&sa, 0, sizeof(sa));
@@ -255,7 +262,7 @@ void Server::_createSignal(int signo, void (*handler)(int))
 		throw std::runtime_error("Sigaction failed");
 }
 
-void Server::_handlesigint(int signo)
+void 	Server::_handlesigint(int signo)
 {
 	(void)signo;
 	throw std::runtime_error("");
@@ -273,12 +280,12 @@ void	Server::_readFd(const int fd)
 		if (n > 0)
 			_handleLine(it->second, buf, n);
 		else if (n == 0) {
-			_disconnectClient(it->second);
+			quitClient(it->second, "");
 			break;
 		} else {
 			if (errno == EAGAIN || errno == EWOULDBLOCK)
 				break;
-			_disconnectClient(it->second);
+			quitClient(it->second, "");
 			break;
 		}
 	}
@@ -332,7 +339,7 @@ void	Server::_writeFd(const int fd)
 			break;
 		else
 		{
-			_disconnectClient(client);
+			quitClient(client, "");
 			break;
 		}
 	}
@@ -359,13 +366,22 @@ void	Server::_addClient(const int fd)
 
 void	Server::_disconnectClient(Client& client) //TODO: send QUIT reply
 {
-	int fd = client.getFd();
+	int fd = client.getFd(); //FIXME: leaks
 	std::map<int, Client>::iterator it = _clients.find(fd);
 
 	std::cout << RED << "Client <" << client << "> disconnected" << RESET << std::endl;
 	epoll_ctl(_epoll, EPOLL_CTL_DEL, fd, NULL);
+	_handleReply(client, ":" + client.getNick() + " ERROR \r\n");
+	std::map<std::string, Channel>::iterator itc = _channels.begin();
+	std::map<std::string, Channel>::iterator end = _channels.end();
+
+	for (; itc != end; ++itc)
+		if (itc->second.isMember(client.getFd()))
+			itc->second.removeUser(client.getFd());
+
 	if (it != _clients.end())
 		_clients.erase(it);
+
 	close(fd);
 }
 
