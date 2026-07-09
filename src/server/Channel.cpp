@@ -4,9 +4,9 @@
 
 Channel::Channel() {}
 
-Channel::Channel(const std::string& name, Client& client): _name(name)
+Channel::Channel(const std::string& name, int clientFd): _name(name)
 {
-	_operators.insert(std::pair<int, Client&>(client.getFd(), client));
+	_operators.insert(clientFd);
 }
 
 Channel::~Channel() {}

@@ -2,7 +2,7 @@
 #define CHANNEL_HPP
 
 #include "Client.hpp"
-#include <map>
+#include <set>
 
 #include <string>
 class Channel
@@ -12,8 +12,8 @@ class Channel
 		std::string				_topic;
 		std::string				_key;
 
-		std::map<int, Client&>	_users;
-		std::map<int, Client&>	_operators;
+		std::set<int>			_users;
+		std::set<int>			_operators;
 		
 		bool					_inviteonly;
 		bool					_topicRestrict;
@@ -21,7 +21,7 @@ class Channel
 
 	public:
 		Channel();
-		Channel(const std::string& name, Client& client);
+		Channel(const std::string& name, int clientFd);
 		~Channel();
 
 		const std::string	&getName() const;

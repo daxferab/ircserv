@@ -130,7 +130,7 @@ void	Server::joinChannel(Client& client, const std::string& name, const std::str
 	std::cout << BLUE << "JOIN START" << RESET << std::endl;
 	std::cout << "channel " << name << ", key: " << key << std::endl;
 	_reply(client.getFd(), ":" + client.getNick() + " JOIN " + name + "\r\n");
-	_addChannel(Channel(name, client));
+	_addChannel(Channel(name, client.getFd()));
 }
 
 // --------------------------- PUBLIC EFUNCTIONS
