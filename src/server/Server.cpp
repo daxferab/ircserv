@@ -121,15 +121,16 @@ void	Server::setClientName(Client& client, const std::string& name) const
 	client.setName(name);
 }
 
-void	Server::joinChannel(Client& client, const std::string& channel, const std::string& key) const
+void	Server::joinChannel(Client& client, const std::string& name, const std::string& key)
 {
 	t_rplContext	context;
 
 	_fillContext(context, client, "", "", "USER");
 
 	std::cout << BLUE << "JOIN START" << RESET << std::endl;
-	std::cout << "channel " << channel << ", key: " << key << std::endl;
-	_reply(client.getFd(), ":" + client.getNick() + " JOIN " + channel + "\r\n");
+	std::cout << "channel " << name << ", key: " << key << std::endl;
+	_reply(client.getFd(), ":" + client.getNick() + " JOIN " + name + "\r\n");
+	_addChannel(Channel(name, client));
 }
 
 // --------------------------- PUBLIC EFUNCTIONS
@@ -263,6 +264,11 @@ void	Server::_disconnectClient(Client& client)
 	if (it != _clients.end())
 		_clients.erase(it);
 	close(fd);
+}
+
+void	Server::_addChannel(const Channel& channel)
+{
+	_channels.insert(std::pair<std::string, Channel>(channel.getName(), channel));
 }
 
 bool	Server::_nickInUse(const std::string nick) const

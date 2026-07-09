@@ -32,6 +32,7 @@ class Server
 		
 		void		_addClient(const int fd);
 		void		_disconnectClient(Client& client);
+		void		_addChannel(const Channel& channel);
 
 		bool		_nickInUse(const std::string nick) const;
 		
@@ -46,7 +47,7 @@ class Server
 		void		setClientNick(Client& client, const std::string& nick) const;
 		bool		setClientUser(Client& client, const std::string& user) const;
 		void		setClientName(Client& client, const std::string& name) const;
-		void		joinChannel(Client& client, const std::string& channel, const std::string& key) const;
+		void		joinChannel(Client& client, const std::string& channel, const std::string& key);
 };
 
 epoll_event	newEvent(int fd, int flags);

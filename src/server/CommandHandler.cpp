@@ -58,7 +58,7 @@ void	CommandHandler::_user(const Message& command, Client& client, const Server&
 		server.setClientName(client, command.getParams()[3]);
 }
 
-void	CommandHandler::_join(const Message& command, Client& client, const Server& server)
+void	CommandHandler::_join(const Message& command, Client& client, Server& server)
 {
 	server.joinChannel(client, command.getParams()[0], command.getParams()[1]);
 }
