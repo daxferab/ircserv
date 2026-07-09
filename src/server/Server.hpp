@@ -40,6 +40,7 @@ class Server
 		void		_addChannel(const Channel& channel);
 
 		bool		_nickInUse(const std::string nick) const;
+		bool		_channelExists(const std::string name) const;
 
 	public:
 		Server(std::string name, std::string password);

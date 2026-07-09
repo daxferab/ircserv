@@ -381,6 +381,8 @@ bool	Server::_nickInUse(const std::string nick) const
 	return false;
 }
 
+bool	Server::_channelExists(const std::string name) const { return _channels.find(name) != _channels.end(); }
+
 // ----------------------------------------------------------------------- UTILS
 epoll_event newEvent(int fd, int flags)
 {
