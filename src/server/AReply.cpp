@@ -40,6 +40,13 @@ std::string	AReply::getReply(int n, const Server& server, const Client& client, 
 		case 403:
 			reply << context.channel << " :No such channel";
 			break;
+		case 411:
+			reply << context.nick << " :No recipient given (" << context.command << ")";
+			break;
+		case 412:
+			reply << context.nick << " :No text to send";
+			break;
+
 		case 431:
 			reply << ":No nickname given";
 			break;
