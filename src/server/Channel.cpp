@@ -46,6 +46,10 @@ bool	Channel::setOperator(int clientFd)
 
 bool	Channel::unsetOperator(int clientFd)
 {
-	// return (_operators.erase(_operators.find(clientFd)) != _operators.end());
-	return (clientFd == -1);
+	if (_operators.find(clientFd) != _operators.end())
+	{
+		_operators.erase(_operators.find(clientFd));
+		return (true);
+	}	
+	return (false);
 }
