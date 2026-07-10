@@ -26,6 +26,7 @@ bool	CommandHandler::execCommand(Message& command, Client& client, Server& serve
 			break;
 		case PRIVMSG:
 			_privmsg(command, client, server);
+			break;
 		case KICK:
 			_kick(command, client, server);
 			break;
