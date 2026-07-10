@@ -27,12 +27,13 @@
 #define LISTENING_QUEUE 5
 
 // ---------------------------------------------------------------- CONSTRUCTORS
+
 Server::Server(std::string name, std::string password) : _fd(-1), _name(name), _isRunning(false), _password(password){}
 
 Server::~Server() {}
 
-// ------------------------------------------------------------ MEMBER FUNCTIONS
-// --------------------------- PRIVATE FUNCTIONS
+// ----------------------------------------------------- PUBLIC MEMBER FUNCTIONS
+
 void	Server::start(char* port)
 {
 	try {
@@ -162,7 +163,7 @@ void	Server::joinChannel(Client& client, const std::string& name, const std::str
 	}
 }
 
-// --------------------------- PUBLIC FUNCTIONS
+// ---------------------------------------------------- PRIVATE MEMBER FUNCTIONS
 
 void	Server::_setup(char* port)
 {
@@ -414,7 +415,8 @@ bool	Server::_nickInUse(const std::string nick) const
 
 bool	Server::_channelExists(const std::string name) const { return _channels.find(name) != _channels.end(); }
 
-// ----------------------------------------------------------------------- UTILS
+//------------------------------------------------------- OUT OF SCOPE FUNCTIONS
+
 epoll_event newEvent(int fd, int flags)
 {
 	epoll_event	ev;

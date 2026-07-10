@@ -3,6 +3,7 @@
 
 #include <sstream>
 #include <iostream>
+
 //----------------------------------------------------------------- CONSTRUCTORS
 
 Message::Message(std::string line)
@@ -12,8 +13,7 @@ Message::Message(std::string line)
 
 Message::~Message() {}
 
-//------------------------------------------------------------- PUBLIC FUNCTIONS
-//---------------------------- GETTERS/SETTERS
+//-------------------------------------------------------------- GETTERS/SETTERS
 
 const std::string&	Message::getPrefix() const { return _prefix; }
 
@@ -24,6 +24,7 @@ const std::vector<std::string>&	Message::getParams() const { return _params; }
 bool	Message::isValid() const { return _valid; }
 
 //------------------------------------------------------------ PRIVATE FUNCTIONS
+
 bool	Message::_parse(std::string& line)
 {
 	std::stringstream	ss(line);
@@ -56,6 +57,7 @@ bool	Message::_parse(std::string& line)
 }
 
 //------------------------------------------------------- OUT OF SCOPE FUNCTIONS
+
 t_comnum	getCommand(std::string word)
 {
 	if (word == "PASS") return PASS;

@@ -1,5 +1,7 @@
 #include "Channel.hpp"
 
+//----------------------------------------------------------------- CONSTRUCTORS
+
 Channel::Channel() {}
 
 Channel::Channel(const std::string& name, int clientFd): _name(name), _topic(""), _key(""), _inviteOnly(false), _topicRestrict(false), _userLimit(-1)
@@ -25,6 +27,8 @@ void				Channel::setInviteOnly(bool opt) { _inviteOnly = opt; }
 void				Channel::setTopicRestricted(bool opt) { _topicRestrict = opt; }
 void				Channel::setUserLimit(int num) { _userLimit = num; }
 
+//------------------------------------------------------------- MEMBER FUNCTIONS
+
 bool				Channel::isFull() const { return _userLimit > 0 && _userLimit >= getUserCount(); }
 bool				Channel::isKeyOk(std::string key) const { return key == _key; }
 bool				Channel::isMember(int fd) const { return _users.find(fd) != _users.end(); }
@@ -35,15 +39,13 @@ void				Channel::removeUser(int fd)
 	_operators.erase(fd);
 }
 
-const bool Channel::setOperator(int clientFd)
+bool	Channel::setOperator(int clientFd)
 {
 	return (_operators.insert(clientFd).second);
 }
 
-const bool Channel::unsetOperator(int clientFd)
+bool	Channel::unsetOperator(int clientFd)
 {
-	return (_operators.erase(_operators.find(clientFd)) != _operators.end());
+	// return (_operators.erase(_operators.find(clientFd)) != _operators.end());
+	return (clientFd == -1);
 }
-
-/***************************** MEMBER FUNCTIONS *******************************/
-

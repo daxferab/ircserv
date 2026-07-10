@@ -49,11 +49,11 @@ class Server
 		void		stop();
 
 		std::string	getName() const;
-		void		joinChannel(Client& client, const std::string& channel, const std::string& key);
 		void		authClient(Client& client, const std::string& pass);
 		void		setClientNick(Client& client, const std::string& nick);
 		bool		setClientUser(Client& client, const std::string& user);
 		void		setClientName(Client& client, const std::string& name);
+		void		joinChannel(Client& client, const std::string& channel, const std::string& key);
 };
 
 epoll_event	newEvent(int fd, int flags);

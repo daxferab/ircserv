@@ -14,6 +14,9 @@ typedef struct s_rplContext
 
 class AReply
 {
+	private:
+		AReply();
+
 	public:
 		static std::string	getReply(int n, const t_rplContext& context);
 };
