@@ -81,7 +81,7 @@ void	Server::quitClient(Client& client, const std::string& msg)
 {
 	//TODO: sendMessage
 	(void)msg;
-	_handleReply(client, "ERROR :Client Terminated session");
+	_handleReply(client, "ERROR :Client Terminated session \r\n");
 	_disconnectClient(client);
 }
 
