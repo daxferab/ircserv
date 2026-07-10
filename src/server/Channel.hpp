@@ -4,11 +4,13 @@
 #include <set>
 
 #include <string>
+#include <sys/types.h>
 class Channel
 {
 	private:
 		const std::string	_name;
 		std::string			_topic;
+		long				_topicSetAt;
 		std::string			_key;
 
 		std::set<int>		_users;
@@ -44,5 +46,7 @@ class Channel
 		void				addUser(int fd);
 		void				removeUser(int fd);
 };
+
+long	getUnixTime();
 
 #endif

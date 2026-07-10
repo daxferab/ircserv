@@ -1,10 +1,11 @@
 #include "Channel.hpp"
+#include <ctime>
 
 //----------------------------------------------------------------- CONSTRUCTORS
 
 Channel::Channel() {}
 
-Channel::Channel(const std::string& name, int clientFd): _name(name), _topic(""), _key(""), _inviteOnly(false), _topicRestrict(false), _userLimit(-1)
+Channel::Channel(const std::string& name, int clientFd): _name(name), _topic(""), _topicSetAt(getUnixTime()), _key(""), _inviteOnly(false), _topicRestrict(false), _userLimit(-1)
 {
 	_users.insert(clientFd);
 	_operators.insert(clientFd);
@@ -22,7 +23,7 @@ bool				Channel::isTopicRestricted() const { return _topicRestrict; }
 int					Channel::getUserLimit() const { return _userLimit; }
 int					Channel::getUserCount() const { return _users.size(); }
 
-void				Channel::setTopic(std::string topic) { _topic = topic; }
+void				Channel::setTopic(std::string topic) { _topic = topic; _topicSetAt = getUnixTime();}
 void				Channel::setInviteOnly(bool opt) { _inviteOnly = opt; }
 void				Channel::setTopicRestricted(bool opt) { _topicRestrict = opt; }
 void				Channel::setUserLimit(int num) { _userLimit = num; }
@@ -48,4 +49,14 @@ bool	Channel::unsetOperator(int clientFd)
 {
 	// return (_operators.erase(_operators.find(clientFd)) != _operators.end());
 	return (clientFd == -1);
+}
+
+//------------------------------------------------------- OUT OF SCOPE FUNCTIONS
+
+long	getUnixTime()
+{
+	time_t timestamp;
+	time(&timestamp);
+	
+	return timestamp;
 }

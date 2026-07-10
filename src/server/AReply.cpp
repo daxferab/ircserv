@@ -1,6 +1,5 @@
 #include "AReply.hpp"
 #include "../utils/colors.h"
-#include "Channel.hpp"
 
 #include <iomanip>
 #include <sstream>
