@@ -27,6 +27,7 @@ class Channel
 		const std::string&	getName() const;
 		const std::string&	getTopic() const;
 		const std::string&	getKey() const;
+		const std::set<int>&	getUsersList() const;
 		bool				isInviteOnly() const;
 		bool				isTopicRestricted() const;
 		int					getUserLimit() const;
@@ -42,8 +43,8 @@ class Channel
 
 		bool				isFull() const;
 		bool				isKeyOk(std::string key) const;
-		bool				isMember(int fd) const;
 		void				addUser(int fd);
+		bool				isMember(int fd) const;
 		void				removeUser(int fd);
 };
 

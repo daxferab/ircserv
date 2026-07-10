@@ -1,4 +1,5 @@
 #include "AReply.hpp"
+#include "Server.hpp"
 #include "../utils/colors.h"
 
 #include <iomanip>
@@ -6,27 +7,28 @@
 #include <string>
 #include <iostream>
 
-std::string	AReply::getReply(int n, const t_rplContext& context)
+std::string	AReply::getReply(int n, const Server& server, const Client& client, const t_rplContext& context)
 {
 	std::stringstream	reply;
-	std::string			cliName =	context.client.empty() ? "*" : context.client;
+	std::string			cliName = client.getNick().empty() ? "*" : client.getNick();
+	std::string			serverName = server.getName();
 
-	reply << ":" << context.server;
+	reply << ":" << serverName;
 	reply << " " << std::setfill('0') << std::setw(3) << n << " " << cliName << " ";
 	switch (n)
 	{
 	// Replies
 		case 001:
-			reply << ":Welcome to the " << context.server << " Network, " << cliName;
+			reply << ":Welcome to the " << serverName << " Network, " << cliName;
 			break;
 		case 002:
-			reply << ":Your host is " << context.server << " running version 1.0";
+			reply << ":Your host is " << serverName << " running version 1.0";
 			break;
 		case 332:
-			reply << context.channel << " :" << context.topic;
+			reply << context.channel << " :" << server.getChannelTopic(context.channel);
 			break;
 		case 353:
-			reply << "= " << context.channel << " :" << " nicks list"; // TODO: nick list
+			reply << "= " << context.channel << " :" << server.getChannelMembers(context.channel);
 			break;
 		case 366:
 			reply << context.channel << " :End of /NAMES list";

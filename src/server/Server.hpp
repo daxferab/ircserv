@@ -33,7 +33,7 @@ class Server
 		void		_handleLine(Client& client, char* line, int data);
 		void		_handleReply(Client& client, const std::string& message);
 		void		_writeFd(const int fd);
-		void		_fillContext(t_rplContext& context, const Client& client, const std::string& nick, const std::string& channel, const std::string& command, const std::string& topic) const;
+		void		_fillContext(t_rplContext& context, const std::string& nick, const std::string& channel, const std::string& command) const;
 		
 		void		_addClient(const int fd);
 		void		_disconnectClient(Client& client);
@@ -50,11 +50,14 @@ class Server
 
 		std::string	getName() const;
 		void		authClient(Client& client, const std::string& pass);
+		void		quitClient(Client& client, const std::string& msg);
 		void		setClientNick(Client& client, const std::string& nick);
 		bool		setClientUser(Client& client, const std::string& user);
 		void		setClientName(Client& client, const std::string& name);
 		void		joinChannel(Client& client, const std::string& channel, const std::string& key);
 		void		partChannel(Client& client, const std::string& name, const std::string& reason);
+		std::string	getChannelTopic(const std::string& channelName) const;
+		std::string	getChannelMembers(const std::string& channelName) const;
 };
 
 epoll_event	newEvent(int fd, int flags);

@@ -17,6 +17,7 @@ Channel::~Channel() {}
 const std::string&	Channel::getName() const { return _name; }
 const std::string&	Channel::getTopic() const { return _topic; }
 const std::string&	Channel::getKey() const { return _key; }
+const std::set<int>&	Channel::getUsersList() const { return _users; }
 bool				Channel::isInviteOnly() const { return _inviteOnly; }
 bool				Channel::isTopicRestricted() const { return _topicRestrict; }
 int					Channel::getUserLimit() const { return _userLimit; }
@@ -31,8 +32,8 @@ void				Channel::setUserLimit(int num) { _userLimit = num; }
 
 bool				Channel::isFull() const { return _userLimit > 0 && _userLimit >= getUserCount(); }
 bool				Channel::isKeyOk(std::string key) const { return key == _key; }
-bool				Channel::isMember(int fd) const { return _users.find(fd) != _users.end(); }
 void				Channel::addUser(int fd) { _users.insert(fd); }
+bool				Channel::isMember(int fd) const { return _users.find(fd) != _users.end(); }
 void				Channel::removeUser(int fd)
 {
 	_users.erase(fd);
