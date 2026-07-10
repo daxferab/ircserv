@@ -33,7 +33,7 @@ class Server
 		void		_handleLine(Client& client, char* line, int data);
 		void		_handleReply(Client& client, const std::string& message);
 		void		_writeFd(const int fd);
-		void		_fillContext(t_rplContext& context, const Client& client, const std::string& nick, const std::string& channel, const std::string& command) const;
+		void		_fillContext(t_rplContext& context, const Client& client, const std::string& nick, const std::string& channel, const std::string& command, const std::string& topic) const;
 		
 		void		_addClient(const int fd);
 		void		_disconnectClient(Client& client);

@@ -10,7 +10,6 @@ class Channel
 	private:
 		const std::string	_name;
 		std::string			_topic;
-		long				_topicSetAt;
 		std::string			_key;
 
 		std::set<int>		_users;
@@ -35,6 +34,7 @@ class Channel
 		bool				setOperator(int clientFd);
 		bool				unsetOperator(int clientFd);
 
+
 		void				setTopic(std::string topic);
 		void				setInviteOnly(bool opt);
 		void				setTopicRestricted(bool opt);
@@ -46,7 +46,5 @@ class Channel
 		void				addUser(int fd);
 		void				removeUser(int fd);
 };
-
-long	getUnixTime();
 
 #endif

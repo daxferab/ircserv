@@ -11,7 +11,6 @@ typedef struct s_rplContext
 	std::string	channel;
 	std::string	command;
 	std::string	topic;
-	long		setAt;
 } t_rplContext;
 
 class AReply

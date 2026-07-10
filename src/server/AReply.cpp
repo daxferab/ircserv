@@ -23,13 +23,10 @@ std::string	AReply::getReply(int n, const t_rplContext& context)
 			reply << cliName << " :Your host is " << context.server << " running version 1.0";
 			break;
 		case 332:
-			reply << cliName << " " << context.channel << " :" << context.topic; // TODO: context.topic (current channel topic)
-			break;
-		case 333:
-			reply << cliName << " " << context.channel << " " << context.nick << " " << context.setAt; // TODO: context.setat (time the topic was set)
+			reply << cliName << " " << context.channel << " :" << context.topic;
 			break;
 		case 353:
-			reply << "placeholder 353"; //TODO reply case
+			reply << cliName << " = " << context.channel << " :" << " nicks list"; // TODO: nick list
 			break;
 		case 366:
 			reply << cliName << " " << context.channel << " :End of /NAMES list";
