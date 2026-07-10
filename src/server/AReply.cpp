@@ -67,7 +67,7 @@ std::string	AReply::getReply(int n, const t_rplContext& context)
 			reply << cliName << " " << context.channel << " :Cannot join channel (+l)";
 			break;
 		case 473:
-			reply << "placeholder 473"; //TODO reply case
+		reply << cliName << " " << context.channel << " :Cannot join channel (+i)";
 			break;
 		case 475:
 			reply << "placeholder 475"; //TODO reply case
