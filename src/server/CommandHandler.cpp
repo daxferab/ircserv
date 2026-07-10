@@ -2,6 +2,7 @@
 #include "Message.hpp"
 #include "Server.hpp"
 #include <cstring>
+#include <unistd.h>
 
 //------------------------------------------------------------- MEMBER FUNCTIONS
 
@@ -79,5 +80,6 @@ void	CommandHandler::_quit(const Message& command, Client& client, Server& serve
 
 void	CommandHandler::_kick(const Message& command, Client& client, Server& server)
 {
-	
+	//TODO: kick multiple users
+	server.kickUser(client, command.getParams()[0], command.getParams()[1], command.getParams()[2]);
 }
