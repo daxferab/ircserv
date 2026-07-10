@@ -49,6 +49,12 @@ std::string	AReply::getReply(int n, const Server& server, const Client& client, 
 		case 433:
 			reply << context.nick << " :Nickname is already in use";
 			break;
+		case 441:
+			reply << context.nick << " " << context.channel << " :They aren't on that channel";
+			break;
+		case 442:
+			reply << context.channel << " :You're not on that channel";
+			break;
 		case 451:
 			reply << ":You have not registered";
 			break;
@@ -69,6 +75,9 @@ std::string	AReply::getReply(int n, const Server& server, const Client& client, 
 			break;
 		case 475:
 			reply << context.channel << " :Cannot join channel (+k)";
+			break;
+		case 482:
+			reply << context.channel << " :You're not channel operator";
 			break;
 	}
 	reply << "\r\n";

@@ -81,7 +81,7 @@ void	Server::quitClient(Client& client, const std::string& msg)
 {
 	//TODO: sendMessage
 	(void)msg;
-	_handleReply(client, "ERROR :Client Terminated session");
+	_handleReply(client, "ERROR :Client Terminated session \n\r");
 	_disconnectClient(client);
 }
 
@@ -156,11 +156,46 @@ void	Server::joinChannel(Client& client, const std::string& name, const std::str
 		else
 			channel->addUser(client.getFd());
 		std::cout << MAGENTA << ":" + client.getNick() + " JOIN " + name + "\r\n" << RESET << std::endl;
-		_handleReply(client, ":" + client.getNick() + " JOIN " + name + "\r\n");
+		std::set<int>	clients = channel->getUsersList();
+		for (std::set<int>::iterator it = clients.begin(); it != clients.end(); it++)
+			_handleReply(_clients.find(*it)->second, ":" + client.getNick() + " JOIN " + name + "\r\n");
 		if (!channel->getTopic().empty())
 			_handleReply(client, AReply::getReply(332, *this, client, context)); //TEST
 		_handleReply(client, AReply::getReply(353, *this, client, context)); //TEST
 		_handleReply(client, AReply::getReply(366, *this, client, context)); //TEST
+	}
+}
+
+void	Server::kickUser(Client& client, const std::string& chanName, const std::string& nick, const std::string& reason)
+{
+	t_rplContext	context;
+	Channel			*channel = NULL;
+
+	_fillContext(context, nick, chanName, "KICK");
+	
+	if (chanName.empty())
+		_handleReply(client, AReply::getReply(461, *this, client, context));
+	else if(!_channelExists(chanName))
+	{
+		_handleReply(client, AReply::getReply(403, *this, client, context));
+		return;
+	}
+	channel = &(_channels.at(chanName));
+
+	if(!channel->isMember(client.getFd()))
+		_handleReply(client, AReply::getReply(442, *this, client, context));
+	if(!channel->isOperator(client.getFd()))
+		_handleReply(client, AReply::getReply(482, *this, client, context));
+	else if (channel->isMember(_getClientFd(nick)))
+		_handleReply(client, AReply::getReply(441, *this, client, context));
+	else
+	{
+		std::set<int>	clients = channel->getUsersList();
+		for (std::set<int>::iterator it = clients.begin(); it != clients.end(); it++)
+			_handleReply(_clients.find(*it)->second, ":" + client.getNick() + " KICK " + chanName + " " + reason + "\r\n");
+
+		std::cout << MAGENTA << ":" + client.getNick() + " KICK " + chanName + " " + reason + "\r\n" << RESET << std::endl;
+		channel->removeUser(_getClientFd(nick));
 	}
 }
 
@@ -451,6 +486,17 @@ bool	Server::_nickInUse(const std::string nick) const
 }
 
 bool	Server::_channelExists(const std::string name) const { return _channels.find(name) != _channels.end(); }
+
+int		Server::_getClientFd(const std::string& nick) const
+{
+	std::map<int, Client>::const_iterator itc = _clients.begin();
+	std::map<int, Client>::const_iterator end = _clients.end();
+
+	for (; itc != end; ++itc)
+		if (itc->second.getNick() == nick)
+			return (itc->second.getFd());
+	return -1;
+}
 
 //------------------------------------------------------- OUT OF SCOPE FUNCTIONS
 

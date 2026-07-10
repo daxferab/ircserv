@@ -2,6 +2,7 @@
 #include "Message.hpp"
 #include "Server.hpp"
 #include <cstring>
+#include <unistd.h>
 
 //------------------------------------------------------------- MEMBER FUNCTIONS
 
@@ -25,6 +26,8 @@ bool	CommandHandler::execCommand(Message& command, Client& client, Server& serve
 			break;
 		case PRIVMSG:
 			_privmsg(command, client, server);
+		case KICK:
+			_kick(command, client, server);
 			break;
 		case QUIT:
 			_quit(command, client, server);
@@ -81,4 +84,10 @@ void	CommandHandler::_quit(const Message& command, Client& client, Server& serve
 	if (command.getParams().empty())
 		server.quitClient(client, "");
 	server.quitClient(client, command.getParams()[0]);
+}
+
+void	CommandHandler::_kick(const Message& command, Client& client, Server& server)
+{
+	//TODO: kick multiple users
+	server.kickUser(client, command.getParams()[0], command.getParams()[1], command.getParams()[2]);
 }
