@@ -12,64 +12,61 @@ std::string	AReply::getReply(int n, const t_rplContext& context)
 	std::string			cliName =	context.client.empty() ? "*" : context.client;
 
 	reply << ":" << context.server;
-	reply << " " << std::setfill('0') << std::setw(3) << n << " ";
+	reply << " " << std::setfill('0') << std::setw(3) << n << " " << cliName << " ";
 	switch (n)
 	{
 	// Replies
 		case 001:
-			reply << cliName << " :Welcome to the " << context.server << " Network, " << cliName;
+			reply << ":Welcome to the " << context.server << " Network, " << cliName;
 			break;
 		case 002:
-			reply << cliName << " :Your host is " << context.server << " running version 1.0";
+			reply << ":Your host is " << context.server << " running version 1.0";
 			break;
 		case 332:
-			reply << "placeholder 332"; //TODO reply case
-			break;
-		case 333:
-			reply << "placeholder 333"; //TODO reply case
+			reply << context.channel << " :" << context.topic;
 			break;
 		case 353:
-			reply << "placeholder 353"; //TODO reply case
+			reply << "= " << context.channel << " :" << " nicks list"; // TODO: nick list
 			break;
 		case 366:
-			reply << "placeholder 366"; //TODO reply case
+			reply << context.channel << " :End of /NAMES list";
 			break;
 	// Errors
 		case 401:
-			reply << cliName << " " << context.nick << " :No such nick/channel";
+			reply << context.nick << " :No such nick/channel";
 			break;
 		case 403:
-			reply << cliName << " " << context.channel << " :No such channel";
+			reply << context.channel << " :No such channel";
 			break;
 		case 431:
-			reply << cliName << " :No nickname given";
+			reply << ":No nickname given";
 			break;
 		case 432:
-			reply << cliName << " " << context.nick << " :Erroneus nickname";
+			reply << context.nick << " :Erroneus nickname";
 			break;
 		case 433:
-			reply << cliName << " " << context.nick << " :Nickname is already in use";
+			reply << context.nick << " :Nickname is already in use";
 			break;
 		case 451:
-			reply << cliName << " :You have not registered";
+			reply << ":You have not registered";
 			break;
 		case 461:
-			reply << cliName << " " << context.command << " :Not enough parameters";
+			reply << context.command << " :Not enough parameters";
 			break;
 		case 462:
-			reply << cliName << " :You may not reregister";
+			reply << ":You may not reregister";
 			break;
 		case 464:
-			reply << cliName << " :Password incorrect";
+			reply << ":Password incorrect";
 			break;
 		case 471:
-			reply << "placeholder 471"; //TODO reply case
+			reply << context.channel << " :Cannot join channel (+l)";
 			break;
 		case 473:
-			reply << "placeholder 473"; //TODO reply case
+			reply << context.channel << " :Cannot join channel (+i)";
 			break;
 		case 475:
-			reply << "placeholder 475"; //TODO reply case
+			reply << context.channel << " :Cannot join channel (+k)";
 			break;
 	}
 	reply << "\r\n";

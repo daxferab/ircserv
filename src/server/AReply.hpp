@@ -10,6 +10,7 @@ typedef struct s_rplContext
 	std::string	nick;
 	std::string	channel;
 	std::string	command;
+	std::string	topic;
 } t_rplContext;
 
 class AReply

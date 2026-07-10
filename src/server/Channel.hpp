@@ -4,6 +4,7 @@
 #include <set>
 
 #include <string>
+#include <sys/types.h>
 class Channel
 {
 	private:
@@ -32,6 +33,7 @@ class Channel
 		int					getUserCount() const;
 		bool				setOperator(int clientFd);
 		bool				unsetOperator(int clientFd);
+
 
 		void				setTopic(std::string topic);
 		void				setInviteOnly(bool opt);

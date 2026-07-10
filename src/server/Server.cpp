@@ -65,7 +65,7 @@ void	Server::authClient(Client& client, const std::string& pass)
 {
 	t_rplContext	context;
 
-	_fillContext(context, client, "", "", "PASS");
+	_fillContext(context, client, "", "", "PASS", "");
 
 	if (client.isAuthenticated())
 		_handleReply(client, AReply::getReply(462, context));
@@ -81,7 +81,7 @@ void	Server::setClientNick(Client& client, const std::string& nick)
 {
 	t_rplContext	context;
 
-	_fillContext(context, client, nick, "", "NICK");
+	_fillContext(context, client, nick, "", "NICK", "");
 
 	if (nick.empty())
 		_handleReply(client, AReply::getReply(431, context));
@@ -92,7 +92,7 @@ void	Server::setClientNick(Client& client, const std::string& nick)
 	else
 	{
 		client.setNick(nick);
-		_fillContext(context, client, "", "", "");
+		_fillContext(context, client, "", "", "", "");
 		_handleReply(client, AReply::getReply(001, context));
 	}
 }
@@ -101,7 +101,7 @@ bool	Server::setClientUser(Client& client, const std::string& user)
 {
 	t_rplContext	context;
 
-	_fillContext(context, client, "", "", "USER");
+	_fillContext(context, client, "", "", "USER", "");
 
 	if (client.isRegistered())
 		_handleReply(client, AReply::getReply(462, context));
@@ -130,7 +130,7 @@ void	Server::joinChannel(Client& client, const std::string& name, const std::str
 		channel = &(_channels.at(name));
 	invited = channel && false;//TODO invited
 
-	_fillContext(context, client, client.getNick(), name, "JOIN");
+	_fillContext(context, client, client.getNick(), name, "JOIN", channel ? channel->getTopic() : "" );
 
 	if (name.empty())
 		_handleReply(client, AReply::getReply(461, context));
@@ -154,10 +154,7 @@ void	Server::joinChannel(Client& client, const std::string& name, const std::str
 		std::cout << MAGENTA << ":" + client.getNick() + " JOIN " + name + "\r\n" << RESET << std::endl;
 		_handleReply(client, ":" + client.getNick() + " JOIN " + name + "\r\n");
 		if (!channel->getTopic().empty())
-		{
 			_handleReply(client, AReply::getReply(332, context)); //TEST
-			_handleReply(client, AReply::getReply(333, context)); //TEST
-		}
 		_handleReply(client, AReply::getReply(353, context)); //TEST
 		_handleReply(client, AReply::getReply(366, context)); //TEST
 	}
@@ -326,7 +323,7 @@ void	Server::_handleLine(Client& client, char* line, int data)
 			if (!CommandHandler::execCommand(message, client, *this))
 			{
 				t_rplContext	context;
-				_fillContext(context, client, "", "", "");
+				_fillContext(context, client, "", "", "", "");
 				_handleReply(client, AReply::getReply(451, context));
 			}
 	}
@@ -370,13 +367,14 @@ void	Server::_writeFd(const int fd)
 	}
 }
 
-void	Server::_fillContext(t_rplContext& context, const Client& client, const std::string& nick, const std::string& channel, const std::string& command) const
+void	Server::_fillContext(t_rplContext& context, const Client& client, const std::string& nick, const std::string& channel, const std::string& command, const std::string& topic) const
 {
 	context.client = client.getNick();
 	context.server = _name;
 	context.nick = nick;
 	context.channel = channel;
 	context.command = command;
+	context.topic = topic;
 }
 
 void	Server::_addClient(const int fd)
