@@ -125,7 +125,6 @@ void	Server::setClientName(Client& client, const std::string& name)
 	client.setName(name);
 }
 
-// --------------------------- PUBLIC EFUNCTIONS
 void	Server::joinChannel(Client& client, const std::string& name, const std::string& key)
 {
 	t_rplContext	context;
@@ -133,7 +132,11 @@ void	Server::joinChannel(Client& client, const std::string& name, const std::str
 	bool			invited;
 
 	if(_channelExists(name))
+	{
 		channel = &(_channels.at(name));
+		if (channel->isMember(client.getFd()))
+			return ;
+	}
 	invited = channel && false;//TODO invited
 	_fillContext(context, client.getNick(), name, "JOIN");
 
