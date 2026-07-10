@@ -91,12 +91,20 @@ void	CommandHandler::_join(const Message& command, Client& client, Server& serve
 
 void	CommandHandler::_part(const Message &command, Client &client, Server &server)
 {
-	// for (size_t i = 0; i < command.getParams().size(); i++)
-	// {
-	// 	if (command.getParams()[i][0] == '#')
-	// }
-	server.partChannel(client, command.getParams()[0], command.getParams()[1]);
-	
+	std::vector<std::string>	channels;
+	std::string					reason;
+
+	if (command.getParams().size() >= 2)
+	{
+		channels = split(command.getParams()[0], ',');
+		if (command.getParams()[1] == "Leaving:Leaving")
+			reason = "Leaving";
+		else
+			reason = command.getParams()[1];
+
+		for (size_t i = 0; i < channels.size(); ++i)
+			server.partChannel(client, channels[i], reason);
+	}
 }
 
 void	CommandHandler::_quit(const Message& command, Client& client, Server& server)

@@ -187,7 +187,7 @@ void	Server::partChannel(Client &client, const std::string &name, const std::str
 	{
 		channel->removeUser(client.getFd());
 		std::cout << MAGENTA << ":" + client.getNick() + " PART " + name + " :" + reason + "\r\n" << RESET << std::endl;
-		_handleReply(client, ":" + client.getNick() + " PART " + name  + " :" + reason + "\r\n");
+		_handleReply(client, ":" + client.getNick() + " PART " + name + " :" + reason + "\r\n");
 	}
 }
 
