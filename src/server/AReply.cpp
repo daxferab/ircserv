@@ -1,5 +1,6 @@
 #include "AReply.hpp"
 #include "../utils/colors.h"
+#include "Channel.hpp"
 
 #include <iomanip>
 #include <sstream>
@@ -63,7 +64,7 @@ std::string	AReply::getReply(int n, const t_rplContext& context)
 			reply << cliName << " :Password incorrect";
 			break;
 		case 471:
-			reply << "placeholder 471"; //TODO reply case
+			reply << cliName << " " << context.channel << " :Cannot join channel (+l)";
 			break;
 		case 473:
 			reply << "placeholder 473"; //TODO reply case
