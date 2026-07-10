@@ -122,16 +122,47 @@ void	Server::setClientName(Client& client, const std::string& name)
 void	Server::joinChannel(Client& client, const std::string& name, const std::string& key)
 {
 	t_rplContext	context;
+	Channel			*channel = NULL;
+	bool			invited;
 
-	_fillContext(context, client, "", "", "USER");
+	if(_channelExists(name))
+		channel = &(_channels.at(name));
+	invited = channel && false;//TODO invited
 
-	std::cout << BLUE << "JOIN START" << RESET << std::endl;
-	std::cout << "channel " << name << ", key: " << key << std::endl;
-	_handleReply(client, ":" + client.getNick() + " JOIN " + name + "\r\n");
-	_addChannel(Channel(name, client.getFd()));
+	_fillContext(context, client, client.getNick(), name, "JOIN");
+
+	if (name.empty())
+		_handleReply(client, AReply::getReply(461, context));
+	else if(name[0] != '#')
+		_handleReply(client, AReply::getReply(403, context));
+	else if (channel && !invited && !channel->isKeyOk(key))
+		_handleReply(client, AReply::getReply(475, context)); //TEST
+	else if (channel && !invited && channel->isInviteOnly())
+		_handleReply(client, AReply::getReply(473, context)); //TEST
+	else if (channel && !invited && channel->isFull())
+		_handleReply(client, AReply::getReply(471, context)); //TEST
+	else
+	{
+		if (!channel)
+		{
+			_addChannel(Channel(name, client.getFd()));
+			channel = &(_channels.at(name));
+		}
+		else
+			channel->addUser(client.getFd());
+		std::cout << MAGENTA << ":" + client.getNick() + " JOIN " + name + "\r\n" << RESET << std::endl;
+		_handleReply(client, ":" + client.getNick() + " JOIN " + name + "\r\n");
+		if (!channel->getTopic().empty())
+		{
+			_handleReply(client, AReply::getReply(332, context)); //TEST
+			_handleReply(client, AReply::getReply(333, context)); //TEST
+		}
+		_handleReply(client, AReply::getReply(353, context)); //TEST
+		_handleReply(client, AReply::getReply(366, context)); //TEST
+	}
 }
 
-// --------------------------- PUBLIC EFUNCTIONS
+// --------------------------- PUBLIC FUNCTIONS
 
 void	Server::_setup(char* port)
 {
@@ -243,7 +274,7 @@ void	Server::_acceptClient()
 	}
 }
 
-void Server::_createSignal(int signo, void (*handler)(int))
+void	Server::_createSignal(int signo, void (*handler)(int))
 {
 	struct sigaction sa;
 	memset(&sa, 0, sizeof(sa));
@@ -255,7 +286,7 @@ void Server::_createSignal(int signo, void (*handler)(int))
 		throw std::runtime_error("Sigaction failed");
 }
 
-void Server::_handlesigint(int signo)
+void	Server::_handlesigint(int signo)
 {
 	(void)signo;
 	throw std::runtime_error("");
