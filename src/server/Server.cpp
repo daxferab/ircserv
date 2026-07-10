@@ -125,7 +125,6 @@ void	Server::setClientName(Client& client, const std::string& name)
 	client.setName(name);
 }
 
-// --------------------------- PUBLIC EFUNCTIONS
 void	Server::joinChannel(Client& client, const std::string& name, const std::string& key)
 {
 	t_rplContext	context;
@@ -192,6 +191,11 @@ std::string	Server::getChannelMembers(const std::string& channelName) const
 		list.append(clientIt->second.getNick());
 	}
 	return list;
+}
+
+void	Server::sendMessage(Client& client, const std::string& target, const std::string& message)
+{
+	
 }
 
 // ---------------------------------------------------- PRIVATE MEMBER FUNCTIONS

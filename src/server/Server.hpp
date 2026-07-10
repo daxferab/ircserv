@@ -57,6 +57,7 @@ class Server
 		void		joinChannel(Client& client, const std::string& channel, const std::string& key);
 		std::string	getChannelTopic(const std::string& channelName) const;
 		std::string	getChannelMembers(const std::string& channelName) const;
+		void		sendMessage(Client& client, const std::string& target, const std::string& message);
 };
 
 epoll_event	newEvent(int fd, int flags);

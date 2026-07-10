@@ -11,6 +11,7 @@ typedef enum e_comnum
 	USER,
 	JOIN,
 	QUIT,
+	PRIVMSG,
 	NONE,
 } t_comnum;
 

@@ -65,5 +65,6 @@ t_comnum	getCommand(std::string word)
 	if (word == "USER") return USER;
 	if (word == "JOIN") return JOIN;
 	if (word == "QUIT") return QUIT;
+	if (word == "PRIVMSG") return PRIVMSG;
 	return NONE;
 }
