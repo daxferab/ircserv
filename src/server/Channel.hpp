@@ -38,6 +38,8 @@ class Channel
 		void				setTopicRestricted(bool opt);
 		void				setUserLimit(int num);
 
+		bool				isFull() const;
+		bool				isKeyOk(std::string key) const;
 		bool				isMember(int fd) const;
 		void				addUser(int fd);
 		void				removeUser(int fd);

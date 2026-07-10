@@ -22,6 +22,18 @@ std::string	AReply::getReply(int n, const t_rplContext& context)
 		case 002:
 			reply << cliName << " :Your host is " << context.server << " running version 1.0";
 			break;
+		case 332:
+			reply << "placeholder 332"; //TODO reply case
+			break;
+		case 333:
+			reply << "placeholder 333"; //TODO reply case
+			break;
+		case 353:
+			reply << "placeholder 353"; //TODO reply case
+			break;
+		case 366:
+			reply << "placeholder 366"; //TODO reply case
+			break;
 	// Errors
 		case 401:
 			reply << cliName << " " << context.nick << " :No such nick/channel";
@@ -49,6 +61,15 @@ std::string	AReply::getReply(int n, const t_rplContext& context)
 			break;
 		case 464:
 			reply << cliName << " :Password incorrect";
+			break;
+		case 471:
+			reply << "placeholder 471"; //TODO reply case
+			break;
+		case 473:
+			reply << "placeholder 473"; //TODO reply case
+			break;
+		case 475:
+			reply << "placeholder 475"; //TODO reply case
 			break;
 	}
 	reply << "\r\n";
