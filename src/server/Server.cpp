@@ -79,8 +79,8 @@ void	Server::authClient(Client& client, const std::string& pass)
 
 void	Server::quitClient(Client& client, const std::string& msg)
 {
-	//TODO: sendMessage
-	(void)msg;
+	for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+		_handleReply(it->second, ":" + client.getNick() + " QUIT :" + msg + "\r\n");
 	_handleReply(client, "ERROR :Client Terminated session \r\n");
 	_disconnectClient(client);
 }
