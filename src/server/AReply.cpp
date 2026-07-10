@@ -26,7 +26,7 @@ std::string	AReply::getReply(int n, const t_rplContext& context)
 			reply << cliName << " " << context.channel << " :" << "context.topic"; // TODO: context.topic (current channel topic)
 			break;
 		case 333:
-			reply << cliName << " " << context.channel << " " << context.nick << " " << "context.setat"; // TODO: context.setat (time the topic was set)
+			reply << cliName << " " << context.channel << " " << context.nick << " " << "context.setaAt"; // TODO: context.setat (time the topic was set)
 			break;
 		case 353:
 			reply << "placeholder 353"; //TODO reply case
