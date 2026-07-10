@@ -165,7 +165,7 @@ void	Server::joinChannel(Client& client, const std::string& name, const std::str
 	}
 }
 
-void Server::partChannel(Client &client, const std::string &name, const std::string &reason)
+void	Server::partChannel(Client &client, const std::string &name, const std::string &reason)
 {
 	t_rplContext	context;
 	Channel			*channel = NULL;

@@ -70,9 +70,14 @@ void	CommandHandler::_join(const Message& command, Client& client, Server& serve
 	server.joinChannel(client, command.getParams()[0], command.getParams()[1]);
 }
 
-void CommandHandler::_part(const Message &command, Client &client, Server &server)
+void	CommandHandler::_part(const Message &command, Client &client, Server &server)
 {
+	// for (size_t i = 0; i < command.getParams().size(); i++)
+	// {
+	// 	if (command.getParams()[i][0] == '#')
+	// }
 	server.partChannel(client, command.getParams()[0], command.getParams()[1]);
+	
 }
 
 void	CommandHandler::_quit(const Message& command, Client& client, Server& server)
