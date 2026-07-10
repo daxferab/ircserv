@@ -370,13 +370,15 @@ void	Server::_writeFd(const int fd)
 	}
 }
 
-void	Server::_fillContext(t_rplContext& context, const Client& client, const std::string& nick, const std::string& channel, const std::string& command) const
+void	Server::_fillContext(t_rplContext& context, const Client& client, const std::string& nick, const std::string& channel, const std::string& command, const std::string& topic, long setAt) const
 {
 	context.client = client.getNick();
 	context.server = _name;
 	context.nick = nick;
 	context.channel = channel;
 	context.command = command;
+	context.topic = topic;
+	context.setAt = setAt;
 }
 
 void	Server::_addClient(const int fd)
