@@ -54,6 +54,7 @@ class Server
 		bool		setClientUser(Client& client, const std::string& user);
 		void		setClientName(Client& client, const std::string& name);
 		void		joinChannel(Client& client, const std::string& channel, const std::string& key);
+		void		partChannel(Client& client, const std::string& name, const std::string& reason);
 };
 
 epoll_event	newEvent(int fd, int flags);

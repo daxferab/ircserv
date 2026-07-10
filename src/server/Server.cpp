@@ -160,6 +160,30 @@ void	Server::joinChannel(Client& client, const std::string& name, const std::str
 	}
 }
 
+void Server::partChannel(Client &client, const std::string &name, const std::string &reason)
+{
+	t_rplContext	context;
+	Channel			*channel = NULL;
+
+	if(_channelExists(name))
+		channel = &(_channels.at(name));
+
+	_fillContext(context, client, client.getNick(), name, "PART", channel ? channel->getTopic() : "");
+
+	if (name.empty())											//Not enough params
+		_handleReply(client, AReply::getReply(461, context));
+	else if (!channel)											//Channel does NOT exit
+		_handleReply(client, AReply::getReply(403, context));
+	else if (channel && !channel->isMember(client.getFd()))		//Channel exists but client is not a member
+		_handleReply(client, AReply::getReply(442, context));
+	else
+	{
+		channel->removeUser(client.getFd());
+		std::cout << MAGENTA << ":" + client.getNick() + " PART " + name + " :" + reason + "\r\n" << RESET << std::endl;
+		_handleReply(client, ":" + client.getNick() + " PART " + name  + " :" + reason + "\r\n");
+	}
+}
+
 // ---------------------------------------------------- PRIVATE MEMBER FUNCTIONS
 
 void	Server::_setup(char* port)

@@ -14,6 +14,7 @@ class CommandHandler
 		static void	_nick(const Message& command, Client& client, Server& server);
 		static void	_user(const Message& command, Client& client, Server& server);
 		static void	_join(const Message& command, Client& client, Server& server);
+		static void	_part(const Message& command, Client& client, Server& server);
 
 	public:
 		static bool	execCommand(Message& command, Client& client, Server& server);

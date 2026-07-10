@@ -47,6 +47,9 @@ std::string	AReply::getReply(int n, const t_rplContext& context)
 		case 433:
 			reply << context.nick << " :Nickname is already in use";
 			break;
+		case 442:
+			reply << context.nick << " " << context.channel << " :You're not on that channel";
+			break;
 		case 451:
 			reply << ":You have not registered";
 			break;

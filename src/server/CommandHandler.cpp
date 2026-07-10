@@ -23,6 +23,9 @@ bool	CommandHandler::execCommand(Message& command, Client& client, Server& serve
 		case JOIN:
 			_join(command, client, server);
 			break;
+		case PART:
+			_part(command, client, server);
+			break;
 		case NONE:
 			;// handle invalid command
 	}
@@ -62,4 +65,9 @@ void	CommandHandler::_user(const Message& command, Client& client, Server& serve
 void	CommandHandler::_join(const Message& command, Client& client, Server& server)
 {
 	server.joinChannel(client, command.getParams()[0], command.getParams()[1]);
+}
+
+void CommandHandler::_part(const Message &command, Client &client, Server &server)
+{
+	server.partChannel(client, command.getParams()[0], command.getParams()[1]);
 }
