@@ -1,4 +1,5 @@
 #include "AReply.hpp"
+#include "Server.hpp"
 #include "../utils/colors.h"
 
 #include <iomanip>
@@ -6,49 +7,68 @@
 #include <string>
 #include <iostream>
 
-std::string	AReply::getReply(int n, const t_rplContext& context)
+std::string	AReply::getReply(int n, const Server& server, const Client& client, const t_rplContext& context)
 {
 	std::stringstream	reply;
-	std::string			cliName =	context.client.empty() ? "*" : context.client;
+	std::string			cliName = client.getNick().empty() ? "*" : client.getNick();
+	std::string			serverName = server.getName();
 
-	reply << ":" << context.server;
-	reply << " " << std::setfill('0') << std::setw(3) << n << " ";
+	reply << ":" << serverName;
+	reply << " " << std::setfill('0') << std::setw(3) << n << " " << cliName << " ";
 	switch (n)
 	{
 	// Replies
 		case 001:
-			reply << cliName << " :Welcome to the " << context.server << " Network, " << cliName;
+			reply << ":Welcome to the " << serverName << " Network, " << cliName;
 			break;
 		case 002:
-			reply << cliName << " :Your host is " << context.server << " running version 1.0";
+			reply << ":Your host is " << serverName << " running version 1.0";
+			break;
+		case 332:
+			reply << context.channel << " :" << server.getChannelTopic(context.channel);
+			break;
+		case 353:
+			reply << "= " << context.channel << " :" << server.getChannelMembers(context.channel);
+			break;
+		case 366:
+			reply << context.channel << " :End of /NAMES list";
 			break;
 	// Errors
 		case 401:
-			reply << cliName << " " << context.nick << " :No such nick/channel";
+			reply << context.nick << " :No such nick/channel";
 			break;
 		case 403:
-			reply << cliName << " " << context.channel << " :No such channel";
+			reply << context.channel << " :No such channel";
 			break;
 		case 431:
-			reply << cliName << " :No nickname given";
+			reply << ":No nickname given";
 			break;
 		case 432:
-			reply << cliName << " " << context.nick << " :Erroneus nickname";
+			reply << context.nick << " :Erroneus nickname";
 			break;
 		case 433:
-			reply << cliName << " " << context.nick << " :Nickname is already in use";
+			reply << context.nick << " :Nickname is already in use";
 			break;
 		case 451:
-			reply << cliName << " :You have not registered";
+			reply << ":You have not registered";
 			break;
 		case 461:
-			reply << cliName << " " << context.command << " :Not enough parameters";
+			reply << context.command << " :Not enough parameters";
 			break;
 		case 462:
-			reply << cliName << " :You may not reregister";
+			reply << ":You may not reregister";
 			break;
 		case 464:
-			reply << cliName << " :Password incorrect";
+			reply << ":Password incorrect";
+			break;
+		case 471:
+			reply << context.channel << " :Cannot join channel (+l)";
+			break;
+		case 473:
+			reply << context.channel << " :Cannot join channel (+i)";
+			break;
+		case 475:
+			reply << context.channel << " :Cannot join channel (+k)";
 			break;
 	}
 	reply << "\r\n";

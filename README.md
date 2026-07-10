@@ -20,6 +20,8 @@ Once connected, the following commands can be used:
 - NICK: allows nickname to be changed (if valid and not in use)
 - JOIN: join a channel if it exists, otherwise, create it and become operator
 - send/recieve messages (public or private)
+- PART: to leave a channel
+- QUIT: to leave the server
 
 If user is operator:
 - KICK: eject a client from a channel

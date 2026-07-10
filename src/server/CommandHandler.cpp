@@ -4,6 +4,7 @@
 #include <cstring>
 
 //------------------------------------------------------------- MEMBER FUNCTIONS
+
 bool	CommandHandler::execCommand(Message& command, Client& client, Server& server)
 {
 	if (command.getCommand() != PASS && !client.isAuthenticated())

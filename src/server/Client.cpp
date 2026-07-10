@@ -10,6 +10,7 @@ Client::Client(int fd) : _fd(fd), _authenticated(false) {}
 Client::~Client() {}
 
 //------------------------------------------------------------- GETTERS /SETTERS
+
 std::string	Client::getNick() const { return _nick.empty() ? "" : _nick; }
 void		Client::setNick(const std::string nick) { _nick = nick; }
 void		Client::setUser(const std::string user) { _username = user; _registered = true; }
@@ -20,6 +21,8 @@ bool		Client::isAuthenticated() const { return _authenticated; }
 void		Client::setAuthenticated(const bool value) { _authenticated = value; }
 bool		Client::isRegistered() const { return _registered; }
 
+//------------------------------------------------------------- MEMBER FUNCTIONS
+
 void		Client::consumeOut(size_t count)
 {
 	if (count >= _outBuffer.size())
@@ -28,7 +31,6 @@ void		Client::consumeOut(size_t count)
 		_outBuffer.erase(0, count);
 }
 
-//------------------------------------------------------------- MEMBER FUNCTIONS
 void	Client::appendBuffer(const char* msg, int data, int type)
 {
 	if (type == OUT)
@@ -65,6 +67,7 @@ std::string	Client::getLine()
 }
 
 //----------------------------------------------------------- OPERATOR OVERLOADS
+
 std::ostream&	operator<<(std::ostream& os, const Client& c)
 {
 	std::string	nick = c.getNick();

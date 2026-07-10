@@ -4,6 +4,7 @@
 #include <set>
 
 #include <string>
+#include <sys/types.h>
 class Channel
 {
 	private:
@@ -26,16 +27,22 @@ class Channel
 		const std::string&	getName() const;
 		const std::string&	getTopic() const;
 		const std::string&	getKey() const;
+		const std::set<int>&	getUsersList() const;
 		bool				isInviteOnly() const;
 		bool				isTopicRestricted() const;
 		int					getUserLimit() const;
 		int					getUserCount() const;
+		bool				setOperator(int clientFd);
+		bool				unsetOperator(int clientFd);
+
 
 		void				setTopic(std::string topic);
 		void				setInviteOnly(bool opt);
 		void				setTopicRestricted(bool opt);
 		void				setUserLimit(int num);
 
+		bool				isFull() const;
+		bool				isKeyOk(std::string key) const;
 		void				addUser(int fd);
 		bool				isMember(int fd) const;
 		void				removeUser(int fd);
