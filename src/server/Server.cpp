@@ -165,35 +165,6 @@ void	Server::joinChannel(Client& client, const std::string& name, const std::str
 	}
 }
 
-std::string	Server::getChannelTopic(const std::string& channelName) const
-{
-	std::map<std::string, Channel>::const_iterator it = _channels.find(channelName);
-	if (it == _channels.end())
-		return "";
-	return it->second.getTopic();
-}
-
-std::string	Server::getChannelMembers(const std::string& channelName) const
-{
-	std::map<std::string, Channel>::const_iterator it = _channels.find(channelName);
-	if (it == _channels.end())
-		return "";
-
-	const std::set<int>&	users = it->second.getUsersList();
-	std::string				list;
-
-	for (std::set<int>::const_iterator fdIt = users.begin(); fdIt != users.end(); ++fdIt)
-	{
-		std::map<int, Client>::const_iterator clientIt = _clients.find(*fdIt);
-		if (clientIt == _clients.end() || clientIt->second.getNick().empty())
-			continue;
-		if (!list.empty())
-			list.append(" ");
-		list.append(clientIt->second.getNick());
-	}
-	return list;
-}
-
 void Server::partChannel(Client &client, const std::string &name, const std::string &reason)
 {
 	t_rplContext	context;
@@ -201,15 +172,14 @@ void Server::partChannel(Client &client, const std::string &name, const std::str
 
 	if(_channelExists(name))
 		channel = &(_channels.at(name));
+	_fillContext(context, client.getNick(), name, "PART");
 
-	_fillContext(context, client, client.getNick(), name, "PART", channel ? channel->getTopic() : "");
-
-	if (name.empty())											//Not enough params
-		_handleReply(client, AReply::getReply(461, context));
-	else if (!channel)											//Channel does NOT exit
-		_handleReply(client, AReply::getReply(403, context));
-	else if (channel && !channel->isMember(client.getFd()))		//Channel exists but client is not a member
-		_handleReply(client, AReply::getReply(442, context));
+	if (name.empty())														//Not enough params
+		_handleReply(client, AReply::getReply(461, *this, client, context));
+	else if (!channel)														//Channel does NOT exit
+		_handleReply(client, AReply::getReply(403, *this, client, context));
+	else if (channel && !channel->isMember(client.getFd()))					//Channel exists but client is not a member
+		_handleReply(client, AReply::getReply(442, *this, client, context));
 	else
 	{
 		channel->removeUser(client.getFd());
@@ -245,30 +215,6 @@ std::string	Server::getChannelMembers(const std::string& channelName) const
 		list.append(clientIt->second.getNick());
 	}
 	return list;
-}
-
-void Server::partChannel(Client &client, const std::string &name, const std::string &reason)
-{
-	t_rplContext	context;
-	Channel			*channel = NULL;
-
-	if(_channelExists(name))
-		channel = &(_channels.at(name));
-
-	_fillContext(context, client, client.getNick(), name, "PART", channel ? channel->getTopic() : "");
-
-	if (name.empty())											//Not enough params
-		_handleReply(client, AReply::getReply(461, context));
-	else if (!channel)											//Channel does NOT exit
-		_handleReply(client, AReply::getReply(403, context));
-	else if (channel && !channel->isMember(client.getFd()))		//Channel exists but client is not a member
-		_handleReply(client, AReply::getReply(442, context));
-	else
-	{
-		channel->removeUser(client.getFd());
-		std::cout << MAGENTA << ":" + client.getNick() + " PART " + name + " :" + reason + "\r\n" << RESET << std::endl;
-		_handleReply(client, ":" + client.getNick() + " PART " + name  + " :" + reason + "\r\n");
-	}
 }
 
 // ---------------------------------------------------- PRIVATE MEMBER FUNCTIONS
