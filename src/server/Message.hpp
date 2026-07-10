@@ -10,6 +10,7 @@ typedef enum e_comnum
 	NICK,
 	USER,
 	JOIN,
+	KICK,
 	QUIT,
 	NONE,
 } t_comnum;

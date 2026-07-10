@@ -23,6 +23,9 @@ bool	CommandHandler::execCommand(Message& command, Client& client, Server& serve
 		case JOIN:
 			_join(command, client, server);
 			break;
+		case KICK:
+			_kick(command, client, server);
+			break;
 		case QUIT:
 			_quit(command, client, server);
 			break;
@@ -72,4 +75,9 @@ void	CommandHandler::_quit(const Message& command, Client& client, Server& serve
 	if (command.getParams().empty())
 		server.quitClient(client, "");
 	server.quitClient(client, command.getParams()[0]);
+}
+
+void	CommandHandler::_kick(const Message& command, Client& client, Server& server)
+{
+	
 }
