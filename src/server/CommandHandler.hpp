@@ -4,6 +4,7 @@
 #include "Client.hpp"
 #include "Server.hpp"
 #include "Message.hpp"
+#include <vector>
 
 class CommandHandler
 {
@@ -19,5 +20,7 @@ class CommandHandler
 	public:
 		static bool	execCommand(Message& command, Client& client, Server& server);
 };
+
+std::vector<std::string> split(const std::string& str, char delimiter);
 
 #endif
