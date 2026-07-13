@@ -100,17 +100,19 @@ std::string	AReply::getReply(int command, const Client& client, const t_rplConte
 	switch (command)
 	{
 		case ERROR:
-			reply << "ERROR :" + context.reason;
+			reply << "ERROR :" << context.message;
 			break;
 		case JOIN:
-			reply << ":" << client.getNick() << " JOIN " + context.channel;
+			reply << ":" << client.getNick() << " JOIN " << context.channel;
 			break;
 		case KICK:
-			reply << ":" << client.getNick() << " KICK " + context.channel << " " << context.reason;
+			reply << ":" << client.getNick() << " KICK " << context.channel << " " << context.message;
 			break;
 		case PART:
-			reply << ":" << client.getNick() << " PART " + context.channel << " " << context.reason;
+			reply << ":" << client.getNick() << " PART " << context.channel << " " << context.message;
 			break;
+		case PRIVMSG:
+			reply << ":" << client.getNick() << " PRIVMSG " << context.target << " " << context.message;
 	}
 	reply << "\r\n";
 	std::cout << MAGENTA << reply.str() << RESET << std::endl;

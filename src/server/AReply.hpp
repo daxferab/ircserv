@@ -11,7 +11,8 @@ typedef struct s_rplContext
 	std::string	nick;
 	std::string	channel;
 	std::string	command;
-	std::string reason;
+	std::string message;
+	std::string target;
 } t_rplContext;
 
 class AReply

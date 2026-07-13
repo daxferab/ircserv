@@ -33,10 +33,10 @@ class Server
 		void		_handleLine(Client& client, char* line, int data);
 		void		_handleReply(Client& client, const std::string& message);
 		void		_writeFd(const int fd);
-		void		_fillContext(t_rplContext& context, const std::string& nick, const std::string& channel, const std::string& command, const std::string& reason) const;
+		void		_fillContext(t_rplContext& context, const std::string& nick, const std::string& channel, const std::string& command, const std::string& message, const std::string& target) const;
 
-		void		_sendPrivate(const Client& client, const int fd, const std::string& message);
-		void		_sendPublic(const Client& client, const std::string& channelName, const std::string& message);
+		void		_sendPrivate(const Client& client, const int fd, t_rplContext& context);
+		void		_sendPublic(Client& client, const std::string& channelName, t_rplContext& context);
 		
 		void		_addClient(const int fd);
 		void		_disconnectClient(Client& client);

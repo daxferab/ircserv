@@ -106,18 +106,24 @@ void	CommandHandler::_part(const Message &command, Client &client, Server &serve
 	if (command.getParams().size() >= 2)
 	{
 		channels = split(command.getParams()[0], ',');
-		if (command.getParams()[1] == "Leaving:Leaving")
-			reason = "Leaving";
-		else
-			reason = command.getParams()[1];
+		reason = command.getParams()[1];
 
 		for (size_t i = 0; i < channels.size(); ++i)
 			server.partChannel(client, channels[i], reason);
 	}
 }
 
-void	CommandHandler::_privmsg(const Message& command, Client& client, Server& server) // /PRIVMSG <target/s> :message
+void	CommandHandler::_privmsg(const Message& command, Client& client, Server& server)
 {
+	// std::vector<std::string>	clients;
+
+	// if (command.getParams().size() == 1)
+	// {
+	// 	clients = split(command.getParams()[0], ',');
+
+	// 	for (size_t i = 0; i < clients.size(); ++i)
+	// 		server.sendMessage(client, clients[i], command.getParams()[1]);
+	// }
 	// foreach (command.getParams()[0] as target)
 		server.sendMessage(client, command.getParams()[0], command.getParams()[1]);
 }

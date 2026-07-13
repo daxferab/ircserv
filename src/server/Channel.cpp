@@ -17,6 +17,7 @@ Channel::~Channel() {}
 const std::string&	Channel::getName() const { return _name; }
 const std::string&	Channel::getTopic() const { return _topic; }
 const std::string&	Channel::getKey() const { return _key; }
+const std::set<int>&	Channel::getUsers() const { return _users; }
 const std::set<int>&	Channel::getUsersList() const { return _users; }
 bool				Channel::isInviteOnly() const { return _inviteOnly; }
 bool				Channel::isTopicRestricted() const { return _topicRestrict; }
