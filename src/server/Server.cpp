@@ -270,6 +270,12 @@ void	Server::sendMessage(Client& client, const std::string& target, const std::s
 		_handleReply(client, AReply::getNReply(401, *this, client, context));
 }
 
+void	Server::setMode(Client& client, std::string channel, bool add, char type, std::string parameter)
+{
+	//TODO remember toask OP permissions at the start
+	std::cout << "got by server mode: " << client.getFd() << " " << channel << " " << add << " " << type << " " << parameter << std::endl;
+}
+
 // ---------------------------------------------------- PRIVATE MEMBER FUNCTIONS
 
 void	Server::_setup(char* port)

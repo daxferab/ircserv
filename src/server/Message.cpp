@@ -68,5 +68,6 @@ t_comnum	getCommand(std::string word)
 	if (word == "PART") return PART;
 	if (word == "QUIT") return QUIT;
 	if (word == "PRIVMSG") return PRIVMSG;
+	if (word == "MODE") return MODE;
 	return NONE;
 }
