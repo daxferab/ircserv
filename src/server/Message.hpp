@@ -14,6 +14,7 @@ typedef enum e_comnum
 	PART,
 	QUIT,
 	ERROR,
+	PRIVMSG,
 	NONE,
 } t_comnum;
 

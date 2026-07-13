@@ -251,6 +251,25 @@ std::string	Server::getChannelMembers(const std::string& channelName) const
 	return list;
 }
 
+void	Server::sendMessage(Client& client, const std::string& target, const std::string& message)
+{
+	t_rplContext	context;
+	int targetFd = _getClientFd(target);
+	
+	_fillContext(context, client.getNick(), "", "PRIVMSG", "");
+	
+	if (target.empty())
+		_handleReply(client, AReply::getNReply(411, *this, client, context));
+	else if (message.empty())
+		_handleReply(client, AReply::getNReply(412, *this, client, context));
+	else if (targetFd > 0)
+		_sendPrivate(client, targetFd, message);
+	else if(_channelExists(target))
+		_sendPublic(client, target, message);
+	else
+		_handleReply(client, AReply::getNReply(401, *this, client, context));
+}
+
 // ---------------------------------------------------- PRIVATE MEMBER FUNCTIONS
 
 void	Server::_setup(char* port)
@@ -459,6 +478,19 @@ void	Server::_fillContext(t_rplContext& context, const std::string& nick, const 
 	context.channel = channel;
 	context.command = command;
 	context.reason = reason;
+}
+
+void	Server::_sendPrivate(const Client& client, const int fd, const std::string& message)
+{
+	_handleReply(_clients.find(fd)->second, ":" + client.getNick() + " PRIVMSG " + _clients.find(fd)->second.getNick() + " " + message + "\n\r");
+}
+
+void	Server::_sendPublic(const Client& client, const std::string& channelName, const std::string& message)
+{
+	(void)client;
+	(void)channelName;
+	(void)message;
+	//TODO implement
 }
 
 void	Server::_addClient(const int fd)

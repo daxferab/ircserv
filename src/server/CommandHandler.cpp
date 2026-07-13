@@ -27,6 +27,9 @@ bool	CommandHandler::execCommand(Message& command, Client& client, Server& serve
 		case JOIN:
 			_join(command, client, server);
 			break;
+		case PRIVMSG:
+			_privmsg(command, client, server);
+			break;
 		case KICK:
 			_kick(command, client, server);
 			break;
@@ -111,6 +114,12 @@ void	CommandHandler::_part(const Message &command, Client &client, Server &serve
 		for (size_t i = 0; i < channels.size(); ++i)
 			server.partChannel(client, channels[i], reason);
 	}
+}
+
+void	CommandHandler::_privmsg(const Message& command, Client& client, Server& server) // /PRIVMSG <target/s> :message
+{
+	// foreach (command.getParams()[0] as target)
+		server.sendMessage(client, command.getParams()[0], command.getParams()[1]);
 }
 
 void	CommandHandler::_quit(const Message& command, Client& client, Server& server)

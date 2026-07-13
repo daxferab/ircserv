@@ -34,6 +34,9 @@ class Server
 		void		_handleReply(Client& client, const std::string& message);
 		void		_writeFd(const int fd);
 		void		_fillContext(t_rplContext& context, const std::string& nick, const std::string& channel, const std::string& command, const std::string& reason) const;
+
+		void		_sendPrivate(const Client& client, const int fd, const std::string& message);
+		void		_sendPublic(const Client& client, const std::string& channelName, const std::string& message);
 		
 		void		_addClient(const int fd);
 		void		_disconnectClient(Client& client);
@@ -60,6 +63,7 @@ class Server
 		void		partChannel(Client& client, const std::string& name, const std::string& reason);
 		std::string	getChannelTopic(const std::string& channelName) const;
 		std::string	getChannelMembers(const std::string& channelName) const;
+		void		sendMessage(Client& client, const std::string& target, const std::string& message);
 };
 
 epoll_event	newEvent(int fd, int flags);
