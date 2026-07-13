@@ -1,5 +1,6 @@
 #include "AReply.hpp"
 #include "Server.hpp"
+#include "Message.hpp"
 #include "../utils/colors.h"
 
 #include <iomanip>
@@ -7,7 +8,7 @@
 #include <string>
 #include <iostream>
 
-std::string	AReply::getReply(int n, const Server& server, const Client& client, const t_rplContext& context)
+std::string	AReply::getNReply(int n, const Server& server, const Client& client, const t_rplContext& context)
 {
 	std::stringstream	reply;
 	std::string			cliName = client.getNick().empty() ? "*" : client.getNick();
@@ -85,6 +86,30 @@ std::string	AReply::getReply(int n, const Server& server, const Client& client, 
 	return reply.str();
 }
 
+std::string	AReply::getReply(int command, const Client& client, const t_rplContext& context)
+{
+	std::stringstream	reply;
+
+	switch (command)
+	{
+		case ERROR:
+			reply << "ERROR :" + context.reason;
+			break;
+		case JOIN:
+			reply << ":" << client.getNick() << " JOIN " + context.channel;
+			break;
+		case KICK:
+			reply << ":" << client.getNick() << " KICK " + context.channel << " " << context.reason;
+			break;
+		case PART:
+			reply << ":" << client.getNick() << " PART " + context.channel << " " << context.reason;
+			break;
+	}
+	reply << "\r\n";
+	std::cout << MAGENTA << reply.str() << RESET << std::endl;
+	return reply.str();
+}
+
 /*
 	All of them have a prefix with the server ¿name? ¿IP?
 ERR_CANNOTSENDTOCHAN (404)	client, channel name
@@ -114,6 +139,4 @@ RPL_INVITING (341)
 RPL_NAMREPLY (353)
 RPL_ENDOFNAMES (366)
 RPL_YOUREOPER (381)
-
-ERROR message (reply to QUIT)
 */

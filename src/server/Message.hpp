@@ -13,6 +13,7 @@ typedef enum e_comnum
 	KICK,
 	PART,
 	QUIT,
+	ERROR,
 	NONE,
 } t_comnum;
 

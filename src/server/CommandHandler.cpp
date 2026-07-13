@@ -37,7 +37,9 @@ bool	CommandHandler::execCommand(Message& command, Client& client, Server& serve
 			_quit(command, client, server);
 			break;
 		case NONE:
-			;// handle invalid command
+			break;// handle invalid command
+		default:
+			break;
 	}
 	return true;
 }

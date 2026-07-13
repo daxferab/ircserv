@@ -4,6 +4,7 @@
 #include "Client.hpp"
 #include "../utils/colors.h"
 #include "CommandHandler.hpp"
+#include "Message.hpp"
 
 #include <cerrno>
 #include <cstdio>
@@ -65,14 +66,14 @@ std::string	Server::getName() const { return _name; }
 void	Server::authClient(Client& client, const std::string& pass)
 {
 	t_rplContext	context;
-	_fillContext(context, "", "", "PASS");
+	_fillContext(context, "", "", "PASS", "");
 
 	if (client.isAuthenticated())
-		_handleReply(client, AReply::getReply(462, *this, client, context));
+		_handleReply(client, AReply::getNReply(462, *this, client, context));
 	else if (pass.empty())
-		_handleReply(client, AReply::getReply(461, *this, client, context));
+		_handleReply(client, AReply::getNReply(461, *this, client, context));
 	else if (pass != _password)
-		_handleReply(client, AReply::getReply(464, *this, client, context));
+		_handleReply(client, AReply::getNReply(464, *this, client, context));
 	else
 		client.setAuthenticated(true);
 }
@@ -81,37 +82,36 @@ void	Server::quitClient(Client& client, const std::string& msg)
 {
 	//TODO: sendMessage
 	(void)msg;
-	_handleReply(client, "ERROR :Client Terminated session \n\r");
 	_disconnectClient(client);
 }
 
 void	Server::setClientNick(Client& client, const std::string& nick)
 {
 	t_rplContext	context;
-	_fillContext(context, nick, "", "NICK");
+	_fillContext(context, nick, "", "NICK", "");
 
 	if (nick.empty())
-		_handleReply(client, AReply::getReply(431, *this, client, context));
+		_handleReply(client, AReply::getNReply(431, *this, client, context));
 	else if (isReservedChar(nick[0]))
-		_handleReply(client, AReply::getReply(432, *this, client, context));
+		_handleReply(client, AReply::getNReply(432, *this, client, context));
 	else if (_nickInUse(nick))
-		_handleReply(client, AReply::getReply(433, *this, client, context));
+		_handleReply(client, AReply::getNReply(433, *this, client, context));
 	else
 	{
 		client.setNick(nick);
-		_handleReply(client, AReply::getReply(001, *this, client, context));
+		_handleReply(client, AReply::getNReply(001, *this, client, context));
 	}
 }
 
 bool	Server::setClientUser(Client& client, const std::string& user)
 {
 	t_rplContext	context;
-	_fillContext(context, "", "", "USER");
+	_fillContext(context, "", "", "USER", "");
 
 	if (client.isRegistered())
-		_handleReply(client, AReply::getReply(462, *this, client, context));
+		_handleReply(client, AReply::getNReply(462, *this, client, context));
 	else if (user.empty())
-		_handleReply(client, AReply::getReply(461, *this, client, context));
+		_handleReply(client, AReply::getNReply(461, *this, client, context));
 	else
 	{
 		client.setUser(user);
@@ -138,18 +138,18 @@ void	Server::joinChannel(Client& client, const std::string& name, const std::str
 			return ;
 	}
 	invited = channel && false;//TODO invited
-	_fillContext(context, client.getNick(), name, "JOIN");
+	_fillContext(context, client.getNick(), name, "JOIN", "");
 
 	if (name.empty())
-		_handleReply(client, AReply::getReply(461, *this, client, context));
+		_handleReply(client, AReply::getNReply(461, *this, client, context));
 	else if(name[0] != '#')
-		_handleReply(client, AReply::getReply(403, *this, client, context));
+		_handleReply(client, AReply::getNReply(403, *this, client, context));
 	else if (channel && !invited && !channel->isKeyOk(key))
-		_handleReply(client, AReply::getReply(475, *this, client, context)); //TEST
+		_handleReply(client, AReply::getNReply(475, *this, client, context)); //TEST
 	else if (channel && !invited && channel->isInviteOnly())
-		_handleReply(client, AReply::getReply(473, *this, client, context)); //TEST
+		_handleReply(client, AReply::getNReply(473, *this, client, context)); //TEST
 	else if (channel && !invited && channel->isFull())
-		_handleReply(client, AReply::getReply(471, *this, client, context)); //TEST
+		_handleReply(client, AReply::getNReply(471, *this, client, context)); //TEST
 	else
 	{
 		if (!channel)
@@ -159,14 +159,13 @@ void	Server::joinChannel(Client& client, const std::string& name, const std::str
 		}
 		else
 			channel->addUser(client.getFd());
-		std::cout << MAGENTA << ":" + client.getNick() + " JOIN " + name + "\r\n" << RESET << std::endl;
 		std::set<int>	clients = channel->getUsersList();
 		for (std::set<int>::iterator it = clients.begin(); it != clients.end(); it++)
-			_handleReply(_clients.find(*it)->second, ":" + client.getNick() + " JOIN " + name + "\r\n");
+			_handleReply(_clients.find(*it)->second, AReply::getReply(JOIN, _clients.find(*it)->second, context));
 		if (!channel->getTopic().empty())
-			_handleReply(client, AReply::getReply(332, *this, client, context)); //TEST
-		_handleReply(client, AReply::getReply(353, *this, client, context)); //TEST
-		_handleReply(client, AReply::getReply(366, *this, client, context)); //TEST
+			_handleReply(client, AReply::getNReply(332, *this, client, context)); //TEST
+		_handleReply(client, AReply::getNReply(353, *this, client, context)); //TEST
+		_handleReply(client, AReply::getNReply(366, *this, client, context)); //TEST
 	}
 }
 
@@ -175,30 +174,28 @@ void	Server::kickUser(Client& client, const std::string& chanName, const std::st
 	t_rplContext	context;
 	Channel			*channel = NULL;
 
-	_fillContext(context, nick, chanName, "KICK");
+	_fillContext(context, nick, chanName, "KICK", reason);
 	
 	if (chanName.empty())
-		_handleReply(client, AReply::getReply(461, *this, client, context));
+		_handleReply(client, AReply::getNReply(461, *this, client, context));
 	else if(!_channelExists(chanName))
 	{
-		_handleReply(client, AReply::getReply(403, *this, client, context));
+		_handleReply(client, AReply::getNReply(403, *this, client, context));
 		return;
 	}
 	channel = &(_channels.at(chanName));
 
 	if(!channel->isMember(client.getFd()))
-		_handleReply(client, AReply::getReply(442, *this, client, context));
+		_handleReply(client, AReply::getNReply(442, *this, client, context));
 	if(!channel->isOperator(client.getFd()))
-		_handleReply(client, AReply::getReply(482, *this, client, context));
+		_handleReply(client, AReply::getNReply(482, *this, client, context));
 	else if (channel->isMember(_getClientFd(nick)))
-		_handleReply(client, AReply::getReply(441, *this, client, context));
+		_handleReply(client, AReply::getNReply(441, *this, client, context));
 	else
 	{
 		std::set<int>	clients = channel->getUsersList();
 		for (std::set<int>::iterator it = clients.begin(); it != clients.end(); it++)
-			_handleReply(_clients.find(*it)->second, ":" + client.getNick() + " KICK " + chanName + " " + reason + "\r\n");
-
-		std::cout << MAGENTA << ":" + client.getNick() + " KICK " + chanName + " " + reason + "\r\n" << RESET << std::endl;
+			_handleReply(_clients.find(*it)->second, AReply::getReply(KICK, _clients.find(*it)->second, context));
 		channel->removeUser(_getClientFd(nick));
 	}
 }
@@ -210,19 +207,18 @@ void	Server::partChannel(Client &client, const std::string &name, const std::str
 
 	if(_channelExists(name))
 		channel = &(_channels.at(name));
-	_fillContext(context, client.getNick(), name, "PART");
+	_fillContext(context, client.getNick(), name, "PART", reason);
 
 	if (name.empty())														//Not enough params
-		_handleReply(client, AReply::getReply(461, *this, client, context));
+		_handleReply(client, AReply::getNReply(461, *this, client, context));
 	else if (!channel)														//Channel does NOT exit
-		_handleReply(client, AReply::getReply(403, *this, client, context));
+		_handleReply(client, AReply::getNReply(403, *this, client, context));
 	else if (channel && !channel->isMember(client.getFd()))					//Channel exists but client is not a member
-		_handleReply(client, AReply::getReply(442, *this, client, context));
+		_handleReply(client, AReply::getNReply(442, *this, client, context));
 	else
 	{
 		channel->removeUser(client.getFd());
-		std::cout << MAGENTA << ":" + client.getNick() + " PART " + name + " :" + reason + "\r\n" << RESET << std::endl;
-		_handleReply(client, ":" + client.getNick() + " PART " + name + " :" + reason + "\r\n");
+		_handleReply(client, AReply::getReply(JOIN, client, context));
 	}
 }
 
@@ -414,7 +410,7 @@ void	Server::_handleLine(Client& client, char* line, int data)
 			if (!CommandHandler::execCommand(message, client, *this))
 			{
 				t_rplContext	context;
-				_handleReply(client, AReply::getReply(451, *this, client, context));
+				_handleReply(client, AReply::getNReply(451, *this, client, context));
 			}
 	}
 }
@@ -457,11 +453,12 @@ void	Server::_writeFd(const int fd)
 	}
 }
 
-void	Server::_fillContext(t_rplContext& context, const std::string& nick, const std::string& channel, const std::string& command) const
+void	Server::_fillContext(t_rplContext& context, const std::string& nick, const std::string& channel, const std::string& command, const std::string& reason) const
 {
 	context.nick = nick;
 	context.channel = channel;
 	context.command = command;
+	context.reason = reason;
 }
 
 void	Server::_addClient(const int fd)
@@ -478,10 +475,13 @@ void	Server::_disconnectClient(Client& client)
 {
 	int fd = client.getFd();
 	std::map<int, Client>::iterator it = _clients.find(fd);
+	t_rplContext	context;
 
+	_fillContext(context, client.getNick(), "", "", "Client disconnected");
+
+	_handleReply(client, AReply::getReply(ERROR,client, context));
 	std::cout << RED << "Client <" << client << "> disconnected" << RESET << std::endl;
 	epoll_ctl(_epoll, EPOLL_CTL_DEL, fd, NULL);
-	_handleReply(client, ":" + client.getNick() + " ERROR \r\n");
 	std::map<std::string, Channel>::iterator itc = _channels.begin();
 	std::map<std::string, Channel>::iterator end = _channels.end();
 
