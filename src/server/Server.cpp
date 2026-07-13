@@ -486,8 +486,7 @@ void	Server::_disconnectClient(Client& client)
 	std::map<std::string, Channel>::iterator end = _channels.end();
 
 	for (; itc != end; ++itc)
-		if (itc->second.isMember(client.getFd()))
-			itc->second.removeUser(client.getFd());
+		partChannel(client, itc->first, context.reason);
 
 	if (it != _clients.end())
 		_clients.erase(it);
