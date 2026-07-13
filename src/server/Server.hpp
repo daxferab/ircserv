@@ -55,6 +55,7 @@ class Server
 		bool		setClientUser(Client& client, const std::string& user);
 		void		setClientName(Client& client, const std::string& name);
 		void		joinChannel(Client& client, const std::string& channel, const std::string& key);
+		void		partChannel(Client& client, const std::string& name, const std::string& reason);
 		std::string	getChannelTopic(const std::string& channelName) const;
 		std::string	getChannelMembers(const std::string& channelName) const;
 };

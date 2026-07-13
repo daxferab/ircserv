@@ -125,7 +125,6 @@ void	Server::setClientName(Client& client, const std::string& name)
 	client.setName(name);
 }
 
-// --------------------------- PUBLIC EFUNCTIONS
 void	Server::joinChannel(Client& client, const std::string& name, const std::string& key)
 {
 	t_rplContext	context;
@@ -133,7 +132,11 @@ void	Server::joinChannel(Client& client, const std::string& name, const std::str
 	bool			invited;
 
 	if(_channelExists(name))
+	{
 		channel = &(_channels.at(name));
+		if (channel->isMember(client.getFd()))
+			return ;
+	}
 	invited = channel && false;//TODO invited
 	_fillContext(context, client.getNick(), name, "JOIN");
 
@@ -162,6 +165,29 @@ void	Server::joinChannel(Client& client, const std::string& name, const std::str
 			_handleReply(client, AReply::getReply(332, *this, client, context)); //TEST
 		_handleReply(client, AReply::getReply(353, *this, client, context)); //TEST
 		_handleReply(client, AReply::getReply(366, *this, client, context)); //TEST
+	}
+}
+
+void	Server::partChannel(Client &client, const std::string &name, const std::string &reason)
+{
+	t_rplContext	context;
+	Channel			*channel = NULL;
+
+	if(_channelExists(name))
+		channel = &(_channels.at(name));
+	_fillContext(context, client.getNick(), name, "PART");
+
+	if (name.empty())														//Not enough params
+		_handleReply(client, AReply::getReply(461, *this, client, context));
+	else if (!channel)														//Channel does NOT exit
+		_handleReply(client, AReply::getReply(403, *this, client, context));
+	else if (channel && !channel->isMember(client.getFd()))					//Channel exists but client is not a member
+		_handleReply(client, AReply::getReply(442, *this, client, context));
+	else
+	{
+		channel->removeUser(client.getFd());
+		std::cout << MAGENTA << ":" + client.getNick() + " PART " + name + " :" + reason + "\r\n" << RESET << std::endl;
+		_handleReply(client, ":" + client.getNick() + " PART " + name + " :" + reason + "\r\n");
 	}
 }
 
