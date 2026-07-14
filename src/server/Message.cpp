@@ -6,10 +6,7 @@
 
 //----------------------------------------------------------------- CONSTRUCTORS
 
-Message::Message(std::string line)
-{
-	_valid = _parse(line);
-}
+Message::Message(std::string line) {	_valid = _parse(line); }
 
 Message::~Message() {}
 
@@ -43,13 +40,11 @@ bool	Message::_parse(std::string& line)
 
 	while (ss >> word)
 	{
-		std::cout << word << std::endl;
 		if (word[0] == ':')
 		{
 			_params.push_back(word.substr(1)); //TODO: fix double word
-			std::getline(ss, word);
-			if (!word.empty())
-				_params.back() += word;
+			while (ss >> word)
+				_params.back() += " " + word;
 			break;
 		}
 		_params.push_back(word);
