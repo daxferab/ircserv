@@ -405,14 +405,19 @@ void	Server::_readFd(const int fd)
 {
 	char	buf[BUFFERSIZE];
 	std::map<int, Client>::iterator it = _clients.find(fd);
-	ssize_t n;
-	while ((n = recv(fd, buf, BUFFERSIZE, 0)) > 0)
-	    _handleLine(it->second, buf, n);
-	
-	if (n == 0)
-	    quitClient(it->second, "");
-	else if (n < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
-	    quitClient(it->second, "");
+	if (it == _clients.end())
+		return;
+	while (true)
+	{
+		ssize_t n = recv(fd, buf, BUFFERSIZE, 0);
+		if (n > 0)
+			_handleLine(it->second, buf, n);
+		else if (n == 0) {
+			quitClient(it->second, "");
+			break;
+		} else
+			break;
+	}
 }
 
 void	Server::_handleLine(Client& client, char* line, int data)
