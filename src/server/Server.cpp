@@ -81,8 +81,16 @@ void	Server::authClient(Client& client, const std::string& pass)
 
 void	Server::quitClient(Client& client, const std::string& msg)
 {
-	//TODO: sendMessage
 	(void)msg;
+	t_rplContext	context;
+
+	_fillContext(context, "", "", "QUIT", msg);
+	// recorrer canales del servidor, si el cliente es miembro del canal, sendpublic
+	std::map<std::string, Channel>::iterator it = _channels.begin();
+	std::map<std::string, Channel>::iterator end = _channels.end();
+
+	for (; it != end; it++)
+		_sendPublic(client, it->first, context);
 	_disconnectClient(client);
 }
 
@@ -219,7 +227,7 @@ void	Server::partChannel(Client &client, const std::string &name, const std::str
 	else
 	{
 		channel->removeUser(client.getFd());
-		_handleReply(client, AReply::getReply(JOIN, client, context));
+		_handleReply(client, AReply::getReply(PART, client, context));
 	}
 }
 
