@@ -41,7 +41,6 @@ bool Message::_parse(std::string& line)
 			return false;
 
 	_command = ::getCommand(word);
-
 	_params = _parseParams(ss);
 	return true;
 }

@@ -257,7 +257,7 @@ void	Server::sendMessage(Client& client, const std::string& target, const std::s
 	t_rplContext	context;
 	int targetFd = _getClientFd(target);
 	
-	_fillContext(context, client.getNick(), "", "PRIVMSG", message, target);
+	_fillContext(context, target, "", "PRIVMSG", message, target);
 	
 	if (target.empty())
 		_handleReply(client, AReply::getNReply(411, *this, client, context));

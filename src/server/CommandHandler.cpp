@@ -116,14 +116,13 @@ void	CommandHandler::_part(const Message &command, Client &client, Server &serve
 void	CommandHandler::_privmsg(const Message& command, Client& client, Server& server)
 {
 	//TODO split targets
-	// std::string	message = command.getParams()[1];
-	// int			i = 1;
+	std::vector<std::string>	clients;
 
-	// while (!command.getParams()[++i].empty())
-	// 	message += " " + command.getParams()[i];
-		
-	// server.sendMessage(client, command.getParams()[0], message);
-	server.sendMessage(client, command.getParams()[0], command.getParams()[1]);
+	clients = split(command.getParams()[0], ',');
+
+	for (size_t i = 0; i < clients.size(); ++i)
+		server.sendMessage(client, command.getParams()[i], command.getParams()[1]);
+
 }
 
 void	CommandHandler::_quit(const Message& command, Client& client, Server& server)
