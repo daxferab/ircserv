@@ -22,29 +22,44 @@ bool	Message::isValid() const { return _valid; }
 
 //------------------------------------------------------------ PRIVATE FUNCTIONS
 
-bool	Message::_parse(std::string& line)
+bool Message::_parse(std::string& line)
 {
-	std::stringstream	ss(line);
-	std::string			word;
+	std::stringstream ss(line);
+	std::string word;
 
-	_prefix = "";
-	if (!(ss >> word)) return false;
+	_prefix.clear();
+
+	if (!(ss >> word))
+		return false;
 
 	std::cout << CYAN << line << RESET << std::endl;
+
 	if (word[0] == ':')
-	{
-		_prefix = word;
-		if (!(ss >> word)) return false;
-	}
-	_command = ::getCommand(word); // normalize to uppercase
+		if (!(ss >> word))
+			return false;
+
+	_command = ::getCommand(word);
 
 	while (ss >> word)
 	{
-		if (word[0] == ':')
+		if (!word.empty() && word[0] == ':')
 		{
-			_params.push_back(word.substr(1)); //TODO: fix double word
-			while (ss >> word)
-				_params.back() += " " + word;
+			word.erase(0, 1);
+
+			std::string rest;
+			std::getline(ss, rest);
+			word += rest;
+			_params.push_back(word);
+			break;
+		}
+		// PRIVMSG: everything after the target is the message
+		if (_command == PRIVMSG && _params.size() == 1)
+		{
+			std::string rest;
+			std::getline(ss, rest);
+			word += rest;
+
+			_params.push_back(word);
 			break;
 		}
 		_params.push_back(word);
