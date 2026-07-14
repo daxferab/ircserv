@@ -6,7 +6,6 @@
 #include <string>
 #include <sstream>
 #include <vector>
-#include <iostream>
 
 //------------------------------------------------------------- MEMBER FUNCTIONS
 
@@ -117,10 +116,11 @@ void	CommandHandler::_part(const Message &command, Client &client, Server &serve
 void	CommandHandler::_privmsg(const Message& command, Client& client, Server& server)
 {
 	std::vector<std::string>	clients;
+	std::string					message = command.getParams()[1].empty() ? "" : command.getParams()[1];
 
 	clients = split(command.getParams()[0], ',');
 	for (size_t i = 0; i < clients.size(); ++i)
-		server.sendMessage(client,  clients[i], command.getParams()[1]);
+		server.sendMessage(client,  clients[i], message);
 }
 
 void	CommandHandler::_quit(const Message& command, Client& client, Server& server)
