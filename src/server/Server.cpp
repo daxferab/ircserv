@@ -67,7 +67,7 @@ std::string	Server::getName() const { return _name; }
 void	Server::authClient(Client& client, const std::string& pass)
 {
 	t_rplContext	context;
-	_fillContext(context, "", "", "PASS", "", "");
+	_fillContext(context, "", "", "PASS", "");
 
 	if (client.isAuthenticated())
 		_handleReply(client, AReply::getNReply(462, *this, client, context));
@@ -89,7 +89,7 @@ void	Server::quitClient(Client& client, const std::string& msg)
 void	Server::setClientNick(Client& client, const std::string& nick)
 {
 	t_rplContext	context;
-	_fillContext(context, nick, "", "NICK", "", "");
+	_fillContext(context, nick, "", "NICK", "");
 
 	if (nick.empty())
 		_handleReply(client, AReply::getNReply(431, *this, client, context));
@@ -107,7 +107,7 @@ void	Server::setClientNick(Client& client, const std::string& nick)
 bool	Server::setClientUser(Client& client, const std::string& user)
 {
 	t_rplContext	context;
-	_fillContext(context, "", "", "USER", "", "");
+	_fillContext(context, "", "", "USER", "");
 
 	if (client.isRegistered())
 		_handleReply(client, AReply::getNReply(462, *this, client, context));
@@ -139,7 +139,7 @@ void	Server::joinChannel(Client& client, const std::string& name, const std::str
 			return ;
 	}
 	invited = channel && false;//TODO invited
-	_fillContext(context, client.getNick(), name, "JOIN", "", "");
+	_fillContext(context, client.getNick(), name, "JOIN", "");
 
 	if (name.empty())
 		_handleReply(client, AReply::getNReply(461, *this, client, context));
@@ -175,7 +175,7 @@ void	Server::kickUser(Client& client, const std::string& chanName, const std::st
 	t_rplContext	context;
 	Channel			*channel = NULL;
 
-	_fillContext(context, nick, chanName, "KICK", reason, "");
+	_fillContext(context, nick, chanName, "KICK", reason);
 	
 	if (chanName.empty())
 		_handleReply(client, AReply::getNReply(461, *this, client, context));
@@ -208,7 +208,7 @@ void	Server::partChannel(Client &client, const std::string &name, const std::str
 
 	if(_channelExists(name))
 		channel = &(_channels.at(name));
-	_fillContext(context, client.getNick(), name, "PART", reason, "");
+	_fillContext(context, client.getNick(), name, "PART", reason);
 
 	if (name.empty())														//Not enough params
 		_handleReply(client, AReply::getNReply(461, *this, client, context));
@@ -257,7 +257,7 @@ void	Server::sendMessage(Client& client, const std::string& target, const std::s
 	t_rplContext	context;
 	int targetFd = _getClientFd(target);
 	
-	_fillContext(context, target, "", "PRIVMSG", message, target);
+	_fillContext(context, target, "", "PRIVMSG", message);
 	
 	if (target.empty())
 		_handleReply(client, AReply::getNReply(411, *this, client, context));
@@ -473,13 +473,12 @@ void	Server::_writeFd(const int fd)
 	}
 }
 
-void	Server::_fillContext(t_rplContext& context, const std::string& nick, const std::string& channel, const std::string& command, const std::string& message, const std::string& target) const
+void	Server::_fillContext(t_rplContext& context, const std::string& target, const std::string& channel, const std::string& command, const std::string& message) const
 {
-	context.nick = nick;
+	context.target = target;
 	context.channel = channel;
 	context.command = command;
 	context.message = message;
-	context.target = target;
 }
 
 void	Server::_sendPrivate(const Client& client, const int fd, t_rplContext& context)
@@ -519,7 +518,7 @@ void	Server::_disconnectClient(Client& client)
 	std::map<int, Client>::iterator it = _clients.find(fd);
 	t_rplContext	context;
 
-	_fillContext(context, client.getNick(), "", "", "Client disconnected", "");
+	_fillContext(context, client.getNick(), "", "", "Client disconnected");
 
 	_handleReply(client, AReply::getReply(ERROR,client, context));
 	std::cout << RED << "Client <" << client << "> disconnected" << RESET << std::endl;

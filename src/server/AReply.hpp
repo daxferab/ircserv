@@ -8,11 +8,10 @@ class Client;
 
 typedef struct s_rplContext
 {
-	std::string	nick;
+	std::string	target;
 	std::string	channel;
 	std::string	command;
 	std::string message;
-	std::string target;
 } t_rplContext;
 
 class AReply

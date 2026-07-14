@@ -36,29 +36,29 @@ std::string	AReply::getNReply(int n, const Server& server, const Client& client,
 			break;
 	// Errors
 		case 401:
-			reply << context.nick << " :No such nick/channel";
+			reply << context.target << " :No such nick/channel";
 			break;
 		case 403:
 			reply << context.channel << " :No such channel";
 			break;
 		case 411:
-			reply << context.nick << " :No recipient given (" << context.command << ")";
+			reply << context.target << " :No recipient given (" << context.command << ")";
 			break;
 		case 412:
-			reply << context.nick << " :No text to send";
+			reply << context.target << " :No text to send";
 			break;
 
 		case 431:
 			reply << ":No nickname given";
 			break;
 		case 432:
-			reply << context.nick << " :Erroneus nickname";
+			reply << context.target << " :Erroneus nickname";
 			break;
 		case 433:
-			reply << context.nick << " :Nickname is already in use";
+			reply << context.target << " :Nickname is already in use";
 			break;
 		case 441:
-			reply << context.nick << " " << context.channel << " :They aren't on that channel";
+			reply << context.target << " " << context.channel << " :They aren't on that channel";
 			break;
 		case 442:
 			reply << context.channel << " :You're not on that channel";
