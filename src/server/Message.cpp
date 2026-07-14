@@ -3,6 +3,8 @@
 
 #include <sstream>
 #include <iostream>
+#include <string>
+#include <vector>
 
 //----------------------------------------------------------------- CONSTRUCTORS
 
@@ -40,30 +42,7 @@ bool Message::_parse(std::string& line)
 
 	_command = ::getCommand(word);
 
-	while (ss >> word)
-	{
-		if (!word.empty() && word[0] == ':')
-		{
-			word.erase(0, 1);
-
-			std::string rest;
-			std::getline(ss, rest);
-			word += rest;
-			_params.push_back(word);
-			break;
-		}
-		// PRIVMSG: everything after the target is the message
-		if (_command == PRIVMSG && _params.size() == 1)
-		{
-			std::string rest;
-			std::getline(ss, rest);
-			word += rest;
-
-			_params.push_back(word);
-			break;
-		}
-		_params.push_back(word);
-	}
+	_params = _parseParams(ss);
 	return true;
 }
 
@@ -80,4 +59,36 @@ t_comnum	getCommand(std::string word)
 	if (word == "QUIT") return QUIT;
 	if (word == "PRIVMSG") return PRIVMSG;
 	return NONE;
+}
+
+std::vector<std::string> Message::_parseParams(std::stringstream& ss)
+{
+    std::vector<std::string> params;
+    std::string word;
+
+    while (ss >> word)
+    {
+        if (!word.empty() && word[0] == ':')
+        {
+            word.erase(0, 1);
+            std::string rest;
+            std::getline(ss, rest);
+            word += rest;
+
+            params.push_back(word);
+            break;
+        }
+        // PRIVMSG: everything after target is the message
+        if (_command == PRIVMSG && params.size() == 1)
+        {
+            std::string rest;
+            std::getline(ss, rest);
+            word += rest;
+
+            params.push_back(word);
+            break;
+        }
+        params.push_back(word);
+    }
+    return params;
 }
