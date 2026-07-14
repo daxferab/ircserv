@@ -3,13 +3,12 @@
 
 #include <sstream>
 #include <iostream>
+#include <string>
+#include <vector>
 
 //----------------------------------------------------------------- CONSTRUCTORS
 
-Message::Message(std::string line)
-{
-	_valid = _parse(line);
-}
+Message::Message(std::string line) {	_valid = _parse(line); }
 
 Message::~Message() {}
 
@@ -25,34 +24,24 @@ bool	Message::isValid() const { return _valid; }
 
 //------------------------------------------------------------ PRIVATE FUNCTIONS
 
-bool	Message::_parse(std::string& line)
+bool Message::_parse(std::string& line)
 {
-	std::stringstream	ss(line);
-	std::string			word;
+	std::stringstream ss(line);
+	std::string word;
 
-	_prefix = "";
-	if (!(ss >> word)) return false;
+	_prefix.clear();
+
+	if (!(ss >> word))
+		return false;
 
 	std::cout << CYAN << line << RESET << std::endl;
-	if (word[0] == ':')
-	{
-		_prefix = word;
-		if (!(ss >> word)) return false;
-	}
-	_command = ::getCommand(word); // normalize to uppercase
 
-	while (ss >> word)
-	{
-		if (word[0] == ':')
-		{
-			_params.push_back(word.substr(1));
-			std::getline(ss, word);
-			if (!word.empty())
-				_params.back() += word;
-			break;
-		}
-		_params.push_back(word);
-	}
+	if (word[0] == ':')
+		if (!(ss >> word))
+			return false;
+
+	_command = ::getCommand(word);
+	_params = _parseParams(ss);
 	return true;
 }
 
@@ -64,6 +53,41 @@ t_comnum	getCommand(std::string word)
 	if (word == "NICK") return NICK;
 	if (word == "USER") return USER;
 	if (word == "JOIN") return JOIN;
+	if (word == "KICK") return KICK;
+	if (word == "PART") return PART;
 	if (word == "QUIT") return QUIT;
+	if (word == "PRIVMSG") return PRIVMSG;
 	return NONE;
+}
+
+std::vector<std::string> Message::_parseParams(std::stringstream& ss)
+{
+    std::vector<std::string> params;
+    std::string word;
+
+    while (ss >> word)
+    {
+        if (!word.empty() && word[0] == ':')
+        {
+            word.erase(0, 1);
+            std::string rest;
+            std::getline(ss, rest);
+            word += rest;
+
+            params.push_back(word);
+            break;
+        }
+        // PRIVMSG: everything after target is the message
+        if (_command == PRIVMSG && params.size() == 1)
+        {
+            std::string rest;
+            std::getline(ss, rest);
+            word += rest;
+
+            params.push_back(word);
+            break;
+        }
+        params.push_back(word);
+    }
+    return params;
 }

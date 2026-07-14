@@ -2,6 +2,10 @@
 #include "Message.hpp"
 #include "Server.hpp"
 #include <cstring>
+#include <unistd.h>
+#include <string>
+#include <sstream>
+#include <vector>
 
 //------------------------------------------------------------- MEMBER FUNCTIONS
 
@@ -23,11 +27,22 @@ bool	CommandHandler::execCommand(Message& command, Client& client, Server& serve
 		case JOIN:
 			_join(command, client, server);
 			break;
+		case PRIVMSG:
+			_privmsg(command, client, server);
+			break;
+		case KICK:
+			_kick(command, client, server);
+			break;
+		case PART:
+			_part(command, client, server);
+			break;
 		case QUIT:
 			_quit(command, client, server);
 			break;
 		case NONE:
-			;// handle invalid command
+			break;// handle invalid command
+		default:
+			break;
 	}
 	return true;
 }
@@ -64,7 +79,48 @@ void	CommandHandler::_user(const Message& command, Client& client, Server& serve
 
 void	CommandHandler::_join(const Message& command, Client& client, Server& server)
 {
-	server.joinChannel(client, command.getParams()[0], command.getParams()[1]);
+	std::vector<std::string>	clients, keys;
+
+	if (command.getParams().size() >= 2)
+	{
+		clients = split(command.getParams()[0], ',');
+		keys = split(command.getParams()[1], ',');
+
+		for (size_t i = 0; i < clients.size(); ++i)
+			server.joinChannel(client, clients[i], keys[i]);
+	}
+	else if (command.getParams().size() == 1)
+	{
+		clients = split(command.getParams()[0], ',');
+
+		for (size_t i = 0; i < clients.size(); ++i)
+			server.joinChannel(client, clients[i], "");
+	}
+}
+
+void	CommandHandler::_part(const Message &command, Client &client, Server &server)
+{
+	std::vector<std::string>	channels;
+	std::string					reason;
+
+	if (command.getParams().size() >= 2)
+	{
+		channels = split(command.getParams()[0], ',');
+		reason = command.getParams()[1];
+
+		for (size_t i = 0; i < channels.size(); ++i)
+			server.partChannel(client, channels[i], reason);
+	}
+}
+
+void	CommandHandler::_privmsg(const Message& command, Client& client, Server& server)
+{
+	std::vector<std::string>	clients;
+	std::string					message = command.getParams()[1].empty() ? "" : command.getParams()[1];
+
+	clients = split(command.getParams()[0], ',');
+	for (size_t i = 0; i < clients.size(); ++i)
+		server.sendMessage(client,  clients[i], message);
 }
 
 void	CommandHandler::_quit(const Message& command, Client& client, Server& server)
@@ -72,4 +128,23 @@ void	CommandHandler::_quit(const Message& command, Client& client, Server& serve
 	if (command.getParams().empty())
 		server.quitClient(client, "");
 	server.quitClient(client, command.getParams()[0]);
+}
+
+void	CommandHandler::_kick(const Message& command, Client& client, Server& server)
+{
+	//TODO: kick multiple users
+	server.kickUser(client, command.getParams()[0], command.getParams()[1], command.getParams()[2]);
+}
+
+//------------------------------------------------------- OUT OF SCOPE FUNCTIONS
+
+std::vector<std::string> split(const std::string& str, char delimiter)
+{
+	std::vector<std::string>	tokens;
+	std::string					token;
+	std::istringstream			iss(str);
+
+	while (getline(iss, token, delimiter))
+		tokens.push_back(token);
+	return (tokens);
 }

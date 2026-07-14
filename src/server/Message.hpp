@@ -10,7 +10,11 @@ typedef enum e_comnum
 	NICK,
 	USER,
 	JOIN,
+	KICK,
+	PART,
 	QUIT,
+	ERROR,
+	PRIVMSG,
 	NONE,
 } t_comnum;
 
@@ -24,6 +28,7 @@ class Message
 		std::vector<std::string>		_params;
 
 		bool							_parse(std::string& line);
+		std::vector<std::string>		_parseParams(std::stringstream& ss);
 
 	public:
 		Message(std::string line);

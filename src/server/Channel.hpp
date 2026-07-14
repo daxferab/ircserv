@@ -27,15 +27,16 @@ class Channel
 		const std::string&	getName() const;
 		const std::string&	getTopic() const;
 		const std::string&	getKey() const;
+		const std::set<int>&	getUsers() const;
 		const std::set<int>&	getUsersList() const;
 		bool				isInviteOnly() const;
 		bool				isTopicRestricted() const;
 		int					getUserLimit() const;
 		int					getUserCount() const;
+		bool				isOperator(int fd);
+		
 		bool				setOperator(int clientFd);
 		bool				unsetOperator(int clientFd);
-
-
 		void				setTopic(std::string topic);
 		void				setInviteOnly(bool opt);
 		void				setTopicRestricted(bool opt);

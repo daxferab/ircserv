@@ -1,5 +1,6 @@
 #include "AReply.hpp"
 #include "Server.hpp"
+#include "Message.hpp"
 #include "../utils/colors.h"
 
 #include <iomanip>
@@ -7,7 +8,7 @@
 #include <string>
 #include <iostream>
 
-std::string	AReply::getReply(int n, const Server& server, const Client& client, const t_rplContext& context)
+std::string	AReply::getNReply(int n, const Server& server, const Client& client, const t_rplContext& context)
 {
 	std::stringstream	reply;
 	std::string			cliName = client.getNick().empty() ? "*" : client.getNick();
@@ -35,19 +36,32 @@ std::string	AReply::getReply(int n, const Server& server, const Client& client, 
 			break;
 	// Errors
 		case 401:
-			reply << context.nick << " :No such nick/channel";
+			reply << context.target << " :No such nick/channel";
 			break;
 		case 403:
 			reply << context.channel << " :No such channel";
 			break;
+		case 411:
+			reply << context.target << " :No recipient given (" << context.command << ")";
+			break;
+		case 412:
+			reply << context.target << " :No text to send";
+			break;
+
 		case 431:
 			reply << ":No nickname given";
 			break;
 		case 432:
-			reply << context.nick << " :Erroneus nickname";
+			reply << context.target << " :Erroneus nickname";
 			break;
 		case 433:
-			reply << context.nick << " :Nickname is already in use";
+			reply << context.target << " :Nickname is already in use";
+			break;
+		case 441:
+			reply << context.target << " " << context.channel << " :They aren't on that channel";
+			break;
+		case 442:
+			reply << context.channel << " :You're not on that channel";
 			break;
 		case 451:
 			reply << ":You have not registered";
@@ -70,6 +84,35 @@ std::string	AReply::getReply(int n, const Server& server, const Client& client, 
 		case 475:
 			reply << context.channel << " :Cannot join channel (+k)";
 			break;
+		case 482:
+			reply << context.channel << " :You're not channel operator";
+			break;
+	}
+	reply << "\r\n";
+	std::cout << MAGENTA << reply.str() << RESET << std::endl;
+	return reply.str();
+}
+
+std::string	AReply::getReply(int command, const Client& client, const t_rplContext& context)
+{
+	std::stringstream	reply;
+
+	switch (command)
+	{
+		case ERROR:
+			reply << "ERROR :" << context.message;
+			break;
+		case JOIN:
+			reply << ":" << client.getNick() << " JOIN " << context.channel;
+			break;
+		case KICK:
+			reply << ":" << client.getNick() << " KICK " << context.channel << " :" << context.message;
+			break;
+		case PART:
+			reply << ":" << client.getNick() << " PART " << context.channel << " :" << context.message;
+			break;
+		case PRIVMSG:
+			reply << ":" << client.getNick() << " PRIVMSG " << context.target << " :" << context.message;
 	}
 	reply << "\r\n";
 	std::cout << MAGENTA << reply.str() << RESET << std::endl;
@@ -105,6 +148,4 @@ RPL_INVITING (341)
 RPL_NAMREPLY (353)
 RPL_ENDOFNAMES (366)
 RPL_YOUREOPER (381)
-
-ERROR message (reply to QUIT)
 */

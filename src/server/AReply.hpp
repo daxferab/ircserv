@@ -8,9 +8,10 @@ class Client;
 
 typedef struct s_rplContext
 {
-	std::string	nick;
+	std::string	target;
 	std::string	channel;
 	std::string	command;
+	std::string message;
 } t_rplContext;
 
 class AReply
@@ -19,7 +20,8 @@ class AReply
 		AReply();
 
 	public:
-		static std::string	getReply(int n, const Server& server, const Client& client, const t_rplContext& context);
+		static std::string	getNReply(int n, const Server& server, const Client& client, const t_rplContext& context);
+		static std::string	getReply(int command, const Client& client, const t_rplContext& context);
 };
 
 #endif

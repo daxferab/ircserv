@@ -33,7 +33,10 @@ class Server
 		void		_handleLine(Client& client, char* line, int data);
 		void		_handleReply(Client& client, const std::string& message);
 		void		_writeFd(const int fd);
-		void		_fillContext(t_rplContext& context, const std::string& nick, const std::string& channel, const std::string& command) const;
+		void		_fillContext(t_rplContext& context, const std::string& target, const std::string& channel, const std::string& command, const std::string& message) const;
+
+		void		_sendPrivate(const Client& client, const int fd, t_rplContext& context);
+		void		_sendPublic(Client& client, const std::string& channelName, t_rplContext& context);
 		
 		void		_addClient(const int fd);
 		void		_disconnectClient(Client& client);
@@ -41,6 +44,7 @@ class Server
 
 		bool		_nickInUse(const std::string nick) const;
 		bool		_channelExists(const std::string name) const;
+		int			_getClientFd(const std::string& nick) const;
 
 	public:
 		Server(std::string name, std::string password);
@@ -55,8 +59,11 @@ class Server
 		bool		setClientUser(Client& client, const std::string& user);
 		void		setClientName(Client& client, const std::string& name);
 		void		joinChannel(Client& client, const std::string& channel, const std::string& key);
+		void		kickUser(Client& client, const std::string& channel, const std::string& nick, const std::string& reason);
+		void		partChannel(Client& client, const std::string& name, const std::string& reason);
 		std::string	getChannelTopic(const std::string& channelName) const;
 		std::string	getChannelMembers(const std::string& channelName) const;
+		void		sendMessage(Client& client, const std::string& target, const std::string& message);
 };
 
 epoll_event	newEvent(int fd, int flags);
