@@ -170,9 +170,7 @@ void	Server::joinChannel(Client& client, const std::string& name, const std::str
 		}
 		else
 			channel->addUser(client.getFd());
-		std::set<int>	clients = channel->getUsersList();
-		for (std::set<int>::iterator it = clients.begin(); it != clients.end(); it++)
-			_handleReply(_clients.find(*it)->second, AReply::getReply(JOIN, _clients.find(*it)->second, context));
+		_handleReplyChannel(*channel, AReply::getReply(JOIN, client, context), -1);
 		if (!channel->getTopic().empty())
 			_handleReply(client, AReply::getNReply(332, *this, client, context)); //TEST
 		_handleReply(client, AReply::getNReply(353, *this, client, context)); //TEST
@@ -222,9 +220,7 @@ void	Server::setChannelTopic(Client& client, const std::string& channelName, con
 		_handleReply(client, AReply::getNReply(482, *this, client, context));
 	else
 	{
-		std::set<int>	clients = channel.getUsersList();
-		for (std::set<int>::iterator it = clients.begin(); it != clients.end(); it++)
-			_handleReply(_clients.find(*it)->second, AReply::getReply(TOPIC, client, context));
+		_handleReplyChannel(channel, AReply::getReply(TOPIC, client, context), -1);
 		channel.setTopic(topic);
 	}
 }
