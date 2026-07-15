@@ -29,7 +29,7 @@ std::string	AReply::getNReply(int n, const Server& server, const Client& client,
 			reply << context.channel << " :" << server.getChannelTopic(context.channel);
 			break;
 		case 341:
-			reply << context.target << context.channel;
+			reply << context.target << " " << context.channel;
 			break;
 		case 353:
 			reply << "= " << context.channel << " :" << server.getChannelMembers(context.channel);
