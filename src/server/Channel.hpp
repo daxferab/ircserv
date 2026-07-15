@@ -35,15 +35,16 @@ class Channel
 		bool				isTopicRestricted() const;
 		int					getUserLimit() const;
 		int					getUserCount() const;
-		bool				isOperator(int fd);
-		
+		bool				isOperator(int fd) const;
 		void				setInvitedUser(int clientFd);
 		bool				setOperator(int clientFd);
 		bool				unsetOperator(int clientFd);
-		void				setTopic(std::string topic);
+		void				setTopic(const std::string topic);
+		void				setKey(const std::string key);
 		void				setInviteOnly(bool opt);
 		void				setTopicRestricted(bool opt);
 		void				setUserLimit(int num);
+		void				setUserLimit(const std::string limit);
 
 		bool				isFull() const;
 		bool				isKeyOk(std::string key) const;

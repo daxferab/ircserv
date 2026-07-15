@@ -83,6 +83,9 @@ std::string	AReply::getNReply(int n, const Server& server, const Client& client,
 		case 471:
 			reply << context.channel << " :Cannot join channel (+l)";
 			break;
+		case 472:
+			reply << context.message << " :is unknown mode char to me";
+			break;
 		case 473:
 			reply << context.channel << " :Cannot join channel (+i)";
 			break;
