@@ -39,6 +39,9 @@ bool	CommandHandler::execCommand(Message& command, Client& client, Server& serve
 		case QUIT:
 			_quit(command, client, server);
 			break;
+		case MODE:
+			_mode(command, client, server);
+			break;
 		case NONE:
 			break;// handle invalid command
 		default:
@@ -134,6 +137,30 @@ void	CommandHandler::_kick(const Message& command, Client& client, Server& serve
 {
 	//TODO: kick multiple users
 	server.kickUser(client, command.getParams()[0], command.getParams()[1], command.getParams()[2]);
+}
+
+void	CommandHandler::_mode(const Message& command, Client& client, Server& server)
+{
+
+	bool	add = true;
+	size_t	param_iter = 2;
+
+	if (command.getParams().size() == 0)
+		server.setMode(client, "", add, '\0', "");
+	else if (command.getParams().size() > 1)
+	{
+		for (size_t i = 0; i < command.getParams()[1].size(); i++)
+		{
+			char c = command.getParams()[1][i];
+			//TODO if not +-, add the char to some list and only use it once
+			if (c == '+' || c == '-')
+				add = c == '+';
+			else if ((c == 'o' || (c == 'k' && add) || (c == 'l' && add)) && command.getParams().size() > param_iter)
+				server.setMode(client, command.getParams()[0], add, c, command.getParams()[param_iter++]);
+			else
+				server.setMode(client, command.getParams()[0], add, c, "");
+		}
+	}
 }
 
 //------------------------------------------------------- OUT OF SCOPE FUNCTIONS
