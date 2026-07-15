@@ -25,9 +25,6 @@ std::string	AReply::getNReply(int n, const Server& server, const Client& client,
 		case 002:
 			reply << ":Your host is " << serverName << " running version 1.0";
 			break;
-		case 315:
-			reply << context.channel << " :End of WHO list";
-			break;
 		case 331:
 			reply << context.channel << " :No topic is set";
 			break;
@@ -36,9 +33,6 @@ std::string	AReply::getNReply(int n, const Server& server, const Client& client,
 			break;
 		case 341:
 			reply << context.target << " " << context.channel;
-			break;
-		case 352:			
-			reply << context.channel << " " << context.target << " localhost Thiscord " << context.target << " " << context.message << " :1 " << context.target;
 			break;
 		case 353:
 			reply << "= " << context.channel << " :" << server.getChannelMembers(context.channel);

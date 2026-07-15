@@ -18,7 +18,6 @@ class CommandHandler
 		static void	_invite(const Message& command, Client& client, Server& server);
 		static void	_topic(const Message& command, Client& client, Server& server);
 		static void	_privmsg(const Message& command, Client& client, Server& server);
-		static void	_who(const Message& command, Client& client, Server& server);
 		static void	_kick(const Message& command, Client& client, Server& server);
 		static void	_part(const Message& command, Client& client, Server& server);
 		static void	_quit(const Message& command, Client& client, Server& server);

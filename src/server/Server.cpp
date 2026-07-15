@@ -241,41 +241,6 @@ void	Server::displayChannelTopic(Client& client, const std::string& channelName)
 		_handleReply(client, AReply::getNReply(332, *this, client, context));
 }
 
-void	Server::whoIsUser(Client& client, const std::string& mask)
-{
-	t_rplContext	context;
-
-	_fillContext(context, "", mask, "WHO" , "");
-	if (mask.empty())
-		_handleReply(client, AReply::getNReply(461, *this, client, context));
-	else
-	{
-		context.target = mask;
-		if (_getClientFd(mask) != -1)
-		{
-			_handleReply(client, AReply::getNReply(352, *this, client, context));
-			_handleReply(client, AReply::getNReply(315, *this, client, context));
-		}
-		else if (_channels.find(mask) != _channels.end())
-		{
-			Channel&	channel = _channels.find(mask)->second;
-
-			std::set<int>	clients = channel.getUsersList();
-			for (std::set<int>::iterator it = clients.begin(); it != clients.end(); it++)
-			{
-				context.message = "H";
-				if (channel.isOperator(_clients.find(*it)->first)) context.message += "@";
-				context.target = _clients.find(*it)->second.getNick();
-				_handleReply(client, AReply::getNReply(352, *this, client, context));
-				context.message.clear();
-			}
-			_handleReply(client, AReply::getNReply(315, *this, client, context));
-		}
-		else
-			_handleReply(client, AReply::getNReply(401, *this, client, context));
-	}
-}
-
 void	Server::kickUser(Client& client, const std::string& chanName, const std::string& nick, const std::string& reason)
 {
 	t_rplContext	context;
@@ -351,6 +316,7 @@ std::string	Server::getChannelMembers(const std::string& channelName) const
 			continue;
 		if (!list.empty())
 			list.append(" ");
+		if (it->second.isOperator(clientIt->first)) list.append("@");
 		list.append(clientIt->second.getNick());
 	}
 	return list;
