@@ -156,8 +156,10 @@ void	CommandHandler::_quit(const Message& command, Client& client, Server& serve
 
 void	CommandHandler::_who(const Message& command, Client& client, Server& server)
 {
-	std::string mask = command.getParams()[0].empty() ? "" : command.getParams()[0];
-	server.whoIsUser(client, mask);
+	if (command.getParams().size() == 1)
+		server.whoIsUser(client, command.getParams()[0]);
+	else
+		server.whoIsUser(client, "");
 }
 
 void	CommandHandler::_kick(const Message& command, Client& client, Server& server)
