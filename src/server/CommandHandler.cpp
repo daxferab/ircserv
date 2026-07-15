@@ -139,12 +139,7 @@ void	CommandHandler::_quit(const Message& command, Client& client, Server& serve
 void	CommandHandler::_kick(const Message& command, Client& client, Server& server)
 {
 	std::vector<std::string>	users = split(command.getParams()[1], ',');
-	std::string					reason;
-
-	if (command.getParams().size() > 2)
-		reason = command.getParams()[2];
-	else
-		reason = "";
+	std::string					reason = command.getParams()[2].empty() ? "" : command.getParams()[2];
 
 	for (size_t i = 0; i < users.size(); ++i)
 	{
