@@ -270,10 +270,41 @@ void	Server::sendMessage(Client& client, const std::string& target, const std::s
 		_handleReply(client, AReply::getNReply(401, *this, client, context));
 }
 
-void	Server::setMode(Client& client, std::string channel, bool add, char type, std::string parameter)
+void	Server::setMode(Client& client, std::string channel_name, bool add, char type, std::string parameter)
 {
-	//TODO remember toask OP permissions at the start
-	std::cout << "got by server mode: " << client.getFd() << " " << channel << " " << add << " " << type << " " << parameter << std::endl;
+	t_rplContext	context;
+	Channel			*channel = NULL;
+
+	_fillContext(context, client.getNick(), channel_name, "MODE", std::string(1, type));
+	if (channel_name.empty())
+		_handleReply(client, AReply::getNReply(461, *this, client, context));
+	else if (!_channelExists(channel_name))
+		_handleReply(client, AReply::getNReply(403, *this, client, context));
+	else
+	{
+		channel = &(_channels.at(channel_name));
+		if (!channel->isMember(client.getFd()))
+			_handleReply(client, AReply::getNReply(442, *this, client, context));
+		else if (!channel->isOperator(client.getFd()))
+			_handleReply(client, AReply::getNReply(482, *this, client, context));
+		else if (type == 'i') //TODO message everyone in the server announcing changes. Example: :nick MODE #channel +i
+			channel->setInviteOnly(add);
+		else if (type == 'k')
+		{
+			if (!(add && parameter.empty()))
+				channel->setKey(parameter);
+		}
+		else if (type == 'l')
+			channel->setUserLimit(parameter);
+		else if (type == 'o' && add)
+			channel->setOperator(_getClientFd(parameter));
+		else if (type == 'o' && !add)
+			channel->unsetOperator(_getClientFd(parameter));
+		else if (type == 't')
+			channel->setTopicRestricted(add);
+		else
+			_handleReply(client, AReply::getNReply(472, *this, client, context));
+	}
 }
 
 // ---------------------------------------------------- PRIVATE MEMBER FUNCTIONS

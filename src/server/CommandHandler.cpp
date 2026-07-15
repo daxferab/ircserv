@@ -142,17 +142,23 @@ void	CommandHandler::_mode(const Message& command, Client& client, Server& serve
 {
 
 	bool	add = true;
-	int		param_iter = 2;
+	size_t	param_iter = 2;
 
-	for (size_t i = 0; i < command.getParams()[1].size(); i++)
+	if (command.getParams().size() == 0)
+		server.setMode(client, "", add, '\0', "");
+	else if (command.getParams().size() > 1)
 	{
-		char c = command.getParams()[1][i];
-		if (c == '+' || c == '-')
-			add = c == '+';
-		else if (c == 'o' || (c == 'k' && add) || (c == 'l' && add))
-			server.setMode(client, command.getParams()[0], add, c, command.getParams()[param_iter++]);
-		else if (c == 'i' || c == 'k' || c == 'l' || c == 't')
-			server.setMode(client, command.getParams()[0], add, c, "");
+		for (size_t i = 0; i < command.getParams()[1].size(); i++)
+		{
+			char c = command.getParams()[1][i];
+			//TODO if not +-, add the char to some list and only use it once
+			if (c == '+' || c == '-')
+				add = c == '+';
+			else if ((c == 'o' || (c == 'k' && add) || (c == 'l' && add)) && command.getParams().size() > param_iter)
+				server.setMode(client, command.getParams()[0], add, c, command.getParams()[param_iter++]);
+			else
+				server.setMode(client, command.getParams()[0], add, c, "");
+		}
 	}
 }
 
