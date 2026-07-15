@@ -25,6 +25,7 @@
 #include <iostream>
 #include <utility>
 #include <signal.h>
+#include <sstream>
 
 #define MAX_EVENTS 16
 #define BUFFERSIZE 512
@@ -347,6 +348,7 @@ void	Server::setMode(Client& client, std::string channel_name, bool add, char ty
 {
 	t_rplContext	context;
 	Channel			*channel = NULL;
+	bool			changes = false;
 
 	_fillContext(context, client.getNick(), channel_name, "MODE", std::string(1, type));
 	if (channel_name.empty())
@@ -360,28 +362,50 @@ void	Server::setMode(Client& client, std::string channel_name, bool add, char ty
 			_handleReply(client, AReply::getNReply(442, *this, client, context));
 		else if (!channel->isOperator(client.getFd()))
 			_handleReply(client, AReply::getNReply(482, *this, client, context));
-		else if (type == 'i') //TODO message everyone in the server announcing changes. Example: :nick MODE #channel +i
-			channel->setInviteOnly(add);
+		else if (type == 'i')
+		{
+			changes = channel->setInviteOnly(add);
+			_fillContext(context, client.getNick(), channel_name, "MODE", (add ? "+i" : "-i"));
+		}
 		else if (type == 'k')
 		{
-			if (!(add && parameter.empty()))
-				channel->setKey(parameter);
+			if (!(add && parameter.empty()) && channel->setKey(parameter))
+			{
+				changes = true;
+				_fillContext(context, client.getNick(), channel_name, "MODE", (add ? "+k " : "-k ") + parameter);
+			}
 		}
 		else if (type == 'l')
-			channel->setUserLimit(parameter);
+		{
+			int n = channel->setUserLimit(parameter);
+			std::stringstream ss;
+			ss << n;
+			changes = n >= 0;
+			if (n > 0)
+				_fillContext(context, client.getNick(), channel_name, "MODE", "+l " + ss.str());
+			if (n == 0)
+				_fillContext(context, client.getNick(), channel_name, "MODE", "-l" );
+		}
 		else if (type == 'o' && add)
-			channel->setOperator(_getClientFd(parameter));
+		{
+			changes = channel->setOperator(_getClientFd(parameter));
+			_fillContext(context, client.getNick(), channel_name, "MODE", "+o " + parameter);
+		}
 		else if (type == 'o' && !add)
-			channel->unsetOperator(_getClientFd(parameter));
+		{
+			changes = channel->unsetOperator(_getClientFd(parameter));
+			_fillContext(context, client.getNick(), channel_name, "MODE", "-o " + parameter);
+		}
 		else if (type == 't')
 		{
-			channel->setTopicRestricted(add);
+			changes = channel->setTopicRestricted(add);
 			_fillContext(context, client.getNick(), channel_name, "MODE", (add ? "+t" : "-t"));
-			_handleReply(client, AReply::getReply(MODE, client, context));
 		}
 		else
 			_handleReply(client, AReply::getNReply(472, *this, client, context));
 	}
+	if (changes)
+		_handleReplyChannel(*channel, AReply::getReply(MODE, client, context), -1);
 }
 
 // ---------------------------------------------------- PRIVATE MEMBER FUNCTIONS
@@ -680,7 +704,7 @@ int		Server::_getClientFd(const std::string& nick) const
 
 	for (; itc != end; ++itc)
 		if (itc->second.getNick() == nick)
-			return (itc->second.getFd());
+			return itc->second.getFd();
 	return -1;
 }
 
