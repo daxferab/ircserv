@@ -198,13 +198,13 @@ void	Server::kickUser(Client& client, const std::string& chanName, const std::st
 		_handleReply(client, AReply::getNReply(442, *this, client, context));
 	if(!channel->isOperator(client.getFd()))
 		_handleReply(client, AReply::getNReply(482, *this, client, context));
-	else if (channel->isMember(_getClientFd(nick)))
+	else if (!channel->isMember(_getClientFd(nick)))
 		_handleReply(client, AReply::getNReply(441, *this, client, context));
 	else
 	{
 		std::set<int>	clients = channel->getUsersList();
 		for (std::set<int>::iterator it = clients.begin(); it != clients.end(); it++)
-			_handleReply(_clients.find(*it)->second, AReply::getReply(KICK, _clients.find(*it)->second, context));
+			_handleReply(_clients.find(*it)->second, AReply::getReply(KICK, client, context));
 		channel->removeUser(_getClientFd(nick));
 	}
 }

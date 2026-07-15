@@ -132,8 +132,10 @@ void	CommandHandler::_quit(const Message& command, Client& client, Server& serve
 
 void	CommandHandler::_kick(const Message& command, Client& client, Server& server)
 {
-	//TODO: kick multiple users
-	server.kickUser(client, command.getParams()[0], command.getParams()[1], command.getParams()[2]);
+	std::vector<std::string> users = split(command.getParams()[1], ',');
+
+	for (size_t i = 0; i < users.size(); ++i)
+		server.kickUser(client, command.getParams()[0], users[i], command.getParams()[2]);
 }
 
 //------------------------------------------------------- OUT OF SCOPE FUNCTIONS
