@@ -209,7 +209,7 @@ void	Server::inviteUser(Client &client, const std::string& nick, const std::stri
 void	Server::setChannelTopic(Client& client, const std::string& channelName, const std::string& topic)
 {
 	std::map<std::string, Channel>::iterator	channelIt = _channels.find(channelName);
-	Channel										channel = channelIt->second;
+	Channel&									channel = channelIt->second;
 	t_rplContext								context;
 
 	_fillContext(context, "", channelName, "TOPIC", topic);

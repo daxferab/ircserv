@@ -1,7 +1,6 @@
 #include "Channel.hpp"
 #include <cstdlib>
 #include <limits>
-#include <iostream>
 
 //----------------------------------------------------------------- CONSTRUCTORS
 
