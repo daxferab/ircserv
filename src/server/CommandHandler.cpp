@@ -1,4 +1,5 @@
 #include "CommandHandler.hpp"
+#include "AReply.hpp"
 #include "Message.hpp"
 #include "Server.hpp"
 #include <cstring>
@@ -35,6 +36,9 @@ bool	CommandHandler::execCommand(Message& command, Client& client, Server& serve
 			break;
 		case PRIVMSG:
 			_privmsg(command, client, server);
+			break;
+		case WHO:
+			_who(command, client, server);
 			break;
 		case KICK:
 			_kick(command, client, server);
@@ -148,6 +152,12 @@ void	CommandHandler::_quit(const Message& command, Client& client, Server& serve
 	if (command.getParams().empty())
 		server.quitClient(client, "");
 	server.quitClient(client, command.getParams()[0]);
+}
+
+void	CommandHandler::_who(const Message& command, Client& client, Server& server)
+{
+	std::string mask = command.getParams()[0].empty() ? "" : command.getParams()[0];
+	server.whoIsUser(client, mask);
 }
 
 void	CommandHandler::_kick(const Message& command, Client& client, Server& server)

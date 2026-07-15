@@ -30,7 +30,8 @@ class Client
 		void		setUser(const std::string user);
 		void		setName(const std::string name);
 		int			getFd() const;
-		const std::string& getOutBuffer() const;
+		const std::string&	getUser() const;
+		const std::string&	getOutBuffer() const;
 		bool		isAuthenticated() const;
 		void		setAuthenticated(const bool value);
 		bool		isRegistered() const;
