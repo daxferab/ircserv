@@ -20,6 +20,7 @@
 #include <fcntl.h>
 #include <netdb.h>
 #include <cstring>
+#include <sys/ucontext.h>
 #include <unistd.h>
 #include <iostream>
 #include <utility>
@@ -196,7 +197,7 @@ void	Server::inviteUser(Client &client, const std::string& nick, const std::stri
 		context.target = nick;
 		_handleReply(client, AReply::getNReply(443, *this, client, context));
 	}
-	else
+	else if (_clients.find(userFd) != _clients.end())
 	{
 		context.target = nick;
 		channelIt->second.setInvitedUser(userFd);
