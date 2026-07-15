@@ -81,8 +81,16 @@ void	Server::authClient(Client& client, const std::string& pass)
 
 void	Server::quitClient(Client& client, const std::string& msg)
 {
-	//TODO: sendMessage
 	(void)msg;
+	t_rplContext	context;
+
+	_fillContext(context, "", "", "QUIT", msg);
+	// recorrer canales del servidor, si el cliente es miembro del canal, sendpublic
+	std::map<std::string, Channel>::iterator it = _channels.begin();
+	std::map<std::string, Channel>::iterator end = _channels.end();
+
+	for (; it != end; it++)
+		_sendPublic(client, it->first, context);
 	_disconnectClient(client);
 }
 
@@ -219,7 +227,7 @@ void	Server::partChannel(Client &client, const std::string &name, const std::str
 	else
 	{
 		channel->removeUser(client.getFd());
-		_handleReply(client, AReply::getReply(JOIN, client, context));
+		_handleReply(client, AReply::getReply(PART, client, context));
 	}
 }
 
@@ -405,14 +413,19 @@ void	Server::_readFd(const int fd)
 {
 	char	buf[BUFFERSIZE];
 	std::map<int, Client>::iterator it = _clients.find(fd);
-	ssize_t n;
-	while ((n = recv(fd, buf, BUFFERSIZE, 0)) > 0)
-	    _handleLine(it->second, buf, n);
-	
-	if (n == 0)
-	    quitClient(it->second, "");
-	else if (n < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
-	    quitClient(it->second, "");
+	if (it == _clients.end())
+		return;
+	while (true)
+	{
+		ssize_t n = recv(fd, buf, BUFFERSIZE, 0);
+		if (n > 0)
+			_handleLine(it->second, buf, n);
+		else if (n == 0) {
+			quitClient(it->second, "");
+			break;
+		} else
+			break;
+	}
 }
 
 void	Server::_handleLine(Client& client, char* line, int data)
