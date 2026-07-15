@@ -114,7 +114,7 @@ std::string	AReply::getReply(int command, const Client& client, const t_rplConte
 			reply << ":" << client.getNick() << " JOIN " << context.channel;
 			break;
 		case INVITE:
-			reply << ":" << client.getNick() << " INVITE " << context.target << context.channel;
+			reply << ":" << client.getNick() << " INVITE " << context.target << " " << context.channel;
 			break;
 		case KICK:
 			reply << ":" << client.getNick() << " KICK " << context.channel << " :" << context.message;

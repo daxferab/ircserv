@@ -189,9 +189,9 @@ void	Server::inviteUser(Client &client, const std::string& nick, const std::stri
 		_handleReply(client, AReply::getNReply(403, *this, client, context));
 	else if (!channelIt->second.isMember(client.getFd()))
 		_handleReply(client, AReply::getNReply(442, *this, client, context));
-	else if (channelIt->second.isInviteOnly() && !channelIt->second.isOperator(client.getFd()))
+	else if (channelIt->second.isInviteOnly() && !channelIt->second.isOperator(client.getFd())) //test
 		_handleReply(client, AReply::getNReply(482, *this, client, context));
-	else if (!channelIt->second.isMember(userFd))
+	else if (channelIt->second.isMember(userFd))
 	{
 		context.target = nick;
 		_handleReply(client, AReply::getNReply(443, *this, client, context));
@@ -201,7 +201,7 @@ void	Server::inviteUser(Client &client, const std::string& nick, const std::stri
 		context.target = nick;
 		channelIt->second.setInvitedUser(userFd);
 		_handleReply(client, AReply::getNReply(341, *this, client, context));
-		_handleReply(client, AReply::getReply(INVITE, client, context));
+		_handleReply(_clients.find(userFd)->second, AReply::getReply(INVITE, client, context));
 	}
 }
 
