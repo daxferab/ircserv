@@ -244,8 +244,6 @@ void	Server::displayChannelTopic(Client& client, const std::string& channelName)
 		_handleReply(client, AReply::getNReply(332, *this, client, context));
 }
 
-// ERR_NOSUCHCHANNEL (403)
-
 void	Server::kickUser(Client& client, const std::string& chanName, const std::string& nick, const std::string& reason)
 {
 	t_rplContext	context;
