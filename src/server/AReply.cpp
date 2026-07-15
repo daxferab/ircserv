@@ -142,6 +142,10 @@ std::string	AReply::getReply(int command, const Client& client, const t_rplConte
 			break;
 		case PRIVMSG:
 			reply << ":" << client.getNick() << " PRIVMSG " << context.target << " :" << context.message;
+			break;
+		case MODE:
+			reply << ":" << client.getNick() << " MODE " << context.channel << " " << context.message;
+			break;
 	}
 	reply << "\r\n";
 	std::cout << MAGENTA << reply.str() << RESET << std::endl;

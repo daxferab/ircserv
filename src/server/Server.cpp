@@ -25,6 +25,7 @@
 #include <iostream>
 #include <utility>
 #include <signal.h>
+#include <sstream>
 
 #define MAX_EVENTS 16
 #define BUFFERSIZE 512
@@ -169,9 +170,7 @@ void	Server::joinChannel(Client& client, const std::string& name, const std::str
 		}
 		else
 			channel->addUser(client.getFd());
-		std::set<int>	clients = channel->getUsersList();
-		for (std::set<int>::iterator it = clients.begin(); it != clients.end(); it++)
-			_handleReply(_clients.find(*it)->second, AReply::getReply(JOIN, _clients.find(*it)->second, context));
+		_handleReplyChannel(*channel, AReply::getReply(JOIN, client, context), -1);
 		if (!channel->getTopic().empty())
 			_handleReply(client, AReply::getNReply(332, *this, client, context)); //TEST
 		_handleReply(client, AReply::getNReply(353, *this, client, context)); //TEST
@@ -221,9 +220,7 @@ void	Server::setChannelTopic(Client& client, const std::string& channelName, con
 		_handleReply(client, AReply::getNReply(482, *this, client, context));
 	else
 	{
-		std::set<int>	clients = channel.getUsersList();
-		for (std::set<int>::iterator it = clients.begin(); it != clients.end(); it++)
-			_handleReply(_clients.find(*it)->second, AReply::getReply(TOPIC, client, context));
+		_handleReplyChannel(channel, AReply::getReply(TOPIC, client, context), -1);
 		channel.setTopic(topic);
 	}
 }
@@ -303,9 +300,7 @@ void	Server::kickUser(Client& client, const std::string& chanName, const std::st
 		_handleReply(client, AReply::getNReply(441, *this, client, context));
 	else
 	{
-		std::set<int>	clients = channel->getUsersList();
-		for (std::set<int>::iterator it = clients.begin(); it != clients.end(); it++)
-			_handleReply(_clients.find(*it)->second, AReply::getReply(KICK, client, context));
+	_handleReplyChannel(*channel, AReply::getReply(KICK, client, context), -1);
 		channel->removeUser(_getClientFd(nick));
 	}
 }
@@ -384,6 +379,7 @@ void	Server::setMode(Client& client, std::string channel_name, bool add, char ty
 {
 	t_rplContext	context;
 	Channel			*channel = NULL;
+	bool			changes = false;
 
 	_fillContext(context, client.getNick(), channel_name, "MODE", std::string(1, type));
 	if (channel_name.empty())
@@ -397,24 +393,50 @@ void	Server::setMode(Client& client, std::string channel_name, bool add, char ty
 			_handleReply(client, AReply::getNReply(442, *this, client, context));
 		else if (!channel->isOperator(client.getFd()))
 			_handleReply(client, AReply::getNReply(482, *this, client, context));
-		else if (type == 'i') //TODO message everyone in the server announcing changes. Example: :nick MODE #channel +i
-			channel->setInviteOnly(add);
+		else if (type == 'i')
+		{
+			changes = channel->setInviteOnly(add);
+			_fillContext(context, client.getNick(), channel_name, "MODE", (add ? "+i" : "-i"));
+		}
 		else if (type == 'k')
 		{
-			if (!(add && parameter.empty()))
-				channel->setKey(parameter);
+			if (!(add && parameter.empty()) && channel->setKey(parameter))
+			{
+				changes = true;
+				_fillContext(context, client.getNick(), channel_name, "MODE", (add ? "+k " : "-k ") + parameter);
+			}
 		}
 		else if (type == 'l')
-			channel->setUserLimit(parameter);
+		{
+			int n = channel->setUserLimit(parameter);
+			std::stringstream ss;
+			ss << n;
+			changes = n >= 0;
+			if (n > 0)
+				_fillContext(context, client.getNick(), channel_name, "MODE", "+l " + ss.str());
+			if (n == 0)
+				_fillContext(context, client.getNick(), channel_name, "MODE", "-l" );
+		}
 		else if (type == 'o' && add)
-			channel->setOperator(_getClientFd(parameter));
+		{
+			changes = channel->setOperator(_getClientFd(parameter));
+			_fillContext(context, client.getNick(), channel_name, "MODE", "+o " + parameter);
+		}
 		else if (type == 'o' && !add)
-			channel->unsetOperator(_getClientFd(parameter));
+		{
+			changes = channel->unsetOperator(_getClientFd(parameter));
+			_fillContext(context, client.getNick(), channel_name, "MODE", "-o " + parameter);
+		}
 		else if (type == 't')
-			channel->setTopicRestricted(add);
+		{
+			changes = channel->setTopicRestricted(add);
+			_fillContext(context, client.getNick(), channel_name, "MODE", (add ? "+t" : "-t"));
+		}
 		else
 			_handleReply(client, AReply::getNReply(472, *this, client, context));
 	}
+	if (changes)
+		_handleReplyChannel(*channel, AReply::getReply(MODE, client, context), -1);
 }
 
 // ---------------------------------------------------- PRIVATE MEMBER FUNCTIONS
@@ -588,6 +610,17 @@ void	Server::_handleReply(Client& client, const std::string& message)
 	epoll_ctl(_epoll, EPOLL_CTL_MOD, client.getFd(), &client_ev);
 }
 
+void	Server::_handleReplyChannel(const Channel& channel, const std::string message, int client_fd)
+{
+	std::set<int>	clients = channel.getUsersList();
+	for (std::set<int>::iterator it = clients.begin(); it != clients.end(); it++)
+	{
+		Client& client = _clients.find(*it)->second;
+		if (client_fd != client.getFd())
+			_handleReply(client, message);
+	}
+}
+
 void	Server::_writeFd(const int fd)
 {
 	std::map<int, Client>::iterator it = _clients.find(fd);
@@ -702,7 +735,7 @@ int		Server::_getClientFd(const std::string& nick) const
 
 	for (; itc != end; ++itc)
 		if (itc->second.getNick() == nick)
-			return (itc->second.getFd());
+			return itc->second.getFd();
 	return -1;
 }
 

@@ -64,7 +64,7 @@ std::string	Client::getLine()
 	std::string	line = _inBuffer.substr(0, pos);
 
 	_inBuffer.erase(0, pos + 2);
-	return (line);
+	return line;
 }
 
 //----------------------------------------------------------- OPERATOR OVERLOADS

@@ -2,9 +2,9 @@
 #define CHANNEL_HPP
 
 #include <set>
-
 #include <string>
 #include <sys/types.h>
+
 class Channel
 {
 	private:
@@ -40,11 +40,11 @@ class Channel
 		bool				setOperator(int clientFd);
 		bool				unsetOperator(int clientFd);
 		void				setTopic(const std::string topic);
-		void				setKey(const std::string key);
-		void				setInviteOnly(bool opt);
-		void				setTopicRestricted(bool opt);
-		void				setUserLimit(int num);
-		void				setUserLimit(const std::string limit);
+		bool				setKey(const std::string key);
+		bool				setInviteOnly(bool opt);
+		bool				setTopicRestricted(bool opt);
+		bool				setUserLimit(int num);
+		int					setUserLimit(const std::string limit);
 
 		bool				isFull() const;
 		bool				isKeyOk(std::string key) const;

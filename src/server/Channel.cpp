@@ -6,7 +6,7 @@
 
 Channel::Channel() {}
 
-Channel::Channel(const std::string& name, int clientFd): _name(name), _topic(""), _key(""), _inviteOnly(false), _topicRestrict(false), _userLimit(-1)
+Channel::Channel(const std::string& name, int clientFd): _name(name), _topic(""), _key(""), _inviteOnly(false), _topicRestrict(true), _userLimit(-1)
 {
 	_users.insert(clientFd);
 	_operators.insert(clientFd);
@@ -31,31 +31,27 @@ bool				Channel::isOperator(int fd) const { return _operators.find(fd) != _opera
 void				Channel::setInvitedUser(int clientFd) { _invitedUsers.insert(clientFd); }
 
 void				Channel::setTopic(const std::string topic) { _topic = topic; }
-void				Channel::setKey(const std::string key) { _key = key; }
-void				Channel::setInviteOnly(bool opt) { _inviteOnly = opt; }
-void				Channel::setTopicRestricted(bool opt) { _topicRestrict = opt; }
-void				Channel::setUserLimit(int num) { _userLimit = num; }
-void				Channel::setUserLimit(const std::string limit)
+bool				Channel::setKey(const std::string key) { if (_key == key) return false; _key = key; return true; }
+bool				Channel::setInviteOnly(bool opt) { if (_inviteOnly == opt) return false; _inviteOnly = opt; return true; }
+bool				Channel::setTopicRestricted(bool opt) { if (_topicRestrict == opt) return false; _topicRestrict = opt; return true; }
+bool				Channel::setUserLimit(int num) { if (_userLimit == num) return false; _userLimit = num; return true;  _userLimit = num; }
+int					Channel::setUserLimit(const std::string limit)
 {
+	long	l;
 	if (limit.empty())
-	{
-		_userLimit = -1;
-		return ;
-	}
-	long	l = atol(limit.c_str());
+		return setUserLimit(-1) ? 0 : -1;
+	l = atol(limit.c_str());
 	if (l > std::numeric_limits<int>::max())
-		_userLimit = std::numeric_limits<int>::max();
-	else if (l > 0)
-		_userLimit = l;
-	else if (l < 0)
-		_userLimit = -1;
-	else
-	{
-		if (limit.size() >= 1 && limit[0] == '0')
-			_userLimit = -1;
-		else if (limit.size() >= 2 && limit[1] == '0' && (limit[0] == '+' || limit[0] == '-'))
-			_userLimit = -1;
-	}
+		return setUserLimit(std::numeric_limits<int>::max()) ? std::numeric_limits<int>::max() : -1;
+	if (l > 0)
+		return setUserLimit(l) ? l : -1;
+	if (l < 0)
+		return setUserLimit(-1) ? 0 : -1;
+	if (limit.size() >= 1 && limit[0] == '0')
+		return setUserLimit(-1) ? 0 : -1;
+	if (limit.size() >= 2 && limit[1] == '0' && (limit[0] == '+' || limit[0] == '-'))
+		return setUserLimit(-1) ? 0 : -1;
+	return (-1);
 }
 
 //------------------------------------------------------------- MEMBER FUNCTIONS
@@ -72,7 +68,7 @@ void				Channel::removeUser(int fd)
 
 bool	Channel::setOperator(int clientFd)
 {
-	return (_operators.insert(clientFd).second);
+	return _users.find(clientFd) != _users.end() && _operators.insert(clientFd).second;
 }
 
 bool	Channel::unsetOperator(int clientFd)
@@ -80,7 +76,7 @@ bool	Channel::unsetOperator(int clientFd)
 	if (_operators.find(clientFd) != _operators.end())
 	{
 		_operators.erase(_operators.find(clientFd));
-		return (true);
+		return true;
 	}	
-	return (false);
+	return false;
 }
