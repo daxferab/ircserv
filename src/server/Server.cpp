@@ -264,7 +264,7 @@ void	Server::whoIsUser(Client& client, const std::string& mask)
 			for (std::set<int>::iterator it = clients.begin(); it != clients.end(); it++)
 			{
 				context.message = "H";
-				if (channel.isOperator(_clients.find(*it)->first)) context.message += "*";
+				if (channel.isOperator(_clients.find(*it)->first)) context.message += "@";
 				context.target = _clients.find(*it)->second.getNick();
 				_handleReply(client, AReply::getNReply(352, *this, client, context));
 				context.message.clear();
