@@ -32,6 +32,7 @@ class Server
 		void		_readFd(const int fd);
 		void		_handleLine(Client& client, char* line, int data);
 		void		_handleReply(Client& client, const std::string& message);
+		void		_handleReplyChannel(const Channel &channel, const std::string message, int client_fd);
 		void		_writeFd(const int fd);
 		void		_fillContext(t_rplContext& context, const std::string& target, const std::string& channel, const std::string& command, const std::string& message) const;
 

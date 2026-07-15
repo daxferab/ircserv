@@ -230,9 +230,7 @@ void	Server::kickUser(Client& client, const std::string& chanName, const std::st
 		_handleReply(client, AReply::getNReply(441, *this, client, context));
 	else
 	{
-		std::set<int>	clients = channel->getUsersList();
-		for (std::set<int>::iterator it = clients.begin(); it != clients.end(); it++)
-			_handleReply(_clients.find(*it)->second, AReply::getReply(KICK, client, context));
+	_handleReplyChannel(*channel, AReply::getReply(KICK, client, context), -1);
 		channel->removeUser(_getClientFd(nick));
 	}
 }
@@ -338,7 +336,11 @@ void	Server::setMode(Client& client, std::string channel_name, bool add, char ty
 		else if (type == 'o' && !add)
 			channel->unsetOperator(_getClientFd(parameter));
 		else if (type == 't')
+		{
 			channel->setTopicRestricted(add);
+			_fillContext(context, client.getNick(), channel_name, "MODE", (add ? "+t" : "-t"));
+			_handleReply(client, AReply::getReply(MODE, client, context));
+		}
 		else
 			_handleReply(client, AReply::getNReply(472, *this, client, context));
 	}
@@ -513,6 +515,17 @@ void	Server::_handleReply(Client& client, const std::string& message)
 	client.appendBuffer(message.c_str(), message.size(), OUT);
 	struct epoll_event client_ev = newEvent(client.getFd(), EPOLLOUT | EPOLLIN);
 	epoll_ctl(_epoll, EPOLL_CTL_MOD, client.getFd(), &client_ev);
+}
+
+void	Server::_handleReplyChannel(const Channel& channel, const std::string message, int client_fd)
+{
+	std::set<int>	clients = channel.getUsersList();
+	for (std::set<int>::iterator it = clients.begin(); it != clients.end(); it++)
+	{
+		Client& client = _clients.find(*it)->second;
+		if (client_fd != client.getFd())
+			_handleReply(client, message);
+	}
 }
 
 void	Server::_writeFd(const int fd)
