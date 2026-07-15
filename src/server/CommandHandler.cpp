@@ -106,17 +106,10 @@ void	CommandHandler::_join(const Message& command, Client& client, Server& serve
 
 void	CommandHandler::_part(const Message &command, Client &client, Server &server)
 {
-	std::vector<std::string>	channels;
-	std::string					reason;
+	std::vector<std::string>	channels = split(command.getParams()[0], ',');
 
-	if (command.getParams().size() >= 2)
-	{
-		channels = split(command.getParams()[0], ',');
-		reason = command.getParams()[1];
-
-		for (size_t i = 0; i < channels.size(); ++i)
-			server.partChannel(client, channels[i], reason);
-	}
+	for (size_t i = 0; i < channels.size(); ++i)
+		server.partChannel(client, channels[i], command.getParams()[1]);
 }
 
 void	CommandHandler::_invite(const Message& command, Client& client, Server& server)
@@ -145,10 +138,18 @@ void	CommandHandler::_quit(const Message& command, Client& client, Server& serve
 
 void	CommandHandler::_kick(const Message& command, Client& client, Server& server)
 {
-	std::vector<std::string> users = split(command.getParams()[1], ',');
+	std::vector<std::string>	users = split(command.getParams()[1], ',');
+	std::string					reason;
+
+	if (command.getParams().size() > 2)
+		reason = command.getParams()[2];
+	else
+		reason = "";
 
 	for (size_t i = 0; i < users.size(); ++i)
-		server.kickUser(client, command.getParams()[0], users[i], command.getParams()[2]);
+	{
+		server.kickUser(client, command.getParams()[0], users[i], reason);
+	}
 }
 
 void	CommandHandler::_mode(const Message& command, Client& client, Server& server)
