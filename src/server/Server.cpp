@@ -146,7 +146,7 @@ void	Server::joinChannel(Client& client, const std::string& name, const std::str
 		if (channel->isMember(client.getFd()))
 			return ;
 	}
-	invited = channel && false;//TODO invited
+	invited = channel && channel->isInvited(client.getFd());
 	_fillContext(context, client.getNick(), name, "JOIN", "");
 
 	if (name.empty())
