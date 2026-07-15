@@ -206,6 +206,44 @@ void	Server::inviteUser(Client &client, const std::string& nick, const std::stri
 	}
 }
 
+void	Server::setChannelTopic(Client& client, const std::string& channelName, const std::string& topic)
+{
+	std::map<std::string, Channel>::iterator	channelIt = _channels.find(channelName);
+	Channel&									channel = channelIt->second;
+	t_rplContext								context;
+
+	_fillContext(context, "", channelName, "TOPIC", topic);
+	if (channelIt == _channels.end())
+		_handleReply(client, AReply::getNReply(403, *this, client, context));
+	else if (!channel.isMember(client.getFd()))
+		_handleReply(client, AReply::getNReply(442, *this, client, context));
+	else if (channel.isTopicRestricted() && !channel.isOperator(client.getFd()))
+		_handleReply(client, AReply::getNReply(482, *this, client, context));
+	else
+	{
+		std::set<int>	clients = channel.getUsersList();
+		for (std::set<int>::iterator it = clients.begin(); it != clients.end(); it++)
+			_handleReply(_clients.find(*it)->second, AReply::getReply(TOPIC, client, context));
+		channel.setTopic(topic);
+	}
+}
+void	Server::displayChannelTopic(Client& client, const std::string& channelName)
+{
+	std::map<std::string, Channel>::iterator	channelIt = _channels.find(channelName);
+	Channel&									channel = channelIt->second;
+	t_rplContext								context;
+
+	_fillContext(context, "", channelName, "TOPIC", "");
+	if (channelIt == _channels.end())
+		_handleReply(client, AReply::getNReply(403, *this, client, context));
+	else if (!channel.isMember(client.getFd()))
+		_handleReply(client, AReply::getNReply(442, *this, client, context));	
+	else if (channel.getTopic().empty())
+		_handleReply(client, AReply::getNReply(331, *this, client, context));
+	else
+		_handleReply(client, AReply::getNReply(332, *this, client, context));
+}
+
 void	Server::kickUser(Client& client, const std::string& chanName, const std::string& nick, const std::string& reason)
 {
 	t_rplContext	context;
