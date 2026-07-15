@@ -10,6 +10,7 @@ typedef enum e_comnum
 	NICK,
 	USER,
 	JOIN,
+	INVITE,
 	KICK,
 	PART,
 	QUIT,

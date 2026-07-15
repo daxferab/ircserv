@@ -27,6 +27,9 @@ bool	CommandHandler::execCommand(Message& command, Client& client, Server& serve
 		case JOIN:
 			_join(command, client, server);
 			break;
+		case INVITE:
+			_invite(command, client, server);
+			break;
 		case PRIVMSG:
 			_privmsg(command, client, server);
 			break;
@@ -111,6 +114,13 @@ void	CommandHandler::_part(const Message &command, Client &client, Server &serve
 		for (size_t i = 0; i < channels.size(); ++i)
 			server.partChannel(client, channels[i], reason);
 	}
+}
+
+void	CommandHandler::_invite(const Message& command, Client& client, Server& server)
+{
+	std::string	channel = command.getParams()[1].empty() ? "" : command.getParams()[1];
+
+	server.inviteUser(client, command.getParams()[0], channel);
 }
 
 void	CommandHandler::_privmsg(const Message& command, Client& client, Server& server)

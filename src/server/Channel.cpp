@@ -19,12 +19,14 @@ const std::string&	Channel::getTopic() const { return _topic; }
 const std::string&	Channel::getKey() const { return _key; }
 const std::set<int>&	Channel::getUsers() const { return _users; }
 const std::set<int>&	Channel::getUsersList() const { return _users; }
+bool				Channel::isInvited(int clientFd) const { return _invitedUsers.find(clientFd) != _invitedUsers.end(); }
 bool				Channel::isInviteOnly() const { return _inviteOnly; }
 bool				Channel::isTopicRestricted() const { return _topicRestrict; }
 int					Channel::getUserLimit() const { return _userLimit; }
 int					Channel::getUserCount() const { return _users.size(); }
+	
 bool				Channel::isOperator(int fd) { return _operators.find(fd) != _operators.end(); }
-
+void				Channel::setInvitedUser(int clientFd) { _invitedUsers.insert(clientFd); }
 void				Channel::setTopic(std::string topic) { _topic = topic; }
 void				Channel::setInviteOnly(bool opt) { _inviteOnly = opt; }
 void				Channel::setTopicRestricted(bool opt) { _topicRestrict = opt; }

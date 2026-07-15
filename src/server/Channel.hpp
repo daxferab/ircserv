@@ -13,6 +13,7 @@ class Channel
 		std::string			_key;
 
 		std::set<int>		_users;
+		std::set<int>		_invitedUsers;
 		std::set<int>		_operators;
 		
 		bool				_inviteOnly;
@@ -29,12 +30,14 @@ class Channel
 		const std::string&	getKey() const;
 		const std::set<int>&	getUsers() const;
 		const std::set<int>&	getUsersList() const;
+		bool				isInvited(int clientFd) const;
 		bool				isInviteOnly() const;
 		bool				isTopicRestricted() const;
 		int					getUserLimit() const;
 		int					getUserCount() const;
 		bool				isOperator(int fd);
 		
+		void				setInvitedUser(int clientFd);
 		bool				setOperator(int clientFd);
 		bool				unsetOperator(int clientFd);
 		void				setTopic(std::string topic);

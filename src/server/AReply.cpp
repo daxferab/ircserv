@@ -28,6 +28,9 @@ std::string	AReply::getNReply(int n, const Server& server, const Client& client,
 		case 332:
 			reply << context.channel << " :" << server.getChannelTopic(context.channel);
 			break;
+		case 341:
+			reply << context.target << context.channel;
+			break;
 		case 353:
 			reply << "= " << context.channel << " :" << server.getChannelMembers(context.channel);
 			break;
@@ -47,7 +50,6 @@ std::string	AReply::getNReply(int n, const Server& server, const Client& client,
 		case 412:
 			reply << context.target << " :No text to send";
 			break;
-
 		case 431:
 			reply << ":No nickname given";
 			break;
@@ -62,6 +64,9 @@ std::string	AReply::getNReply(int n, const Server& server, const Client& client,
 			break;
 		case 442:
 			reply << context.channel << " :You're not on that channel";
+			break;
+		case 443:
+			reply << context.target << " " << context.channel << " :is already on channel";
 			break;
 		case 451:
 			reply << ":You have not registered";
@@ -103,10 +108,13 @@ std::string	AReply::getReply(int command, const Client& client, const t_rplConte
 			reply << "ERROR :" << context.message;
 			break;
 		case QUIT:
-			reply << ":" << client.getNick() << "QUIT :" << context.message;
+			reply << ":" << client.getNick() << " QUIT :" << context.message;
 			break;
 		case JOIN:
 			reply << ":" << client.getNick() << " JOIN " << context.channel;
+			break;
+		case INVITE:
+			reply << ":" << client.getNick() << " INVITE " << context.target << context.channel;
 			break;
 		case KICK:
 			reply << ":" << client.getNick() << " KICK " << context.channel << " :" << context.message;

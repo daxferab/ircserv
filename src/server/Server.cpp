@@ -178,6 +178,33 @@ void	Server::joinChannel(Client& client, const std::string& name, const std::str
 	}
 }
 
+void	Server::inviteUser(Client &client, const std::string& nick, const std::string& channelName)
+{
+	int											userFd = _getClientFd(nick);
+	std::map<std::string, Channel>::iterator	channelIt = _channels.find(channelName);
+	t_rplContext								context;
+
+	_fillContext(context, client.getNick(), channelName, "INVITE", "");
+	if (channelIt == _channels.end())
+		_handleReply(client, AReply::getNReply(403, *this, client, context));
+	else if (!channelIt->second.isMember(client.getFd()))
+		_handleReply(client, AReply::getNReply(442, *this, client, context));
+	else if (channelIt->second.isInviteOnly() && !channelIt->second.isOperator(client.getFd()))
+		_handleReply(client, AReply::getNReply(482, *this, client, context));
+	else if (!channelIt->second.isMember(userFd))
+	{
+		context.target = nick;
+		_handleReply(client, AReply::getNReply(443, *this, client, context));
+	}
+	else
+	{
+		context.target = nick;
+		channelIt->second.setInvitedUser(userFd);
+		_handleReply(client, AReply::getNReply(341, *this, client, context));
+		_handleReply(client, AReply::getReply(INVITE, client, context));
+	}
+}
+
 void	Server::kickUser(Client& client, const std::string& chanName, const std::string& nick, const std::string& reason)
 {
 	t_rplContext	context;
