@@ -25,6 +25,9 @@ std::string	AReply::getNReply(int n, const Server& server, const Client& client,
 		case 002:
 			reply << ":Your host is " << serverName << " running version 1.0";
 			break;
+		case 331:
+			reply << context.channel << " :No topic is set";
+			break;
 		case 332:
 			reply << context.channel << " :" << server.getChannelTopic(context.channel);
 			break;
@@ -43,6 +46,9 @@ std::string	AReply::getNReply(int n, const Server& server, const Client& client,
 			break;
 		case 403:
 			reply << context.channel << " :No such channel";
+			break;
+		case 404:
+			reply << context.channel << " :Cannot send to channel";
 			break;
 		case 411:
 			reply << context.target << " :No recipient given (" << context.command << ")";
@@ -119,6 +125,9 @@ std::string	AReply::getReply(int command, const Client& client, const t_rplConte
 		case INVITE:
 			reply << ":" << client.getNick() << " INVITE " << context.target << " " << context.channel;
 			break;
+		case TOPIC:
+			reply << ":" << client.getNick() << " TOPIC " << context.channel << " :" << context.message;
+			break;
 		case KICK:
 			reply << ":" << client.getNick() << " KICK " << context.channel << " " << context.target << " :" << context.message;
 			break;
@@ -135,7 +144,6 @@ std::string	AReply::getReply(int command, const Client& client, const t_rplConte
 
 /*
 	All of them have a prefix with the server ¿name? ¿IP?
-ERR_CANNOTSENDTOCHAN (404)	client, channel name
 ERR_NORECIPIENT (411)		client, commandname(i think its always privmsg)
 ERR_NOTEXTTOSEND (412)		client
 ERR_USERNOTINCHANNEL (441)	client, non-existing nick, channel

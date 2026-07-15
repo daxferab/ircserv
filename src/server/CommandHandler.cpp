@@ -30,6 +30,9 @@ bool	CommandHandler::execCommand(Message& command, Client& client, Server& serve
 		case INVITE:
 			_invite(command, client, server);
 			break;
+		case TOPIC:
+			_topic(command, client, server);
+			break;
 		case PRIVMSG:
 			_privmsg(command, client, server);
 			break;
@@ -117,6 +120,17 @@ void	CommandHandler::_invite(const Message& command, Client& client, Server& ser
 	std::string	channel = command.getParams()[1].empty() ? "" : command.getParams()[1];
 
 	server.inviteUser(client, command.getParams()[0], channel);
+}
+
+void	CommandHandler::_topic(const Message& command, Client& client, Server& server)
+{
+	if (command.getParams().size() == 1)
+		server.displayChannelTopic(client, command.getParams()[0]);
+	else
+	{
+		if (command.getParams()[1].empty()) server.setChannelTopic(client, command.getParams()[0], "");
+		else server.setChannelTopic(client, command.getParams()[0], command.getParams()[1]);
+	}
 }
 
 void	CommandHandler::_privmsg(const Message& command, Client& client, Server& server)

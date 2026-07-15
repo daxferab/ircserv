@@ -54,6 +54,7 @@ t_comnum	getCommand(std::string word)
 	if (word == "USER") return USER;
 	if (word == "JOIN") return JOIN;
 	if (word == "INVITE") return INVITE;
+	if (word == "TOPIC") return TOPIC;
 	if (word == "KICK") return KICK;
 	if (word == "PART") return PART;
 	if (word == "QUIT") return QUIT;
