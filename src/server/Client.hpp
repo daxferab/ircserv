@@ -35,7 +35,8 @@ class Client
 		bool		isAuthenticated() const;
 		void		setAuthenticated(const bool value);
 		bool		isRegistered() const;
-			
+		void		setRegistered();
+		
 		void		appendBuffer(const char* msg, int data, int type);
 		bool		hasFullLine(int type) const;
 		void		consumeLine(int type, size_t end);

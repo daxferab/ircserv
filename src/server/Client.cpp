@@ -5,7 +5,7 @@
 
 //----------------------------------------------------------------- CONSTRUCTORS
 
-Client::Client(int fd) : _fd(fd), _authenticated(false) {}
+Client::Client(int fd) : _fd(fd), _authenticated(false), _registered(false) {}
 
 Client::~Client() {}
 
@@ -13,7 +13,7 @@ Client::~Client() {}
 
 std::string	Client::getNick() const { return _nick.empty() ? "" : _nick; }
 void		Client::setNick(const std::string nick) { _nick = nick; }
-void		Client::setUser(const std::string user) { _username = user; _registered = true; }
+void		Client::setUser(const std::string user) { _username = user; }
 void		Client::setName(const std::string name) { _realName = name; }
 int			Client::getFd() const { return _fd; }
 const std::string&	Client::getUser() const { return _username; }
@@ -21,6 +21,7 @@ const std::string&	Client::getOutBuffer() const { return _outBuffer; }
 bool		Client::isAuthenticated() const { return _authenticated; }
 void		Client::setAuthenticated(const bool value) { _authenticated = value; }
 bool		Client::isRegistered() const { return _registered; }
+void		Client::setRegistered() { _registered = true; }
 
 //------------------------------------------------------------- MEMBER FUNCTIONS
 

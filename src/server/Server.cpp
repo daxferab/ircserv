@@ -111,8 +111,11 @@ void	Server::setClientNick(Client& client, const std::string& nick)
 	{
 		if (client.getNick().empty())
 		{
+
 			client.setNick(nick);
 			_handleReply(client, AReply::getNReply(001, *this, client, context));
+			if (!client.getUser().empty())
+				client.setRegistered();	
 		}
 		else
 		{
@@ -140,6 +143,8 @@ bool	Server::setClientUser(Client& client, const std::string& user)
 	else
 	{
 		client.setUser(user);
+		if (!client.getNick().empty())
+			client.setRegistered();
 		return true;
 	}
 	return false;
