@@ -17,6 +17,7 @@ SRC_DIR := src/
 OBJ_DIR := obj/
 
 VPATH := $(SRC_DIR) $(addprefix $(SRC_DIR), \
+				messages\
  				server\
 	 			utils\
 			)

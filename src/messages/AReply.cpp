@@ -1,5 +1,5 @@
 #include "AReply.hpp"
-#include "Server.hpp"
+#include "../server/Server.hpp"
 #include "Message.hpp"
 #include "../utils/colors.h"
 

@@ -1,7 +1,7 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include "AReply.hpp"
+#include "../messages/AReply.hpp"
 #include "Channel.hpp"
 #include "Client.hpp"
 #include <netdb.h>

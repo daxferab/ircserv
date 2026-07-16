@@ -1,8 +1,8 @@
 #ifndef COMMANDHANDLER_HPP
 #define COMMANDHANDLER_HPP
 
-#include "Client.hpp"
-#include "Server.hpp"
+#include "../server/Client.hpp"
+#include "../server/Server.hpp"
 #include "Message.hpp"
 #include <vector>
 

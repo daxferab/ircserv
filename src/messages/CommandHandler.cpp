@@ -1,7 +1,7 @@
 #include "CommandHandler.hpp"
 #include "AReply.hpp"
 #include "Message.hpp"
-#include "Server.hpp"
+#include "../server/Server.hpp"
 #include <cstring>
 #include <unistd.h>
 #include <string>
