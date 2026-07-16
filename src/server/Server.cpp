@@ -288,9 +288,8 @@ void	Server::partChannel(Client &client, const std::string &name, const std::str
 		_handleReply(client, AReply::getNReply(442, *this, client, context));
 	else
 	{
-		channel->removeUser(client.getFd());
-		_handleReply(client, AReply::getReply(PART, client, context));
 		_handleReplyChannel(*channel, AReply::getReply(PART, client, context), -1);
+		channel->removeUser(client.getFd());
 	}
 }
 
