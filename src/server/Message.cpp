@@ -1,10 +1,12 @@
 #include "Message.hpp"
 #include "../utils/colors.h"
 
+#include <ios>
 #include <sstream>
 #include <iostream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 //----------------------------------------------------------------- CONSTRUCTORS
 
@@ -49,6 +51,7 @@ bool Message::_parse(std::string& line)
 
 t_comnum	getCommand(std::string word)
 {
+	std::transform(word.begin(), word.end(), word.begin(), ::toupper);
 	if (word == "PASS") return PASS;
 	if (word == "NICK") return NICK;
 	if (word == "USER") return USER;
