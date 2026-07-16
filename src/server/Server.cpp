@@ -354,9 +354,9 @@ void	Server::sendMessage(Client& client, const std::string& target, const std::s
 	else if (message.empty())
 		_handleReply(client, AReply::getNReply(412, *this, client, context));
 	else if (targetFd > 0)
-		_sendPrivate(client, targetFd, context);
+		_handleReply(_clients.find(targetFd)->second, AReply::getReply(PRIVMSG, client, context));
 	else if(_channelExists(target))
-		_sendPublic(client, target, context);
+		_handleReplyChannel(_channels.find(target)->second, AReply::getReply(PRIVMSG, client, context), client.getFd());
 	else
 		_handleReply(client, AReply::getNReply(401, *this, client, context));
 }
@@ -644,27 +644,6 @@ void	Server::_fillContext(t_rplContext& context, const std::string& target, cons
 	context.channel = channel;
 	context.command = command;
 	context.message = message;
-}
-
-void	Server::_sendPrivate(const Client& client, const int fd, t_rplContext& context)
-{
-	_handleReply(_clients.find(fd)->second, AReply::getReply(PRIVMSG, client, context));
-}
-
-void	Server::_sendPublic(Client& client, const std::string& channelName, t_rplContext& context)
-{
-	Channel	channel = _channels.find(channelName)->second;
-
-	if (!channel.isMember(client.getFd()))
-		_handleReply(client, AReply::getNReply(404, *this, client, context));
-
-	std::set<int>			members = channel.getUsers();
-	std::set<int>::iterator	it = members.begin();
-	std::set<int>::iterator	end = members.end();
-
-	for (; it != end; it++)
-		if (_clients.find(*it)->first != client.getFd())
-			_handleReply(_clients.find(*it)->second, AReply::getReply(PRIVMSG, client, context));
 }
 
 void	Server::_addClient(const int fd)
