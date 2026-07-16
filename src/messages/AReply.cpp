@@ -1,7 +1,7 @@
 #include "AReply.hpp"
-#include "../server/Server.hpp"
+#include "Server.hpp"
 #include "Message.hpp"
-#include "../utils/colors.h"
+#include "colors.h"
 
 #include <iomanip>
 #include <sstream>

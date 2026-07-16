@@ -1,9 +1,10 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include "../messages/AReply.hpp"
+#include "AReply.hpp"
 #include "Channel.hpp"
 #include "Client.hpp"
+
 #include <netdb.h>
 #include <string>
 #include <sys/epoll.h>

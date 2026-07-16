@@ -1,4 +1,5 @@
 #include "Client.hpp"
+
 #include <features.h>
 #include <ostream>
 #include <string>

@@ -8,19 +8,23 @@ MKDIR := mkdir -p
 
 NAME := ircserv
 
+DIRECTORIES = $(SRC_DIR) $(addprefix $(SRC_DIR), \
+				messages\
+ 				server\
+	 			utils\
+			)
+
+INCLUDES = $(addprefix -I , $(DIRECTORIES))
+
 CXX= c++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g3
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g3 $(INCLUDES)
 
 #FILES
 
 SRC_DIR := src/
 OBJ_DIR := obj/
 
-VPATH := $(SRC_DIR) $(addprefix $(SRC_DIR), \
-				messages\
- 				server\
-	 			utils\
-			)
+VPATH := $(DIRECTORIES)
 
 SOURCES :=	\
 			main.cpp\

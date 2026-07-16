@@ -1,10 +1,10 @@
 #include "Server.hpp"
-#include "../messages/AReply.hpp"
+#include "AReply.hpp"
 #include "Channel.hpp"
 #include "Client.hpp"
-#include "../utils/colors.h"
-#include "../messages/CommandHandler.hpp"
-#include "../messages/Message.hpp"
+#include "colors.h"
+#include "CommandHandler.hpp"
+#include "Message.hpp"
 
 #include <cerrno>
 #include <cstdio>

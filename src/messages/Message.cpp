@@ -1,5 +1,5 @@
 #include "Message.hpp"
-#include "../utils/colors.h"
+#include "colors.h"
 
 #include <ios>
 #include <sstream>
