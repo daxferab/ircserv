@@ -119,6 +119,9 @@ std::string	AReply::getReply(int command, const Client& client, const t_rplConte
 		case QUIT:
 			reply << ":" << client.getNick() << " QUIT :Quit: " << context.message;
 			break;
+		case NICK:
+			reply << ":" << context.target << " NICK " << client.getNick();
+			break;
 		case JOIN:
 			reply << ":" << client.getNick() << " JOIN " << context.channel;
 			break;

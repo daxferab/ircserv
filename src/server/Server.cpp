@@ -109,8 +109,22 @@ void	Server::setClientNick(Client& client, const std::string& nick)
 		_handleReply(client, AReply::getNReply(433, *this, client, context));
 	else
 	{
-		client.setNick(nick);
-		_handleReply(client, AReply::getNReply(001, *this, client, context));
+		if (client.getNick().empty())
+		{
+			client.setNick(nick);
+			_handleReply(client, AReply::getNReply(001, *this, client, context));
+		}
+		else
+		{
+			context.target = client.getNick();
+			client.setNick(nick);
+			_handleReply(client, AReply::getReply(NICK, client, context));
+			std::map<std::string, Channel>::iterator it = _channels.begin();
+			std::map<std::string, Channel>::iterator end = _channels.end();
+		
+			for (; it != end; it++)
+				_handleReplyChannel(it->second, AReply::getReply(NICK, client, context), client.getFd());
+		}
 	}
 }
 
