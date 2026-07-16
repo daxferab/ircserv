@@ -51,6 +51,7 @@ class Channel
 		void				addUser(int fd);
 		bool				isMember(int fd) const;
 		void				removeUser(int fd);
+		const std::string&	getModes() const;
 };
 
 #endif

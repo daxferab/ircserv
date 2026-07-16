@@ -1,6 +1,7 @@
 #include "Channel.hpp"
 #include <cstdlib>
 #include <limits>
+#include <sstream>
 
 //----------------------------------------------------------------- CONSTRUCTORS
 
@@ -79,4 +80,29 @@ bool	Channel::unsetOperator(int clientFd)
 		return true;
 	}	
 	return false;
+}
+
+const std::string&	Channel::getModes() const
+{
+	std::string			modes = "+";
+	std::string			params = "";
+	std::stringstream	ss;
+
+
+	if (isInviteOnly())
+		modes.append("i");
+	if (!getKey().empty())
+	{
+		modes.append("k");
+		params = params + " " + getKey();
+	}
+	if (getUserLimit() > 0)
+	{
+		modes.append("l");
+		ss << getUserLimit();
+		params = params + " " + ss.str();
+	}
+	if (isTopicRestricted())
+		modes.append("t");
+	return (modes + params);
 }

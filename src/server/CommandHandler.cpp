@@ -172,6 +172,8 @@ void	CommandHandler::_mode(const Message& command, Client& client, Server& serve
 
 	if (command.getParams().size() == 0)
 		server.setMode(client, "", add, '\0', "");
+	else if (command.getParams().size() == 1)
+		server.getMode(client, command.getParams()[0]);
 	else if (command.getParams().size() > 1)
 	{
 		for (size_t i = 0; i < command.getParams()[1].size(); i++)

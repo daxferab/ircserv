@@ -407,6 +407,22 @@ void	Server::setMode(Client& client, std::string channel_name, bool add, char ty
 		_handleReplyChannel(*channel, AReply::getReply(MODE, client, context), -1);
 }
 
+void	Server::getMode(Client& client, std::string channel_name)
+{
+	t_rplContext	context;
+
+	_fillContext(context, client.getNick(), channel_name, "MODE", "");
+	if (channel_name.empty())
+		_handleReply(client, AReply::getNReply(461, *this, client, context));
+	else if (!_channelExists(channel_name))
+		_handleReply(client, AReply::getNReply(403, *this, client, context));
+	else
+	{
+		_fillContext(context, client.getNick(), channel_name, "MODE", _channels.at(channel_name).getModes());
+		_handleReply(client, AReply::getNReply(324, *this, client, context));
+	}
+}
+
 // ---------------------------------------------------- PRIVATE MEMBER FUNCTIONS
 
 void	Server::_setup(char* port)
