@@ -87,12 +87,12 @@ void	Server::quitClient(Client& client, const std::string& msg)
 	t_rplContext	context;
 
 	_fillContext(context, "", "", "QUIT", msg);
-	// recorrer canales del servidor, si el cliente es miembro del canal, sendpublic
+
 	std::map<std::string, Channel>::iterator it = _channels.begin();
 	std::map<std::string, Channel>::iterator end = _channels.end();
 
 	for (; it != end; it++)
-		_sendPublic(client, it->first, context);
+		_handleReplyChannel(it->second, AReply::getReply(QUIT, client, context), -1);
 	_disconnectClient(client);
 }
 
@@ -224,6 +224,7 @@ void	Server::setChannelTopic(Client& client, const std::string& channelName, con
 		channel.setTopic(topic);
 	}
 }
+
 void	Server::displayChannelTopic(Client& client, const std::string& channelName)
 {
 	std::map<std::string, Channel>::iterator	channelIt = _channels.find(channelName);
@@ -665,7 +666,7 @@ void	Server::_disconnectClient(Client& client)
 
 	_fillContext(context, client.getNick(), "", "", "Client disconnected");
 
-	_handleReply(client, AReply::getReply(ERROR,client, context));
+	_handleReply(client, AReply::getReply(ERROR, client, context));
 	std::cout << RED << "Client <" << client << "> disconnected" << RESET << std::endl;
 	epoll_ctl(_epoll, EPOLL_CTL_DEL, fd, NULL);
 	std::map<std::string, Channel>::iterator itc = _channels.begin();
