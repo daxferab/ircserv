@@ -678,16 +678,18 @@ void	Server::_disconnectClient(Client& client)
 	std::map<int, Client>::iterator it = _clients.find(fd);
 	t_rplContext	context;
 
+	std::map<std::string, Channel>::iterator itc = _channels.begin();
+	std::map<std::string, Channel>::iterator end = _channels.end();
+
+	for (; itc != end; ++itc)
+		if (itc->second.isMember(client.getFd()))
+			partChannel(client, itc->first, context.message);
+	
 	_fillContext(context, client.getNick(), "", "", "Client disconnected");
 
 	_handleReply(client, AReply::getReply(ERROR, client, context));
 	std::cout << RED << "Client <" << client << "> disconnected" << RESET << std::endl;
 	epoll_ctl(_epoll, EPOLL_CTL_DEL, fd, NULL);
-	std::map<std::string, Channel>::iterator itc = _channels.begin();
-	std::map<std::string, Channel>::iterator end = _channels.end();
-
-	for (; itc != end; ++itc)
-		partChannel(client, itc->first, context.message);
 
 	if (it != _clients.end())
 		_clients.erase(it);
