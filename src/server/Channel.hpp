@@ -15,7 +15,7 @@ class Channel
 		std::set<int>		_users;
 		std::set<int>		_invitedUsers;
 		std::set<int>		_operators;
-		
+
 		bool				_inviteOnly;
 		bool				_topicRestrict;
 		int					_userLimit;
@@ -51,6 +51,8 @@ class Channel
 		void				addUser(int fd);
 		bool				isMember(int fd) const;
 		void				removeUser(int fd);
+		bool				changeOperator(int clientFd, bool set);
+		std::string			getModes() const;
 };
 
 #endif

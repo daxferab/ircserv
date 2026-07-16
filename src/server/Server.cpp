@@ -114,6 +114,7 @@ void	Server::setClientNick(Client& client, const std::string& nick)
 
 			client.setNick(nick);
 			_handleReply(client, AReply::getNReply(001, *this, client, context));
+			_handleReply(client, AReply::getNReply(005, *this, client, context));
 			if (!client.getUser().empty())
 				client.setRegistered();	
 		}
@@ -254,7 +255,7 @@ void	Server::displayChannelTopic(Client& client, const std::string& channelName)
 	if (channelIt == _channels.end())
 		_handleReply(client, AReply::getNReply(403, *this, client, context));
 	else if (!channel.isMember(client.getFd()))
-		_handleReply(client, AReply::getNReply(442, *this, client, context));	
+		_handleReply(client, AReply::getNReply(442, *this, client, context));
 	else if (channel.getTopic().empty())
 		_handleReply(client, AReply::getNReply(331, *this, client, context));
 	else
@@ -267,7 +268,6 @@ void	Server::kickUser(Client& client, const std::string& chanName, const std::st
 	Channel			*channel = NULL;
 
 	_fillContext(context, nick, chanName, "KICK", reason);
-	
 	if (chanName.empty())
 		_handleReply(client, AReply::getNReply(461, *this, client, context));
 	else if(!_channelExists(chanName))
@@ -348,9 +348,8 @@ void	Server::sendMessage(Client& client, const std::string& target, const std::s
 {
 	t_rplContext	context;
 	int targetFd = _getClientFd(target);
-	
+
 	_fillContext(context, target, "", "PRIVMSG", message);
-	
 	if (target.empty())
 		_handleReply(client, AReply::getNReply(411, *this, client, context));
 	else if (message.empty())
@@ -365,9 +364,11 @@ void	Server::sendMessage(Client& client, const std::string& target, const std::s
 
 void	Server::setMode(Client& client, std::string channel_name, bool add, char type, std::string parameter)
 {
-	t_rplContext	context;
-	Channel			*channel = NULL;
-	bool			changes = false;
+	t_rplContext		context;
+	Channel				*channel = NULL;
+	bool				changes = false;
+	std::stringstream	ss;
+	int					n;
 
 	_fillContext(context, client.getNick(), channel_name, "MODE", std::string(1, type));
 	if (channel_name.empty())
@@ -381,50 +382,59 @@ void	Server::setMode(Client& client, std::string channel_name, bool add, char ty
 			_handleReply(client, AReply::getNReply(442, *this, client, context));
 		else if (!channel->isOperator(client.getFd()))
 			_handleReply(client, AReply::getNReply(482, *this, client, context));
-		else if (type == 'i')
+		switch (type)
 		{
+		case 'i':
 			changes = channel->setInviteOnly(add);
 			_fillContext(context, client.getNick(), channel_name, "MODE", (add ? "+i" : "-i"));
-		}
-		else if (type == 'k')
-		{
+			break;
+		case 'k':
 			if (!(add && parameter.empty()) && channel->setKey(parameter))
 			{
 				changes = true;
 				_fillContext(context, client.getNick(), channel_name, "MODE", (add ? "+k " : "-k ") + parameter);
 			}
-		}
-		else if (type == 'l')
-		{
-			int n = channel->setUserLimit(parameter);
-			std::stringstream ss;
+			break;
+		case 'l':
+			n = channel->setUserLimit(parameter);
 			ss << n;
 			changes = n >= 0;
 			if (n > 0)
 				_fillContext(context, client.getNick(), channel_name, "MODE", "+l " + ss.str());
 			if (n == 0)
 				_fillContext(context, client.getNick(), channel_name, "MODE", "-l" );
-		}
-		else if (type == 'o' && add)
-		{
-			changes = channel->setOperator(_getClientFd(parameter));
-			_fillContext(context, client.getNick(), channel_name, "MODE", "+o " + parameter);
-		}
-		else if (type == 'o' && !add)
-		{
-			changes = channel->unsetOperator(_getClientFd(parameter));
-			_fillContext(context, client.getNick(), channel_name, "MODE", "-o " + parameter);
-		}
-		else if (type == 't')
-		{
+			break;
+		case 'o':
+			changes = channel->changeOperator(_getClientFd(parameter), add);
+			_fillContext(context, client.getNick(), channel_name, "MODE", (add ? "+o " : "-o "));
+			break;
+		case 't':
 			changes = channel->setTopicRestricted(add);
 			_fillContext(context, client.getNick(), channel_name, "MODE", (add ? "+t" : "-t"));
-		}
-		else
+			break;
+		default:
 			_handleReply(client, AReply::getNReply(472, *this, client, context));
+			break;
+		}
 	}
 	if (changes)
 		_handleReplyChannel(*channel, AReply::getReply(MODE, client, context), -1);
+}
+
+void	Server::getMode(Client& client, std::string channel_name)
+{
+	t_rplContext	context;
+
+	_fillContext(context, client.getNick(), channel_name, "MODE", "");
+	if (channel_name.empty())
+		_handleReply(client, AReply::getNReply(461, *this, client, context));
+	else if (!_channelExists(channel_name))
+		_handleReply(client, AReply::getNReply(403, *this, client, context));
+	else
+	{
+		_fillContext(context, client.getNick(), channel_name, "MODE", _channels.at(channel_name).getModes());
+		_handleReply(client, AReply::getNReply(324, *this, client, context));
+	}
 }
 
 // ---------------------------------------------------- PRIVATE MEMBER FUNCTIONS
@@ -435,7 +445,7 @@ void	Server::_setup(char* port)
 
 	_createSignal(SIGINT, _handlesigint);
 	_createSignal(SIGQUIT, SIG_IGN);
-	
+
 	std::memset(&hints, 0, sizeof(hints));		// remove garbage data
 	hints.ai_family = AF_UNSPEC;				// Allow IPv4 or IPv6
 	hints.ai_socktype = SOCK_STREAM;			// TCP
@@ -580,7 +590,7 @@ void	Server::_handleLine(Client& client, char* line, int data)
 {
 	client.appendBuffer(line, data, IN);
 	while (client.hasFullLine(IN))
-	{		
+	{
 		Message	message(client.getLine());
 		if (message.isValid())
 			if (!CommandHandler::execCommand(message, client, *this))

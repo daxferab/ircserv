@@ -25,6 +25,12 @@ std::string	AReply::getNReply(int n, const Server& server, const Client& client,
 		case 002:
 			reply << ":Your host is " << serverName << " running version 1.0";
 			break;
+		case 005:
+			reply << "CHANMODES=o,,kl,it :are supported by this server";
+			break;
+		case 324:
+			reply << context.channel << " " << context.message;
+			break;
 		case 331:
 			reply << context.channel << " :No topic is set";
 			break;

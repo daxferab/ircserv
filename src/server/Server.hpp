@@ -25,7 +25,7 @@ class Server
 		void		_initEpoll();
 		void		_eventLoop();
 		void		_acceptClient();
-	
+
 		void		_createSignal(int signo, void (*handler)(int));
 		static void	_handlesigint(int signo);
 
@@ -35,7 +35,10 @@ class Server
 		void		_handleReplyChannel(const Channel &channel, const std::string message, int client_fd);
 		void		_writeFd(const int fd);
 		void		_fillContext(t_rplContext& context, const std::string& target, const std::string& channel, const std::string& command, const std::string& message) const;
-		
+
+		void		_sendPrivate(const Client& client, const int fd, t_rplContext& context);
+		void		_sendPublic(Client& client, const std::string& channelName, t_rplContext& context);
+
 		void		_addClient(const int fd);
 		void		_disconnectClient(Client& client);
 		void		_addChannel(const Channel& channel);
@@ -66,7 +69,8 @@ class Server
 		std::string	getChannelTopic(const std::string& channelName) const;
 		std::string	getChannelMembers(const std::string& channelName) const;
 		void		sendMessage(Client& client, const std::string& target, const std::string& message);
-		void		setMode(Client &client, std::string channel, bool add, char type, std::string parameter);
+		void		setMode(Client &client, std::string channel_name, bool add, char type, std::string parameter);
+		void		getMode(Client &client, std::string channel_name);
 };
 
 epoll_event	newEvent(int fd, int flags);
