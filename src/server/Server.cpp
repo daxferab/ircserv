@@ -111,6 +111,7 @@ void	Server::setClientNick(Client& client, const std::string& nick)
 	{
 		client.setNick(nick);
 		_handleReply(client, AReply::getNReply(001, *this, client, context));
+		_handleReply(client, AReply::getNReply(005, *this, client, context));
 	}
 }
 
