@@ -12,7 +12,7 @@
 
 bool	CommandHandler::execCommand(Message& command, Client& client, Server& server)
 {
-	if (command.getCommand() != PASS && !client.isAuthenticated())
+	if ((command.getCommand() != PASS || command.getCommand() != QUIT) && !client.isAuthenticated())
 		return false;
 	switch (command.getCommand())
 	{
