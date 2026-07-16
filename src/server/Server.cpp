@@ -285,8 +285,9 @@ void	Server::kickUser(Client& client, const std::string& chanName, const std::st
 		_handleReply(client, AReply::getNReply(441, *this, client, context));
 	else
 	{
-	_handleReplyChannel(*channel, AReply::getReply(KICK, client, context), -1);
+		_handleReplyChannel(*channel, AReply::getReply(KICK, client, context), -1);
 		channel->removeUser(_getClientFd(nick));
+		if (channel->getUserCount() < 1) _deleteChannel(*channel);
 	}
 }
 
@@ -309,6 +310,7 @@ void	Server::partChannel(Client &client, const std::string &name, const std::str
 	{
 		_handleReplyChannel(*channel, AReply::getReply(PART, client, context), -1);
 		channel->removeUser(client.getFd());
+		if (channel->getUserCount() < 1) _deleteChannel(*channel);
 	}
 }
 
@@ -684,6 +686,11 @@ void	Server::_disconnectClient(Client& client)
 void	Server::_addChannel(const Channel& channel)
 {
 	_channels.insert(std::pair<std::string, Channel>(channel.getName(), channel));
+}
+
+void	Server::_deleteChannel(Channel& channel)
+{
+	_channels.erase(_channels.find(channel.getName()));
 }
 
 bool	Server::_nickInUse(const std::string nick) const

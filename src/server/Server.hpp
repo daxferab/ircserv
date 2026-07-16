@@ -39,6 +39,7 @@ class Server
 		void		_addClient(const int fd);
 		void		_disconnectClient(Client& client);
 		void		_addChannel(const Channel& channel);
+		void		_deleteChannel(Channel& channel);
 
 		bool		_nickInUse(const std::string nick) const;
 		bool		_channelExists(const std::string name) const;

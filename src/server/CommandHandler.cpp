@@ -12,10 +12,7 @@
 
 bool	CommandHandler::execCommand(Message& command, Client& client, Server& server)
 {
-	if (command.getCommand() == NONE) return true;
-	if (!client.isAuthenticated() && command.getCommand() != PASS && command.getCommand() != QUIT)
-		return false;
-	if (!client.isRegistered() && command.getCommand() != PASS && command.getCommand() != QUIT && command.getCommand() != NICK && command.getCommand() != USER)
+	if (command.getCommand() != PASS && !client.isAuthenticated())
 		return false;
 	switch (command.getCommand())
 	{
@@ -160,9 +157,7 @@ void	CommandHandler::_kick(const Message& command, Client& client, Server& serve
 	std::string					reason = command.getParams()[2].empty() ? "" : command.getParams()[2];
 
 	for (size_t i = 0; i < users.size(); ++i)
-	{
 		server.kickUser(client, command.getParams()[0], users[i], reason);
-	}
 }
 
 void	CommandHandler::_mode(const Message& command, Client& client, Server& server)
