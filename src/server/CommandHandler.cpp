@@ -165,8 +165,10 @@ void	CommandHandler::_kick(const Message& command, Client& client, Server& serve
 void	CommandHandler::_mode(const Message& command, Client& client, Server& server)
 {
 
-	bool	add = true;
-	size_t	param_iter = 2;
+	bool			add = true;
+	size_t			param_iter = 2;
+	char			c;
+	std::set<char>	seen;
 
 	if (command.getParams().size() == 0)
 		server.setMode(client, "", add, '\0', "");
@@ -174,12 +176,19 @@ void	CommandHandler::_mode(const Message& command, Client& client, Server& serve
 	{
 		for (size_t i = 0; i < command.getParams()[1].size(); i++)
 		{
-			char c = command.getParams()[1][i];
-			//TODO if not +-, add the char to some list and only use it once
+			c = command.getParams()[1][i];
 			if (c == '+' || c == '-')
 				add = c == '+';
-			else if ((c == 'o' || (c == 'k' && add) || (c == 'l' && add)) && command.getParams().size() > param_iter)
-				server.setMode(client, command.getParams()[0], add, c, command.getParams()[param_iter++]);
+			else if (c == 'i' || c == 'l' || c == 'k' || c == 'o' || c == 't')
+			{
+				if (seen.find(c) != seen.end())
+					continue ;
+				seen.insert(c);
+				if ((c == 'o' || (c == 'k' && add) || (c == 'l' && add)) && command.getParams().size() > param_iter)
+					server.setMode(client, command.getParams()[0], add, c, command.getParams()[param_iter++]);
+				else
+					server.setMode(client, command.getParams()[0], add, c, "");
+			}
 			else
 				server.setMode(client, command.getParams()[0], add, c, "");
 		}
