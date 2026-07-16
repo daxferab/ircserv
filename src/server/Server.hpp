@@ -25,7 +25,7 @@ class Server
 		void		_initEpoll();
 		void		_eventLoop();
 		void		_acceptClient();
-	
+
 		void		_createSignal(int signo, void (*handler)(int));
 		static void	_handlesigint(int signo);
 
@@ -38,7 +38,7 @@ class Server
 
 		void		_sendPrivate(const Client& client, const int fd, t_rplContext& context);
 		void		_sendPublic(Client& client, const std::string& channelName, t_rplContext& context);
-		
+
 		void		_addClient(const int fd);
 		void		_disconnectClient(Client& client);
 		void		_addChannel(const Channel& channel);

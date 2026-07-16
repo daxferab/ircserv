@@ -27,7 +27,7 @@ bool				Channel::isInviteOnly() const { return _inviteOnly; }
 bool				Channel::isTopicRestricted() const { return _topicRestrict; }
 int					Channel::getUserLimit() const { return _userLimit; }
 int					Channel::getUserCount() const { return _users.size(); }
-	
+
 bool				Channel::isOperator(int fd) const { return _operators.find(fd) != _operators.end(); }
 void				Channel::setInvitedUser(int clientFd) { _invitedUsers.insert(clientFd); }
 
@@ -78,16 +78,20 @@ bool	Channel::unsetOperator(int clientFd)
 	{
 		_operators.erase(_operators.find(clientFd));
 		return true;
-	}	
+	}
 	return false;
 }
 
-const std::string&	Channel::getModes() const
+bool Channel::changeOperator(int clientFd, bool set)
+{
+	return (set ? setOperator(clientFd) : unsetOperator(clientFd));
+}
+
+std::string	Channel::getModes() const
 {
 	std::string			modes = "+";
 	std::string			params = "";
 	std::stringstream	ss;
-
 
 	if (isInviteOnly())
 		modes.append("i");

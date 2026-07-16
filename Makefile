@@ -63,7 +63,7 @@ $(OBJ_DIR)%.o: %.cpp $(HEADER) | $(OBJ_DIR)
 
 $(OBJ_DIR):
 	$(MKDIR) $(OBJ_DIR)
-	
+
 .PHONY: a all
 a: all
 all: $(NAME)
