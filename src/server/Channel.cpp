@@ -17,7 +17,7 @@ Channel::Channel(const std::string& name, int clientFd): _name(name), _topic("")
 Channel::~Channel() {}
 
 //------------------------------------------------------------ GETTERS / SETTERS
-// ---------------------------------- GETTERS
+//---------------------------------- GETTERS
 const std::string&		Channel::getName() const { return _name; }
 const std::string&		Channel::getTopic() const { return _topic; }
 const std::string&		Channel::getKey() const { return _key; }
@@ -30,7 +30,7 @@ bool					Channel::isTopicRestricted() const { return _topicRestrict; }
 int						Channel::getUserLimit() const { return _userLimit; }
 int						Channel::getUserCount() const { return _users.size(); }
 
-// ---------------------------------- SETTERS
+//---------------------------------- SETTERS
 void					Channel::setTopic(const std::string topic) { _topic = topic; }
 bool					Channel::setKey(const std::string key) { if (_key == key) return false; _key = key; return true; }
 void					Channel::setInvitedUser(int clientFd) { _invitedUsers.insert(clientFd); }
