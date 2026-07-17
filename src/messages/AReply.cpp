@@ -159,13 +159,9 @@ std::string	AReply::getReply(int command, const Client& client, const t_rplConte
 
 /*
 	All of them have a prefix with the server ¿name? ¿IP?
-ERR_BADCHANMASK (476)		client, channel
 ERR_UMODEUNKNOWNFLAG (501)	client
 ERR_USERSDONTMATCH (502)	client
 
 RPL_UMODEIS (221)
-RPL_AWAY (301)
-RPL_CREATIONTIME (329)
-RPL_TOPICWHOTIME (333)
 RPL_YOUREOPER (381)
 */
