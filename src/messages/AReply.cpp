@@ -21,92 +21,92 @@ std::string	AReply::getNReply(int n, const Server& server, const Client& client,
 	switch (n)
 	{
 	// Replies
-		case 001:
+		case RPL_WELCOME:
 			reply << ":Welcome to the " << serverName << " Network, " << cliName;
 			break;
-		case 002:
+		case RPL_YOURHOST:
 			reply << ":Your host is " << serverName << " running version 1.0";
 			break;
-		case 005:
+		case RPL_ISUPPORT:
 			reply << "CHANMODES=o,,kl,it :are supported by this server";
 			break;
-		case 324:
+		case RPL_CHANNELMODEIS:
 			reply << context.channel << " " << context.message;
 			break;
-		case 331:
+		case RPL_NOTOPIC:
 			reply << context.channel << " :No topic is set";
 			break;
-		case 332:
+		case RPL_TOPIC:
 			reply << context.channel << " :" << server.getChannelTopic(context.channel);
 			break;
-		case 341:
+		case RPL_INVITING:
 			reply << context.target << " " << context.channel;
 			break;
-		case 353:
+		case RPL_NAMREPLY:
 			reply << "= " << context.channel << " :" << server.getChannelMembers(context.channel);
 			break;
-		case 366:
+		case RPL_ENDOFNAMES:
 			reply << context.channel << " :End of /NAMES list";
 			break;
 	// Errors
-		case 401:
+		case ERR_NOSUCHNICK:
 			reply << context.target << " :No such nick/channel";
 			break;
-		case 403:
+		case ERR_NOSUCHCHANNEL:
 			reply << context.channel << " :No such channel";
 			break;
-		case 404:
+		case ERR_CANNOTSENDTOCHAN:
 			reply << context.channel << " :Cannot send to channel";
 			break;
-		case 411:
+		case ERR_NORECIPIENT:
 			reply << context.target << " :No recipient given (" << context.command << ")";
 			break;
-		case 412:
+		case ERR_NOTEXTTOSEND:
 			reply << context.target << " :No text to send";
 			break;
-		case 431:
+		case ERR_NONICKNAMEGIVEN:
 			reply << ":No nickname given";
 			break;
-		case 432:
+		case ERR_ERRONEUSNICKNAME:
 			reply << context.target << " :Erroneus nickname";
 			break;
-		case 433:
+		case ERR_NICKNAMEINUSE:
 			reply << context.target << " :Nickname is already in use";
 			break;
-		case 441:
+		case ERR_USERNOTINCHANNEL:
 			reply << context.target << " " << context.channel << " :They aren't on that channel";
 			break;
-		case 442:
+		case ERR_NOTONCHANNEL:
 			reply << context.channel << " :You're not on that channel";
 			break;
-		case 443:
+		case ERR_USERONCHANNEL:
 			reply << context.target << " " << context.channel << " :is already on channel";
 			break;
-		case 451:
+		case ERR_NOTREGISTERED:
 			reply << ":You have not registered";
 			break;
-		case 461:
+		case ERR_NEEDMOREPARAMS:
 			reply << context.command << " :Not enough parameters";
 			break;
-		case 462:
+		case ERR_ALREADYREGISTERED:
 			reply << ":You may not reregister";
 			break;
-		case 464:
+		case ERR_PASSWDMISMATCH:
 			reply << ":Password incorrect";
 			break;
-		case 471:
+		case ERR_CHANNELISFULL:
 			reply << context.channel << " :Cannot join channel (+l)";
 			break;
-		case 472:
+		case ERR_UNKNOWNMODE:
 			reply << context.message << " :is unknown mode char to me";
 			break;
-		case 473:
+		case ERR_INVITEONLYCHAN:
 			reply << context.channel << " :Cannot join channel (+i)";
 			break;
-		case 475:
+		case ERR_BADCHANNELKEY:
 			reply << context.channel << " :Cannot join channel (+k)";
 			break;
-		case 482:
+		case ERR_CHANOPRIVSNEEDED:
 			reply << context.channel << " :You're not channel operator";
 			break;
 	}
