@@ -10,23 +10,13 @@
 
 //----------------------------------------------------------------- CONSTRUCTORS
 
-Message::Message(std::string line) {	_valid = _parse(line); }
+Message::Message(std::string line) { _valid = _parse(line); }
 
 Message::~Message() {}
 
-//-------------------------------------------------------------- GETTERS/SETTERS
-
-const std::string&	Message::getPrefix() const { return _prefix; }
-
-t_comnum	Message::getCommand() const { return _command; }
-
-const std::vector<std::string>&	Message::getParams() const { return _params; }
-
-bool	Message::isValid() const { return _valid; }
-
 //------------------------------------------------------------ PRIVATE FUNCTIONS
 
-bool Message::_parse(std::string& line)
+bool							Message::_parse(std::string& line)
 {
 	std::stringstream ss(line);
 	std::string word;
@@ -47,27 +37,7 @@ bool Message::_parse(std::string& line)
 	return true;
 }
 
-//------------------------------------------------------- OUT OF SCOPE FUNCTIONS
-
-t_comnum	getCommand(std::string word)
-{
-	std::transform(word.begin(), word.end(), word.begin(), ::toupper);
-	if (word == "PASS") return PASS;
-	if (word == "NICK") return NICK;
-	if (word == "USER") return USER;
-	if (word == "JOIN") return JOIN;
-	if (word == "INVITE") return INVITE;
-	if (word == "TOPIC") return TOPIC;
-	if (word == "WHO") return WHO;
-	if (word == "KICK") return KICK;
-	if (word == "PART") return PART;
-	if (word == "QUIT") return QUIT;
-	if (word == "PRIVMSG") return PRIVMSG;
-	if (word == "MODE") return MODE;
-	return NONE;
-}
-
-std::vector<std::string> Message::_parseParams(std::stringstream& ss)
+std::vector<std::string>		Message::_parseParams(std::stringstream& ss)
 {
     std::vector<std::string> params;
     std::string word;
@@ -98,3 +68,33 @@ std::vector<std::string> Message::_parseParams(std::stringstream& ss)
     }
     return params;
 }
+
+//-------------------------------------------------------------- GETTERS/SETTERS
+
+const std::string&				Message::getPrefix() const { return _prefix; }
+
+t_comnum						Message::getCommand() const { return _command; }
+
+const std::vector<std::string>&	Message::getParams() const { return _params; }
+
+bool							Message::isValid() const { return _valid; }
+
+//------------------------------------------------------- OUT OF SCOPE FUNCTIONS
+
+t_comnum						getCommand(std::string word)
+{
+	std::transform(word.begin(), word.end(), word.begin(), ::toupper);
+	if (word == "PASS") return PASS;
+	if (word == "NICK") return NICK;
+	if (word == "USER") return USER;
+	if (word == "JOIN") return JOIN;
+	if (word == "PRIVMSG") return PRIVMSG;
+	if (word == "TOPIC") return TOPIC;
+	if (word == "MODE") return MODE;
+	if (word == "INVITE") return INVITE;
+	if (word == "PART") return PART;
+	if (word == "KICK") return KICK;
+	if (word == "QUIT") return QUIT;
+	return NONE;
+}
+

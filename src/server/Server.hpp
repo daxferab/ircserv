@@ -37,9 +37,6 @@ class Server
 		void		_writeFd(const int fd);
 		void		_fillContext(t_rplContext& context, const std::string& target, const std::string& channel, const std::string& command, const std::string& message) const;
 
-		void		_sendPrivate(const Client& client, const int fd, t_rplContext& context);
-		void		_sendPublic(Client& client, const std::string& channelName, t_rplContext& context);
-
 		void		_addClient(const int fd);
 		void		_disconnectClient(Client& client);
 		void		_addChannel(const Channel& channel);

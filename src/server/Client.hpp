@@ -25,23 +25,23 @@ class Client
 		Client(int fd);
 		~Client();
 
-		std::string	getNick() const;
-		void		setNick(const std::string nick);
-		void		setUser(const std::string user);
-		void		setName(const std::string name);
-		int			getFd() const;
+		std::string			getNick() const;
+		void				setNick(const std::string nick);
+		void				setUser(const std::string user);
+		void				setName(const std::string name);
+		int					getFd() const;
 		const std::string&	getUser() const;
 		const std::string&	getOutBuffer() const;
-		bool		isAuthenticated() const;
-		void		setAuthenticated(const bool value);
-		bool		isRegistered() const;
-		void		setRegistered();
+		bool				isAuthenticated() const;
+		void				setAuthenticated(const bool value);
+		bool				isRegistered() const;
+		void				setRegistered();
 
-		void		appendBuffer(const char* msg, int data, int type);
-		bool		hasFullLine(int type) const;
-		void		consumeLine(int type, size_t end);
-		std::string	getLine();
-		void	consumeOut(size_t count);
+		void				appendBuffer(const char* msg, int data, int type);
+		bool				hasFullLine(int type) const;
+		std::string			getLine();
+		void				consumeLine(int type, size_t end);
+		void				consumeOut(size_t count);
 };
 
 std::ostream&	operator<<(std::ostream& os, const Client& c);

@@ -39,7 +39,7 @@ Server::~Server() {}
 
 // ----------------------------------------------------- PUBLIC MEMBER FUNCTIONS
 
-void	Server::start(char* port)
+void		Server::start(char* port)
 {
 	try {
 		_setup(port);
@@ -50,7 +50,7 @@ void	Server::start(char* port)
 	}
 }
 
-void	Server::stop()
+void		Server::stop()
 {
 	_isRunning = false;
 	while (!_clients.empty())
@@ -66,7 +66,7 @@ void	Server::stop()
 
 std::string	Server::getName() const { return _name; }
 
-void	Server::authClient(Client& client, const std::string& pass)
+void		Server::authClient(Client& client, const std::string& pass)
 {
 	t_rplContext	context;
 	_fillContext(context, "", "", "PASS", "");
@@ -81,7 +81,7 @@ void	Server::authClient(Client& client, const std::string& pass)
 		client.setAuthenticated(true);
 }
 
-void	Server::quitClient(Client& client, const std::string& msg)
+void		Server::quitClient(Client& client, const std::string& msg)
 {
 	(void)msg;
 	t_rplContext	context;
@@ -96,7 +96,7 @@ void	Server::quitClient(Client& client, const std::string& msg)
 	_disconnectClient(client);
 }
 
-void	Server::setClientNick(Client& client, const std::string& nick)
+void		Server::setClientNick(Client& client, const std::string& nick)
 {
 	t_rplContext	context;
 	_fillContext(context, nick, "", "NICK", "");
@@ -132,7 +132,7 @@ void	Server::setClientNick(Client& client, const std::string& nick)
 	}
 }
 
-bool	Server::setClientUser(Client& client, const std::string& user)
+bool		Server::setClientUser(Client& client, const std::string& user)
 {
 	t_rplContext	context;
 	_fillContext(context, "", "", "USER", "");
@@ -151,12 +151,12 @@ bool	Server::setClientUser(Client& client, const std::string& user)
 	return false;
 }
 
-void	Server::setClientName(Client& client, const std::string& name)
+void		Server::setClientName(Client& client, const std::string& name)
 {
 	client.setName(name);
 }
 
-void	Server::joinChannel(Client& client, const std::string& name, const std::string& key)
+void		Server::joinChannel(Client& client, const std::string& name, const std::string& key)
 {
 	t_rplContext	context;
 	Channel			*channel = NULL;
@@ -198,7 +198,7 @@ void	Server::joinChannel(Client& client, const std::string& name, const std::str
 	}
 }
 
-void	Server::inviteUser(Client &client, const std::string& nick, const std::string& channelName)
+void		Server::inviteUser(Client &client, const std::string& nick, const std::string& channelName)
 {
 	int											userFd = _getClientFd(nick);
 	std::map<std::string, Channel>::iterator	channelIt = _channels.find(channelName);
@@ -225,7 +225,7 @@ void	Server::inviteUser(Client &client, const std::string& nick, const std::stri
 	}
 }
 
-void	Server::setChannelTopic(Client& client, const std::string& channelName, const std::string& topic)
+void		Server::setChannelTopic(Client& client, const std::string& channelName, const std::string& topic)
 {
 	std::map<std::string, Channel>::iterator	channelIt = _channels.find(channelName);
 	Channel&									channel = channelIt->second;
@@ -245,7 +245,7 @@ void	Server::setChannelTopic(Client& client, const std::string& channelName, con
 	}
 }
 
-void	Server::displayChannelTopic(Client& client, const std::string& channelName)
+void		Server::displayChannelTopic(Client& client, const std::string& channelName)
 {
 	std::map<std::string, Channel>::iterator	channelIt = _channels.find(channelName);
 	Channel&									channel = channelIt->second;
@@ -262,7 +262,7 @@ void	Server::displayChannelTopic(Client& client, const std::string& channelName)
 		_handleReply(client, AReply::getNReply(332, *this, client, context));
 }
 
-void	Server::kickUser(Client& client, const std::string& chanName, const std::string& nick, const std::string& reason)
+void		Server::kickUser(Client& client, const std::string& chanName, const std::string& nick, const std::string& reason)
 {
 	t_rplContext	context;
 	Channel			*channel = NULL;
@@ -291,7 +291,7 @@ void	Server::kickUser(Client& client, const std::string& chanName, const std::st
 	}
 }
 
-void	Server::partChannel(Client &client, const std::string &name, const std::string &reason)
+void		Server::partChannel(Client &client, const std::string &name, const std::string &reason)
 {
 	t_rplContext	context;
 	Channel			*channel = NULL;
@@ -344,7 +344,7 @@ std::string	Server::getChannelMembers(const std::string& channelName) const
 	return list;
 }
 
-void	Server::sendMessage(Client& client, const std::string& target, const std::string& message)
+void		Server::sendMessage(Client& client, const std::string& target, const std::string& message)
 {
 	t_rplContext	context;
 	int targetFd = _getClientFd(target);
@@ -362,7 +362,7 @@ void	Server::sendMessage(Client& client, const std::string& target, const std::s
 		_handleReply(client, AReply::getNReply(401, *this, client, context));
 }
 
-void	Server::setMode(Client& client, std::string channel_name, bool add, char type, std::string parameter)
+void		Server::setMode(Client& client, std::string channel_name, bool add, char type, std::string parameter)
 {
 	t_rplContext		context;
 	Channel				*channel = NULL;
@@ -421,7 +421,7 @@ void	Server::setMode(Client& client, std::string channel_name, bool add, char ty
 		_handleReplyChannel(*channel, AReply::getReply(MODE, client, context), -1);
 }
 
-void	Server::getMode(Client& client, std::string channel_name)
+void		Server::getMode(Client& client, std::string channel_name)
 {
 	t_rplContext	context;
 
@@ -439,7 +439,7 @@ void	Server::getMode(Client& client, std::string channel_name)
 
 // ---------------------------------------------------- PRIVATE MEMBER FUNCTIONS
 
-void	Server::_setup(char* port)
+void		Server::_setup(char* port)
 {
 	struct addrinfo	hints, *info; //NOTE: dont know if we need to free hints
 
@@ -466,7 +466,7 @@ void	Server::_setup(char* port)
 	std::cout << BLUE << "---------------- THISCORD RUNNING ----------------" << RESET << std::endl;
 }
 
-bool	Server::_createSocket(struct addrinfo *info)
+bool		Server::_createSocket(struct addrinfo *info)
 {
 	for(struct addrinfo *it = info;it != NULL; it = it->ai_next)
 	{
@@ -482,7 +482,7 @@ bool	Server::_createSocket(struct addrinfo *info)
 	return false;
 }
 
-void	Server::_initEpoll()
+void		Server::_initEpoll()
 {
 	_epoll = epoll_create1(0);
 	if (_epoll < 0) throw std::runtime_error("Error creating epoll");
@@ -495,7 +495,7 @@ void	Server::_initEpoll()
 	epoll_ctl(_epoll, EPOLL_CTL_ADD, _fd, &sock_ev);
 }
 
-void	Server::_eventLoop()
+void		Server::_eventLoop()
 {
 	while (_isRunning)
 	{
@@ -526,7 +526,7 @@ void	Server::_eventLoop()
 	}
 }
 
-void	Server::_acceptClient()
+void		Server::_acceptClient()
 {
 	struct sockaddr_storage	addr;
 	socklen_t				addrlen = sizeof(addr);
@@ -549,7 +549,7 @@ void	Server::_acceptClient()
 	}
 }
 
-void	Server::_createSignal(int signo, void (*handler)(int))
+void		Server::_createSignal(int signo, void (*handler)(int))
 {
 	struct sigaction sa;
 	memset(&sa, 0, sizeof(sa));
@@ -561,13 +561,13 @@ void	Server::_createSignal(int signo, void (*handler)(int))
 		throw std::runtime_error("Sigaction failed");
 }
 
-void	Server::_handlesigint(int signo)
+void		Server::_handlesigint(int signo)
 {
 	(void)signo;
 	throw std::runtime_error("");
 }
 
-void	Server::_readFd(const int fd)
+void		Server::_readFd(const int fd)
 {
 	char	buf[BUFFERSIZE];
 	std::map<int, Client>::iterator it = _clients.find(fd);
@@ -586,7 +586,7 @@ void	Server::_readFd(const int fd)
 	}
 }
 
-void	Server::_handleLine(Client& client, char* line, int data)
+void		Server::_handleLine(Client& client, char* line, int data)
 {
 	client.appendBuffer(line, data, IN);
 	while (client.hasFullLine(IN))
@@ -601,14 +601,14 @@ void	Server::_handleLine(Client& client, char* line, int data)
 	}
 }
 
-void	Server::_handleReply(Client& client, const std::string& message)
+void		Server::_handleReply(Client& client, const std::string& message)
 {
 	client.appendBuffer(message.c_str(), message.size(), OUT);
 	struct epoll_event client_ev = newEvent(client.getFd(), EPOLLOUT | EPOLLIN);
 	epoll_ctl(_epoll, EPOLL_CTL_MOD, client.getFd(), &client_ev);
 }
 
-void	Server::_handleReplyChannel(const Channel& channel, const std::string message, int client_fd)
+void		Server::_handleReplyChannel(const Channel& channel, const std::string message, int client_fd)
 {
 	std::set<int>	clients = channel.getUsersList();
 	for (std::set<int>::iterator it = clients.begin(); it != clients.end(); it++)
@@ -619,7 +619,7 @@ void	Server::_handleReplyChannel(const Channel& channel, const std::string messa
 	}
 }
 
-void	Server::_writeFd(const int fd)
+void		Server::_writeFd(const int fd)
 {
 	std::map<int, Client>::iterator it = _clients.find(fd);
 	if (it == _clients.end()) return;
@@ -650,7 +650,7 @@ void	Server::_writeFd(const int fd)
 	}
 }
 
-void	Server::_fillContext(t_rplContext& context, const std::string& target, const std::string& channel, const std::string& command, const std::string& message) const
+void		Server::_fillContext(t_rplContext& context, const std::string& target, const std::string& channel, const std::string& command, const std::string& message) const
 {
 	context.target = target;
 	context.channel = channel;
@@ -658,7 +658,7 @@ void	Server::_fillContext(t_rplContext& context, const std::string& target, cons
 	context.message = message;
 }
 
-void	Server::_addClient(const int fd)
+void		Server::_addClient(const int fd)
 {
 	struct epoll_event client_ev = newEvent(fd, EPOLLIN);
 	epoll_ctl(_epoll, EPOLL_CTL_ADD, fd, &client_ev);
@@ -668,7 +668,7 @@ void	Server::_addClient(const int fd)
 	std::cout << GREEN << "Client " << fd << " connected" << RESET << std::endl;
 }
 
-void	Server::_disconnectClient(Client& client)
+void		Server::_disconnectClient(Client& client)
 {
 	int fd = client.getFd();
 	std::map<int, Client>::iterator it = _clients.find(fd);
@@ -693,26 +693,26 @@ void	Server::_disconnectClient(Client& client)
 	close(fd);
 }
 
-void	Server::_addChannel(const Channel& channel)
+void		Server::_addChannel(const Channel& channel)
 {
 	_channels.insert(std::pair<std::string, Channel>(channel.getName(), channel));
 }
 
-void	Server::_deleteChannel(Channel& channel)
+void		Server::_deleteChannel(Channel& channel)
 {
 	_channels.erase(_channels.find(channel.getName()));
 }
 
-bool	Server::_nickInUse(const std::string nick) const
+bool		Server::_nickInUse(const std::string nick) const
 {
 	for (std::map<int, Client>::const_iterator it = _clients.begin(); it != _clients.end();it++)
 		if (it->second.getNick().compare(nick) == 0) return true;
 	return false;
 }
 
-bool	Server::_channelExists(const std::string name) const { return _channels.find(name) != _channels.end(); }
+bool		Server::_channelExists(const std::string name) const { return _channels.find(name) != _channels.end(); }
 
-int		Server::_getClientFd(const std::string& nick) const
+int			Server::_getClientFd(const std::string& nick) const
 {
 	std::map<int, Client>::const_iterator itc = _clients.begin();
 	std::map<int, Client>::const_iterator end = _clients.end();
@@ -725,7 +725,7 @@ int		Server::_getClientFd(const std::string& nick) const
 
 //------------------------------------------------------- OUT OF SCOPE FUNCTIONS
 
-epoll_event newEvent(int fd, int flags)
+epoll_event	newEvent(int fd, int flags)
 {
 	epoll_event	ev;
 	ev.events = flags;

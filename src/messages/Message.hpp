@@ -10,26 +10,25 @@ typedef enum e_comnum
 	NICK,
 	USER,
 	JOIN,
-	INVITE,
+	PRIVMSG,
 	TOPIC,
-	WHO,
-	KICK,
+	MODE,
+	INVITE,
 	PART,
+	KICK,
 	QUIT,
 	ERROR,
-	PRIVMSG,
-	MODE,
 	NONE,
 } t_comnum;
 
 class Message
 {
 	private:
-		bool							_valid;
+		bool						_valid;
 
-		std::string						_prefix;
-		t_comnum						_command;
-		std::vector<std::string>		_params;
+		std::string					_prefix;
+		t_comnum					_command;
+		std::vector<std::string>	_params;
 
 		bool							_parse(std::string& line);
 		std::vector<std::string>		_parseParams(std::stringstream& ss);
@@ -44,6 +43,6 @@ class Message
 		bool							isValid() const;
 };
 
-t_comnum								getCommand(std::string word);
+t_comnum	getCommand(std::string word);
 
 #endif

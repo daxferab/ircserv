@@ -25,34 +25,37 @@ class Channel
 		Channel(const std::string& name, int clientFd);
 		~Channel();
 
-		const std::string&	getName() const;
-		const std::string&	getTopic() const;
-		const std::string&	getKey() const;
+		const std::string&		getName() const;
+		const std::string&		getTopic() const;
+		const std::string&		getKey() const;
 		const std::set<int>&	getUsers() const;
 		const std::set<int>&	getUsersList() const;
-		bool				isInvited(int clientFd) const;
-		bool				isInviteOnly() const;
-		bool				isTopicRestricted() const;
-		int					getUserLimit() const;
-		int					getUserCount() const;
-		bool				isOperator(int fd) const;
-		void				setInvitedUser(int clientFd);
-		bool				setOperator(int clientFd);
-		bool				unsetOperator(int clientFd);
-		void				setTopic(const std::string topic);
-		bool				setKey(const std::string key);
-		bool				setInviteOnly(bool opt);
-		bool				setTopicRestricted(bool opt);
-		bool				setUserLimit(int num);
-		int					setUserLimit(const std::string limit);
+		bool					isInvited(int clientFd) const;
+		bool					isInviteOnly() const;
+		bool					isTopicRestricted() const;
+		int						getUserLimit() const;
+		int						getUserCount() const;
+		
+		bool					isOperator(int fd) const;
+		void					setInvitedUser(int clientFd);
 
-		bool				isFull() const;
-		bool				isKeyOk(std::string key) const;
-		void				addUser(int fd);
-		bool				isMember(int fd) const;
-		void				removeUser(int fd);
-		bool				changeOperator(int clientFd, bool set);
-		std::string			getModes() const;
+		void					setTopic(const std::string topic);
+		bool					setKey(const std::string key);
+		bool					setInviteOnly(bool opt);
+		bool					setTopicRestricted(bool opt);
+		bool					setUserLimit(int num);
+		int						setUserLimit(const std::string limit);
+
+		bool					isFull() const;
+		bool					isKeyOk(std::string key) const;
+		void					addUser(int fd);
+		bool					isMember(int fd) const;
+		void					removeUser(int fd);
+
+		bool					setOperator(int clientFd);
+		bool					unsetOperator(int clientFd);
+		bool					changeOperator(int clientFd, bool set);
+		std::string				getModes() const;
 };
 
 #endif
