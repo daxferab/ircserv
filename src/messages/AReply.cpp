@@ -8,6 +8,8 @@
 #include <string>
 #include <iostream>
 
+//------------------------------------------------------------- MEMBER FUNCTIONS
+
 std::string	AReply::getNReply(int n, const Server& server, const Client& client, const t_rplContext& context)
 {
 	std::stringstream	reply;
