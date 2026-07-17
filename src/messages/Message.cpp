@@ -11,7 +11,6 @@
 //----------------------------------------------------------------- CONSTRUCTORS
 
 Message::Message(std::string line) { _valid = _parse(line); }
-
 Message::~Message() {}
 
 //------------------------------------------------------------ PRIVATE FUNCTIONS
@@ -70,18 +69,16 @@ std::vector<std::string>		Message::_parseParams(std::stringstream& ss)
 }
 
 //-------------------------------------------------------------- GETTERS/SETTERS
-
-const std::string&				Message::getPrefix() const { return _prefix; }
-
-t_comnum						Message::getCommand() const { return _command; }
-
-const std::vector<std::string>&	Message::getParams() const { return _params; }
+//--------------------------------------------- GETTERS
 
 bool							Message::isValid() const { return _valid; }
+const std::string&				Message::getPrefix() const { return _prefix; }
+t_comnum						Message::getCommand() const { return _command; }
+const std::vector<std::string>&	Message::getParams() const { return _params; }
 
 //------------------------------------------------------- OUT OF SCOPE FUNCTIONS
 
-t_comnum						getCommand(std::string word)
+t_comnum	getCommand(std::string word)
 {
 	std::transform(word.begin(), word.end(), word.begin(), ::toupper);
 	if (word == "PASS") return PASS;

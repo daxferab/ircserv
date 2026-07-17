@@ -37,10 +37,10 @@ class Message
 		Message(std::string line);
 		~Message();
 
+		bool							isValid() const;
 		const std::string&				getPrefix() const;
 		t_comnum						getCommand() const;
 		const std::vector<std::string>&	getParams() const;
-		bool							isValid() const;
 };
 
 t_comnum	getCommand(std::string word);
