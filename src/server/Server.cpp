@@ -406,7 +406,7 @@ void		Server::setMode(Client& client, std::string channel_name, bool add, char t
 			break;
 		case 'o':
 			changes = channel->changeOperator(_getClientFd(parameter), add);
-			_fillContext(context, client.getNick(), channel_name, "MODE", (add ? "+o " : "-o "));
+			_fillContext(context, client.getNick(), channel_name, "MODE", (add ? "+o " : "-o ") + parameter);
 			break;
 		case 't':
 			changes = channel->setTopicRestricted(add);
