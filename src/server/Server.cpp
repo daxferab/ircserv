@@ -72,11 +72,11 @@ void		Server::authClient(Client& client, const std::string& pass)
 	_fillContext(context, "", "", "PASS", "");
 
 	if (client.isAuthenticated())
-		_handleReply(client, AReply::getNReply(462, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_ALREADYREGISTERED, *this, client, context));
 	else if (pass.empty())
-		_handleReply(client, AReply::getNReply(461, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
 	else if (pass != _password)
-		_handleReply(client, AReply::getNReply(464, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_PASSWDMISMATCH, *this, client, context));
 	else
 		client.setAuthenticated(true);
 }
@@ -102,19 +102,19 @@ void		Server::setClientNick(Client& client, const std::string& nick)
 	_fillContext(context, nick, "", "NICK", "");
 
 	if (nick.empty())
-		_handleReply(client, AReply::getNReply(431, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NONICKNAMEGIVEN, *this, client, context));
 	else if (isReservedChar(nick[0]))
-		_handleReply(client, AReply::getNReply(432, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_ERRONEUSNICKNAME, *this, client, context));
 	else if (_nickInUse(nick))
-		_handleReply(client, AReply::getNReply(433, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NICKNAMEINUSE, *this, client, context));
 	else
 	{
 		if (client.getNick().empty())
 		{
 
 			client.setNick(nick);
-			_handleReply(client, AReply::getNReply(001, *this, client, context));
-			_handleReply(client, AReply::getNReply(005, *this, client, context));
+			_handleReply(client, AReply::getNReply(RPL_WELCOME, *this, client, context));
+			_handleReply(client, AReply::getNReply(RPL_ISUPPORT, *this, client, context));
 			if (!client.getUser().empty())
 				client.setRegistered();	
 		}
@@ -138,9 +138,9 @@ bool		Server::setClientUser(Client& client, const std::string& user)
 	_fillContext(context, "", "", "USER", "");
 
 	if (client.isRegistered())
-		_handleReply(client, AReply::getNReply(462, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_ALREADYREGISTERED, *this, client, context));
 	else if (user.empty())
-		_handleReply(client, AReply::getNReply(461, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
 	else
 	{
 		client.setUser(user);
@@ -172,15 +172,15 @@ void		Server::joinChannel(Client& client, const std::string& name, const std::st
 	_fillContext(context, client.getNick(), name, "JOIN", "");
 
 	if (name.empty())
-		_handleReply(client, AReply::getNReply(461, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
 	else if(name[0] != '#')
-		_handleReply(client, AReply::getNReply(403, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
 	else if (channel && !invited && !channel->isKeyOk(key))
-		_handleReply(client, AReply::getNReply(475, *this, client, context)); //TEST
+		_handleReply(client, AReply::getNReply(ERR_BADCHANNELKEY, *this, client, context)); //TEST
 	else if (channel && !invited && channel->isInviteOnly())
-		_handleReply(client, AReply::getNReply(473, *this, client, context)); //TEST
+		_handleReply(client, AReply::getNReply(ERR_INVITEONLYCHAN, *this, client, context)); //TEST
 	else if (channel && !invited && channel->isFull())
-		_handleReply(client, AReply::getNReply(471, *this, client, context)); //TEST
+		_handleReply(client, AReply::getNReply(ERR_CHANNELISFULL, *this, client, context)); //TEST
 	else
 	{
 		if (!channel)
@@ -192,9 +192,9 @@ void		Server::joinChannel(Client& client, const std::string& name, const std::st
 			channel->addUser(client.getFd());
 		_handleReplyChannel(*channel, AReply::getReply(JOIN, client, context), -1);
 		if (!channel->getTopic().empty())
-			_handleReply(client, AReply::getNReply(332, *this, client, context)); //TEST
-		_handleReply(client, AReply::getNReply(353, *this, client, context)); //TEST
-		_handleReply(client, AReply::getNReply(366, *this, client, context)); //TEST
+			_handleReply(client, AReply::getNReply(RPL_TOPIC, *this, client, context)); //TEST
+		_handleReply(client, AReply::getNReply(RPL_NAMREPLY, *this, client, context)); //TEST
+		_handleReply(client, AReply::getNReply(RPL_ENDOFNAMES, *this, client, context)); //TEST
 	}
 }
 
@@ -206,21 +206,21 @@ void		Server::inviteUser(Client &client, const std::string& nick, const std::str
 
 	_fillContext(context, client.getNick(), channelName, "INVITE", "");
 	if (channelIt == _channels.end())
-		_handleReply(client, AReply::getNReply(403, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
 	else if (!channelIt->second.isMember(client.getFd()))
-		_handleReply(client, AReply::getNReply(442, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NOTONCHANNEL, *this, client, context));
 	else if (channelIt->second.isInviteOnly() && !channelIt->second.isOperator(client.getFd())) //test
-		_handleReply(client, AReply::getNReply(482, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_CHANOPRIVSNEEDED, *this, client, context));
 	else if (channelIt->second.isMember(userFd))
 	{
 		context.target = nick;
-		_handleReply(client, AReply::getNReply(443, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_USERONCHANNEL, *this, client, context));
 	}
 	else if (_clients.find(userFd) != _clients.end())
 	{
 		context.target = nick;
 		channelIt->second.setInvitedUser(userFd);
-		_handleReply(client, AReply::getNReply(341, *this, client, context));
+		_handleReply(client, AReply::getNReply(RPL_INVITING, *this, client, context));
 		_handleReply(_clients.find(userFd)->second, AReply::getReply(INVITE, client, context));
 	}
 }
@@ -233,11 +233,11 @@ void		Server::setChannelTopic(Client& client, const std::string& channelName, co
 
 	_fillContext(context, "", channelName, "TOPIC", topic);
 	if (channelIt == _channels.end())
-		_handleReply(client, AReply::getNReply(403, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
 	else if (!channel.isMember(client.getFd()))
-		_handleReply(client, AReply::getNReply(442, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NOTONCHANNEL, *this, client, context));
 	else if (channel.isTopicRestricted() && !channel.isOperator(client.getFd()))
-		_handleReply(client, AReply::getNReply(482, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_CHANOPRIVSNEEDED, *this, client, context));
 	else
 	{
 		_handleReplyChannel(channel, AReply::getReply(TOPIC, client, context), -1);
@@ -253,13 +253,13 @@ void		Server::displayChannelTopic(Client& client, const std::string& channelName
 
 	_fillContext(context, "", channelName, "TOPIC", "");
 	if (channelIt == _channels.end())
-		_handleReply(client, AReply::getNReply(403, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
 	else if (!channel.isMember(client.getFd()))
-		_handleReply(client, AReply::getNReply(442, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NOTONCHANNEL, *this, client, context));
 	else if (channel.getTopic().empty())
-		_handleReply(client, AReply::getNReply(331, *this, client, context));
+		_handleReply(client, AReply::getNReply(RPL_NOTOPIC, *this, client, context));
 	else
-		_handleReply(client, AReply::getNReply(332, *this, client, context));
+		_handleReply(client, AReply::getNReply(RPL_TOPIC, *this, client, context));
 }
 
 void		Server::kickUser(Client& client, const std::string& chanName, const std::string& nick, const std::string& reason)
@@ -269,20 +269,20 @@ void		Server::kickUser(Client& client, const std::string& chanName, const std::s
 
 	_fillContext(context, nick, chanName, "KICK", reason);
 	if (chanName.empty())
-		_handleReply(client, AReply::getNReply(461, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
 	else if(!_channelExists(chanName))
 	{
-		_handleReply(client, AReply::getNReply(403, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
 		return;
 	}
 	channel = &(_channels.at(chanName));
 
 	if(!channel->isMember(client.getFd()))
-		_handleReply(client, AReply::getNReply(442, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NOTONCHANNEL, *this, client, context));
 	if(!channel->isOperator(client.getFd()))
-		_handleReply(client, AReply::getNReply(482, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_CHANOPRIVSNEEDED, *this, client, context));
 	else if (!channel->isMember(_getClientFd(nick)))
-		_handleReply(client, AReply::getNReply(441, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_USERNOTINCHANNEL, *this, client, context));
 	else
 	{
 		_handleReplyChannel(*channel, AReply::getReply(KICK, client, context), -1);
@@ -301,11 +301,11 @@ void		Server::partChannel(Client &client, const std::string &name, const std::st
 	_fillContext(context, client.getNick(), name, "PART", reason);
 
 	if (name.empty())														//Not enough params
-		_handleReply(client, AReply::getNReply(461, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
 	else if (!channel)														//Channel does NOT exit
-		_handleReply(client, AReply::getNReply(403, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
 	else if (channel && !channel->isMember(client.getFd()))					//Channel exists but client is not a member
-		_handleReply(client, AReply::getNReply(442, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NOTONCHANNEL, *this, client, context));
 	else
 	{
 		_handleReplyChannel(*channel, AReply::getReply(PART, client, context), -1);
@@ -351,15 +351,15 @@ void		Server::sendMessage(Client& client, const std::string& target, const std::
 
 	_fillContext(context, target, "", "PRIVMSG", message);
 	if (target.empty())
-		_handleReply(client, AReply::getNReply(411, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NORECIPIENT, *this, client, context));
 	else if (message.empty())
-		_handleReply(client, AReply::getNReply(412, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NOTEXTTOSEND, *this, client, context));
 	else if (targetFd > 0)
 		_handleReply(_clients.find(targetFd)->second, AReply::getReply(PRIVMSG, client, context));
 	else if(_channelExists(target))
 		_handleReplyChannel(_channels.find(target)->second, AReply::getReply(PRIVMSG, client, context), client.getFd());
 	else
-		_handleReply(client, AReply::getNReply(401, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NOSUCHNICK, *this, client, context));
 }
 
 void		Server::setMode(Client& client, std::string channel_name, bool add, char type, std::string parameter)
@@ -372,16 +372,16 @@ void		Server::setMode(Client& client, std::string channel_name, bool add, char t
 
 	_fillContext(context, client.getNick(), channel_name, "MODE", std::string(1, type));
 	if (channel_name.empty())
-		_handleReply(client, AReply::getNReply(461, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
 	else if (!_channelExists(channel_name))
-		_handleReply(client, AReply::getNReply(403, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
 	else
 	{
 		channel = &(_channels.at(channel_name));
 		if (!channel->isMember(client.getFd()))
-			_handleReply(client, AReply::getNReply(442, *this, client, context));
+			_handleReply(client, AReply::getNReply(ERR_NOTONCHANNEL, *this, client, context));
 		else if (!channel->isOperator(client.getFd()))
-			_handleReply(client, AReply::getNReply(482, *this, client, context));
+			_handleReply(client, AReply::getNReply(ERR_CHANOPRIVSNEEDED, *this, client, context));
 		switch (type)
 		{
 		case 'i':
@@ -413,7 +413,7 @@ void		Server::setMode(Client& client, std::string channel_name, bool add, char t
 			_fillContext(context, client.getNick(), channel_name, "MODE", (add ? "+t" : "-t"));
 			break;
 		default:
-			_handleReply(client, AReply::getNReply(472, *this, client, context));
+			_handleReply(client, AReply::getNReply(ERR_UNKNOWNMODE, *this, client, context));
 			break;
 		}
 	}
@@ -427,13 +427,13 @@ void		Server::getMode(Client& client, std::string channel_name)
 
 	_fillContext(context, client.getNick(), channel_name, "MODE", "");
 	if (channel_name.empty())
-		_handleReply(client, AReply::getNReply(461, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
 	else if (!_channelExists(channel_name))
-		_handleReply(client, AReply::getNReply(403, *this, client, context));
+		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
 	else
 	{
 		_fillContext(context, client.getNick(), channel_name, "MODE", _channels.at(channel_name).getModes());
-		_handleReply(client, AReply::getNReply(324, *this, client, context));
+		_handleReply(client, AReply::getNReply(RPL_CHANNELMODEIS, *this, client, context));
 	}
 }
 
@@ -596,7 +596,7 @@ void		Server::_handleLine(Client& client, char* line, int data)
 			if (!CommandHandler::execCommand(message, client, *this))
 			{
 				t_rplContext	context;
-				_handleReply(client, AReply::getNReply(451, *this, client, context));
+				_handleReply(client, AReply::getNReply(ERR_NOTREGISTERED, *this, client, context));
 			}
 	}
 }
