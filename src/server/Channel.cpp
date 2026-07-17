@@ -16,24 +16,35 @@ Channel::Channel(const std::string& name, int clientFd): _name(name), _topic("")
 
 Channel::~Channel() {}
 
-//------------------------------------------------------------- GETTERS /SETTERS
-
+//------------------------------------------------------------ GETTERS / SETTERS
+// ---------------------------------- GETTERS
 const std::string&		Channel::getName() const { return _name; }
 const std::string&		Channel::getTopic() const { return _topic; }
 const std::string&		Channel::getKey() const { return _key; }
 const std::set<int>&	Channel::getUsers() const { return _users; }
 const std::set<int>&	Channel::getUsersList() const { return _users; }
 bool					Channel::isInvited(int clientFd) const { return _invitedUsers.find(clientFd) != _invitedUsers.end(); }
+bool					Channel::isOperator(int fd) const { return _operators.find(fd) != _operators.end(); }
 bool					Channel::isInviteOnly() const { return _inviteOnly; }
 bool					Channel::isTopicRestricted() const { return _topicRestrict; }
 int						Channel::getUserLimit() const { return _userLimit; }
 int						Channel::getUserCount() const { return _users.size(); }
 
-bool					Channel::isOperator(int fd) const { return _operators.find(fd) != _operators.end(); }
-void					Channel::setInvitedUser(int clientFd) { _invitedUsers.insert(clientFd); }
-
+// ---------------------------------- SETTERS
 void					Channel::setTopic(const std::string topic) { _topic = topic; }
 bool					Channel::setKey(const std::string key) { if (_key == key) return false; _key = key; return true; }
+void					Channel::setInvitedUser(int clientFd) { _invitedUsers.insert(clientFd); }
+bool					Channel::setOperator(int clientFd) { return _users.find(clientFd) != _users.end() && _operators.insert(clientFd).second; }
+bool					Channel::unsetOperator(int clientFd)
+{
+	if (_operators.find(clientFd) != _operators.end())
+	{
+		_operators.erase(_operators.find(clientFd));
+		return true;
+	}
+	return false;
+}
+
 bool					Channel::setInviteOnly(bool opt) { if (_inviteOnly == opt) return false; _inviteOnly = opt; return true; }
 bool					Channel::setTopicRestricted(bool opt) { if (_topicRestrict == opt) return false; _topicRestrict = opt; return true; }
 bool					Channel::setUserLimit(int num) { if (_userLimit == num) return false; _userLimit = num; return true;  _userLimit = num; }
@@ -66,21 +77,6 @@ void					Channel::removeUser(int fd)
 {
 	_users.erase(fd);
 	_operators.erase(fd);
-}
-
-bool					Channel::setOperator(int clientFd)
-{
-	return _users.find(clientFd) != _users.end() && _operators.insert(clientFd).second;
-}
-
-bool					Channel::unsetOperator(int clientFd)
-{
-	if (_operators.find(clientFd) != _operators.end())
-	{
-		_operators.erase(_operators.find(clientFd));
-		return true;
-	}
-	return false;
 }
 
 bool 					Channel::changeOperator(int clientFd, bool set)
