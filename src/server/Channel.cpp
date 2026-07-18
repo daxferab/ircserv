@@ -47,7 +47,7 @@ bool					Channel::unsetOperator(int clientFd)
 
 bool					Channel::setInviteOnly(bool opt) { if (_inviteOnly == opt) return false; _inviteOnly = opt; return true; }
 bool					Channel::setTopicRestricted(bool opt) { if (_topicRestrict == opt) return false; _topicRestrict = opt; return true; }
-bool					Channel::setUserLimit(int num) { if (_userLimit == num) return false; _userLimit = num; return true; _userLimit = num; }
+bool					Channel::setUserLimit(int num) { if (_userLimit == num) return false; _userLimit = num; return true; }
 int						Channel::setUserLimit(const std::string limit)
 {
 	long	l;
@@ -64,7 +64,7 @@ int						Channel::setUserLimit(const std::string limit)
 		return setUserLimit(-1) ? 0 : -1;
 	if (limit.size() >= 2 && limit[1] == '0' && (limit[0] == '+' || limit[0] == '-'))
 		return setUserLimit(-1) ? 0 : -1;
-	return (-1);
+	return -1;
 }
 
 //------------------------------------------------------------- MEMBER FUNCTIONS
@@ -81,7 +81,7 @@ void					Channel::removeUser(int fd)
 
 bool 					Channel::changeOperator(int clientFd, bool set)
 {
-	return (set ? setOperator(clientFd) : unsetOperator(clientFd));
+	return set ? setOperator(clientFd) : unsetOperator(clientFd);
 }
 
 std::string				Channel::getModes() const
@@ -105,5 +105,5 @@ std::string				Channel::getModes() const
 	}
 	if (isTopicRestricted())
 		modes.append("t");
-	return (modes + params);
+	return modes + params;
 }

@@ -19,7 +19,7 @@ int	main(int ac, char* av[])
 		std::cerr << RED << e.what() << std::endl;
 	}
 
-	return (0);
+	return 0;
 }
 
 /*  TODO list
