@@ -283,6 +283,8 @@ void	Server::setClientNick(Client& client, const std::string& nick)
 
 	if (nick.empty())
 		_handleReply(client, AReply::getNReply(ERR_NONICKNAMEGIVEN, *this, client, context));
+	else if (nick == client.getNick())
+		return;
 	else if (isReservedChar(nick[0]))
 		_handleReply(client, AReply::getNReply(ERR_ERRONEUSNICKNAME, *this, client, context));
 	else if (_nickInUse(nick))
