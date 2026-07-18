@@ -4,9 +4,9 @@
 #include "Server.hpp"
 
 #include <cstring>
-#include <unistd.h>
-#include <string>
 #include <sstream>
+#include <string>
+#include <unistd.h>
 #include <vector>
 
 //------------------------------------------------------------- MEMBER FUNCTIONS

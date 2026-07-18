@@ -1,12 +1,12 @@
 #include "Message.hpp"
 #include "colors.h"
 
+#include <algorithm>
 #include <ios>
-#include <sstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 //----------------------------------------------------------------- CONSTRUCTORS
 

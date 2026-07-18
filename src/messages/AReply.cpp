@@ -4,9 +4,9 @@
 #include "colors.h"
 
 #include <iomanip>
+#include <iostream>
 #include <sstream>
 #include <string>
-#include <iostream>
 
 //------------------------------------------------------------- MEMBER FUNCTIONS
 

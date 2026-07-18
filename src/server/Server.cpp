@@ -7,25 +7,25 @@
 #include "Message.hpp"
 
 #include <cerrno>
+#include <cstring>
 #include <cstdio>
 #include <exception>
+#include <fcntl.h>
+#include <iostream>
 #include <map>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <set>
+#include <signal.h>
 #include <stdexcept>
+#include <sstream>
 #include <string>
+#include <sys/epoll.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <sys/epoll.h>
-#include <fcntl.h>
-#include <netdb.h>
-#include <cstring>
 #include <sys/ucontext.h>
 #include <unistd.h>
-#include <iostream>
 #include <utility>
-#include <signal.h>
-#include <sstream>
 
 #define MAX_EVENTS 16
 #define BUFFERSIZE 512

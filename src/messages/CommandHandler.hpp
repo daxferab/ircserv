@@ -1,11 +1,12 @@
 #ifndef COMMANDHANDLER_HPP
 #define COMMANDHANDLER_HPP
 
-#include "Client.hpp"
-#include "Server.hpp"
-#include "Message.hpp"
-
+#include <string>
 #include <vector>
+
+class Client;
+class Message;
+class Server;
 
 class CommandHandler
 {

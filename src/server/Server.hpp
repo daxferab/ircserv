@@ -5,10 +5,10 @@
 #include "Channel.hpp"
 #include "Client.hpp"
 
+#include <map>
 #include <netdb.h>
 #include <string>
 #include <sys/epoll.h>
-#include <map>
 
 class Server
 {
