@@ -33,7 +33,7 @@ class Server
 		void		_readFd(const int fd);
 		void		_handleLine(Client& client, char* line, int data);
 		void		_handleReply(Client& client, const std::string& message);
-		void		_handleReplyChannel(const Channel &channel, const std::string message, int client_fd);
+		void		_handleReplyChannel(const Channel& channel, const std::string message, int client_fd);
 		void		_writeFd(const int fd);
 		void		_fillContext(t_rplContext& context, const std::string& target, const std::string& channel, const std::string& command, const std::string& message) const;
 
@@ -59,7 +59,7 @@ class Server
 		bool		setClientUser(Client& client, const std::string& user);
 		void		setClientName(Client& client, const std::string& name);
 		void		joinChannel(Client& client, const std::string& channel, const std::string& key);
-		void		inviteUser(Client &client, const std::string& nick, const std::string& channelName);
+		void		inviteUser(Client& client, const std::string& nick, const std::string& channelName);
 		void		setChannelTopic(Client& client, const std::string& channelName, const std::string& topic);
 		void		displayChannelTopic(Client& client, const std::string& channelName);
 		void		kickUser(Client& client, const std::string& channel, const std::string& nick, const std::string& reason);
@@ -67,8 +67,8 @@ class Server
 		std::string	getChannelTopic(const std::string& channelName) const;
 		std::string	getChannelMembers(const std::string& channelName) const;
 		void		sendMessage(Client& client, const std::string& target, const std::string& message);
-		void		setMode(Client &client, std::string channel_name, bool add, char type, std::string parameter);
-		void		getMode(Client &client, std::string channel_name);
+		void		setMode(Client& client, std::string channel_name, bool add, char type, std::string parameter);
+		void		getMode(Client& client, std::string channel_name);
 };
 
 epoll_event	newEvent(int fd, int flags);

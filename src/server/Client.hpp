@@ -26,6 +26,7 @@ class Client
 		~Client();
 
 		//----------------------------------- GETTERS / SETTERS
+
 		int					getFd() const;
 		const std::string&	getOutBuffer() const;
 		std::string			getNick() const;
@@ -40,6 +41,7 @@ class Client
 		void				setRegistered();
 
 		//------------------------------------ MEMBER FUNCTIONS
+
 		void				appendBuffer(const char* msg, int data, int type);
 		bool				hasFullLine(int type) const;
 		std::string			getLine();

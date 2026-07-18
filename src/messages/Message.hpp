@@ -38,6 +38,7 @@ class Message
 		~Message();
 
 		//----------------------------------- GETTERS / SETTERS
+
 		bool							isValid() const;
 		const std::string&				getPrefix() const;
 		t_comnum						getCommand() const;

@@ -6,8 +6,6 @@
 
 //----------------------------------------------------------------- CONSTRUCTORS
 
-Channel::Channel() {}
-
 Channel::Channel(const std::string& name, int clientFd): _name(name), _topic(""), _key(""), _inviteOnly(false), _topicRestrict(true), _userLimit(-1)
 {
 	_users.insert(clientFd);
@@ -18,6 +16,7 @@ Channel::~Channel() {}
 
 //------------------------------------------------------------ GETTERS / SETTERS
 //---------------------------------- GETTERS
+
 const std::string&		Channel::getName() const { return _name; }
 const std::string&		Channel::getTopic() const { return _topic; }
 const std::string&		Channel::getKey() const { return _key; }
@@ -31,6 +30,7 @@ int						Channel::getUserLimit() const { return _userLimit; }
 int						Channel::getUserCount() const { return _users.size(); }
 
 //---------------------------------- SETTERS
+
 void					Channel::setTopic(const std::string topic) { _topic = topic; }
 bool					Channel::setKey(const std::string key) { if (_key == key) return false; _key = key; return true; }
 void					Channel::setInvitedUser(int clientFd) { _invitedUsers.insert(clientFd); }
@@ -47,7 +47,7 @@ bool					Channel::unsetOperator(int clientFd)
 
 bool					Channel::setInviteOnly(bool opt) { if (_inviteOnly == opt) return false; _inviteOnly = opt; return true; }
 bool					Channel::setTopicRestricted(bool opt) { if (_topicRestrict == opt) return false; _topicRestrict = opt; return true; }
-bool					Channel::setUserLimit(int num) { if (_userLimit == num) return false; _userLimit = num; return true;  _userLimit = num; }
+bool					Channel::setUserLimit(int num) { if (_userLimit == num) return false; _userLimit = num; return true; _userLimit = num; }
 int						Channel::setUserLimit(const std::string limit)
 {
 	long	l;

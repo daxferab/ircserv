@@ -116,7 +116,7 @@ void		Server::setClientNick(Client& client, const std::string& nick)
 			_handleReply(client, AReply::getNReply(RPL_WELCOME, *this, client, context));
 			_handleReply(client, AReply::getNReply(RPL_ISUPPORT, *this, client, context));
 			if (!client.getUser().empty())
-				client.setRegistered();	
+				client.setRegistered();
 		}
 		else
 		{
@@ -125,7 +125,7 @@ void		Server::setClientNick(Client& client, const std::string& nick)
 			_handleReply(client, AReply::getReply(NICK, client, context));
 			std::map<std::string, Channel>::iterator it = _channels.begin();
 			std::map<std::string, Channel>::iterator end = _channels.end();
-		
+
 			for (; it != end; it++)
 				_handleReplyChannel(it->second, AReply::getReply(NICK, client, context), client.getFd());
 		}
@@ -680,7 +680,7 @@ void		Server::_disconnectClient(Client& client)
 	for (; itc != end; ++itc)
 		if (itc->second.isMember(client.getFd()))
 			partChannel(client, itc->first, context.message);
-	
+
 	_fillContext(context, client.getNick(), "", "", "Client disconnected");
 
 	_handleReply(client, AReply::getReply(ERROR, client, context));

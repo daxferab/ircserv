@@ -21,6 +21,7 @@ bool				Client::isAuthenticated() const { return _authenticated; }
 bool				Client::isRegistered() const { return _registered; }
 
 //---------------------------------- SETTERS
+
 void				Client::setNick(const std::string nick) { _nick = nick; }
 void				Client::setUser(const std::string user) { _username = user; }
 void				Client::setName(const std::string name) { _realName = name; }

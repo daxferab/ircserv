@@ -38,38 +38,37 @@ bool							Message::_parse(std::string& line)
 
 std::vector<std::string>		Message::_parseParams(std::stringstream& ss)
 {
-    std::vector<std::string> params;
-    std::string word;
+	std::vector<std::string> params;
+	std::string word;
 
-    while (ss >> word)
-    {
-        if (!word.empty() && word[0] == ':')
-        {
-            word.erase(0, 1);
-            std::string rest;
-            std::getline(ss, rest);
-            word += rest;
+	while (ss >> word)
+	{
+		if (!word.empty() && word[0] == ':')
+		{
+			word.erase(0, 1);
+			std::string rest;
+			std::getline(ss, rest);
+			word += rest;
 
-            params.push_back(word);
-            break;
-        }
-        // PRIVMSG: everything after target is the message
-        if (_command == PRIVMSG && params.size() == 1)
-        {
-            std::string rest;
-            std::getline(ss, rest);
-            word += rest;
+			params.push_back(word);
+			break;
+		}
+		// PRIVMSG: everything after target is the message
+		if (_command == PRIVMSG && params.size() == 1)
+		{
+			std::string rest;
+			std::getline(ss, rest);
+			word += rest;
 
-            params.push_back(word);
-            break;
-        }
-        params.push_back(word);
-    }
-    return params;
+			params.push_back(word);
+			break;
+		}
+		params.push_back(word);
+	}
+	return params;
 }
 
 //-------------------------------------------------------------- GETTERS/SETTERS
-//--------------------------------------------- GETTERS
 
 bool							Message::isValid() const { return _valid; }
 const std::string&				Message::getPrefix() const { return _prefix; }

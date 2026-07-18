@@ -22,11 +22,12 @@ class Channel
 
 	public:
 		//---------------------------------------- CONSTRUCTORS
-		Channel();
+
 		Channel(const std::string& name, int clientFd);
 		~Channel();
 
 		//----------------------------------- GETTERS / SETTERS
+
 		const std::string&		getName() const;
 		const std::string&		getTopic() const;
 		const std::string&		getKey() const;
@@ -50,6 +51,7 @@ class Channel
 		int						setUserLimit(const std::string limit);
 
 		//------------------------------------ MEMBER FUNCTIONS
+
 		bool					isFull() const;
 		bool					isKeyOk(std::string key) const;
 		void					addUser(int fd);
