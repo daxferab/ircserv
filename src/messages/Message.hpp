@@ -6,17 +6,17 @@
 
 typedef enum e_comnum
 {
-	PASS,
-	NICK,
-	USER,
-	JOIN,
-	PRIVMSG,
-	TOPIC,
-	MODE,
 	INVITE,
-	PART,
+	JOIN,
 	KICK,
+	MODE,
+	NICK,
+	PART,
+	PASS,
+	PRIVMSG,
 	QUIT,
+	TOPIC,
+	USER,
 	ERROR,
 	NONE,
 } t_comnum;

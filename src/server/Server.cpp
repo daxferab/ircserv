@@ -39,7 +39,7 @@ Server::~Server() {}
 
 // ----------------------------------------------------- PUBLIC MEMBER FUNCTIONS
 
-void		Server::start(char* port)
+void	Server::start(char* port)
 {
 	try {
 		_setup(port);
@@ -50,7 +50,7 @@ void		Server::start(char* port)
 	}
 }
 
-void		Server::stop()
+void	Server::stop()
 {
 	_isRunning = false;
 	while (!_clients.empty())
@@ -64,255 +64,9 @@ void		Server::stop()
 	std::cout << std::endl << RED << "------------- THISCORD SERVER CLOSED! ------------" << RESET << std::endl;
 }
 
+//-----------------------------------------------------------------------GETTERS
+
 std::string	Server::getName() const { return _name; }
-
-void		Server::authClient(Client& client, const std::string& pass)
-{
-	t_rplContext	context;
-	_fillContext(context, "", "", "PASS", "");
-
-	if (client.isAuthenticated())
-		_handleReply(client, AReply::getNReply(ERR_ALREADYREGISTERED, *this, client, context));
-	else if (pass.empty())
-		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
-	else if (pass != _password)
-		_handleReply(client, AReply::getNReply(ERR_PASSWDMISMATCH, *this, client, context));
-	else
-		client.setAuthenticated(true);
-}
-
-void		Server::quitClient(Client& client, const std::string& msg)
-{
-	(void)msg;
-	t_rplContext	context;
-
-	_fillContext(context, "", "", "QUIT", msg);
-
-	std::map<std::string, Channel>::iterator it = _channels.begin();
-	std::map<std::string, Channel>::iterator end = _channels.end();
-
-	for (; it != end; it++)
-		_handleReplyChannel(it->second, AReply::getReply(QUIT, client, context), -1);
-	_disconnectClient(client);
-}
-
-void		Server::setClientNick(Client& client, const std::string& nick)
-{
-	t_rplContext	context;
-	_fillContext(context, nick, "", "NICK", "");
-
-	if (nick.empty())
-		_handleReply(client, AReply::getNReply(ERR_NONICKNAMEGIVEN, *this, client, context));
-	else if (isReservedChar(nick[0]))
-		_handleReply(client, AReply::getNReply(ERR_ERRONEUSNICKNAME, *this, client, context));
-	else if (_nickInUse(nick))
-		_handleReply(client, AReply::getNReply(ERR_NICKNAMEINUSE, *this, client, context));
-	else
-	{
-		if (client.getNick().empty())
-		{
-
-			client.setNick(nick);
-			_handleReply(client, AReply::getNReply(RPL_WELCOME, *this, client, context));
-			_handleReply(client, AReply::getNReply(RPL_ISUPPORT, *this, client, context));
-			if (!client.getUser().empty())
-				client.setRegistered();
-		}
-		else
-		{
-			context.target = client.getNick();
-			client.setNick(nick);
-			_handleReply(client, AReply::getReply(NICK, client, context));
-			std::map<std::string, Channel>::iterator it = _channels.begin();
-			std::map<std::string, Channel>::iterator end = _channels.end();
-
-			for (; it != end; it++)
-				_handleReplyChannel(it->second, AReply::getReply(NICK, client, context), client.getFd());
-		}
-	}
-}
-
-bool		Server::setClientUser(Client& client, const std::string& user)
-{
-	t_rplContext	context;
-	_fillContext(context, "", "", "USER", "");
-
-	if (client.isRegistered())
-		_handleReply(client, AReply::getNReply(ERR_ALREADYREGISTERED, *this, client, context));
-	else if (user.empty())
-		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
-	else
-	{
-		client.setUser(user);
-		if (!client.getNick().empty())
-			client.setRegistered();
-		return true;
-	}
-	return false;
-}
-
-void		Server::setClientName(Client& client, const std::string& name)
-{
-	client.setName(name);
-}
-
-void		Server::joinChannel(Client& client, const std::string& name, const std::string& key)
-{
-	t_rplContext	context;
-	Channel			*channel = NULL;
-	bool			invited;
-
-	if(_channelExists(name))
-	{
-		channel = &(_channels.at(name));
-		if (channel->isMember(client.getFd()))
-			return ;
-	}
-	invited = channel && channel->isInvited(client.getFd());
-	_fillContext(context, client.getNick(), name, "JOIN", "");
-
-	if (name.empty())
-		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
-	else if(name[0] != '#')
-		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
-	else if (channel && !invited && !channel->isKeyOk(key))
-		_handleReply(client, AReply::getNReply(ERR_BADCHANNELKEY, *this, client, context)); //TEST
-	else if (channel && !invited && channel->isInviteOnly())
-		_handleReply(client, AReply::getNReply(ERR_INVITEONLYCHAN, *this, client, context)); //TEST
-	else if (channel && !invited && channel->isFull())
-		_handleReply(client, AReply::getNReply(ERR_CHANNELISFULL, *this, client, context)); //TEST
-	else
-	{
-		if (!channel)
-		{
-			_addChannel(Channel(name, client.getFd()));
-			channel = &(_channels.at(name));
-		}
-		else
-			channel->addUser(client.getFd());
-		_handleReplyChannel(*channel, AReply::getReply(JOIN, client, context), -1);
-		if (!channel->getTopic().empty())
-			_handleReply(client, AReply::getNReply(RPL_TOPIC, *this, client, context)); //TEST
-		_handleReply(client, AReply::getNReply(RPL_NAMREPLY, *this, client, context)); //TEST
-		_handleReply(client, AReply::getNReply(RPL_ENDOFNAMES, *this, client, context)); //TEST
-	}
-}
-
-void		Server::inviteUser(Client &client, const std::string& nick, const std::string& channelName)
-{
-	int											userFd = _getClientFd(nick);
-	std::map<std::string, Channel>::iterator	channelIt = _channels.find(channelName);
-	t_rplContext								context;
-
-	_fillContext(context, client.getNick(), channelName, "INVITE", "");
-	if (channelIt == _channels.end())
-		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
-	else if (!channelIt->second.isMember(client.getFd()))
-		_handleReply(client, AReply::getNReply(ERR_NOTONCHANNEL, *this, client, context));
-	else if (channelIt->second.isInviteOnly() && !channelIt->second.isOperator(client.getFd())) //test
-		_handleReply(client, AReply::getNReply(ERR_CHANOPRIVSNEEDED, *this, client, context));
-	else if (channelIt->second.isMember(userFd))
-	{
-		context.target = nick;
-		_handleReply(client, AReply::getNReply(ERR_USERONCHANNEL, *this, client, context));
-	}
-	else if (_clients.find(userFd) != _clients.end())
-	{
-		context.target = nick;
-		channelIt->second.setInvitedUser(userFd);
-		_handleReply(client, AReply::getNReply(RPL_INVITING, *this, client, context));
-		_handleReply(_clients.find(userFd)->second, AReply::getReply(INVITE, client, context));
-	}
-}
-
-void		Server::setChannelTopic(Client& client, const std::string& channelName, const std::string& topic)
-{
-	std::map<std::string, Channel>::iterator	channelIt = _channels.find(channelName);
-	Channel&									channel = channelIt->second;
-	t_rplContext								context;
-
-	_fillContext(context, "", channelName, "TOPIC", topic);
-	if (channelIt == _channels.end())
-		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
-	else if (!channel.isMember(client.getFd()))
-		_handleReply(client, AReply::getNReply(ERR_NOTONCHANNEL, *this, client, context));
-	else if (channel.isTopicRestricted() && !channel.isOperator(client.getFd()))
-		_handleReply(client, AReply::getNReply(ERR_CHANOPRIVSNEEDED, *this, client, context));
-	else
-	{
-		_handleReplyChannel(channel, AReply::getReply(TOPIC, client, context), -1);
-		channel.setTopic(topic);
-	}
-}
-
-void		Server::displayChannelTopic(Client& client, const std::string& channelName)
-{
-	std::map<std::string, Channel>::iterator	channelIt = _channels.find(channelName);
-	Channel&									channel = channelIt->second;
-	t_rplContext								context;
-
-	_fillContext(context, "", channelName, "TOPIC", "");
-	if (channelIt == _channels.end())
-		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
-	else if (!channel.isMember(client.getFd()))
-		_handleReply(client, AReply::getNReply(ERR_NOTONCHANNEL, *this, client, context));
-	else if (channel.getTopic().empty())
-		_handleReply(client, AReply::getNReply(RPL_NOTOPIC, *this, client, context));
-	else
-		_handleReply(client, AReply::getNReply(RPL_TOPIC, *this, client, context));
-}
-
-void		Server::kickUser(Client& client, const std::string& chanName, const std::string& nick, const std::string& reason)
-{
-	t_rplContext	context;
-	Channel			*channel = NULL;
-
-	_fillContext(context, nick, chanName, "KICK", reason);
-	if (chanName.empty())
-		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
-	else if(!_channelExists(chanName))
-	{
-		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
-		return;
-	}
-	channel = &(_channels.at(chanName));
-
-	if(!channel->isMember(client.getFd()))
-		_handleReply(client, AReply::getNReply(ERR_NOTONCHANNEL, *this, client, context));
-	if(!channel->isOperator(client.getFd()))
-		_handleReply(client, AReply::getNReply(ERR_CHANOPRIVSNEEDED, *this, client, context));
-	else if (!channel->isMember(_getClientFd(nick)))
-		_handleReply(client, AReply::getNReply(ERR_USERNOTINCHANNEL, *this, client, context));
-	else
-	{
-		_handleReplyChannel(*channel, AReply::getReply(KICK, client, context), -1);
-		channel->removeUser(_getClientFd(nick));
-		if (channel->getUserCount() < 1) _deleteChannel(*channel);
-	}
-}
-
-void		Server::partChannel(Client &client, const std::string &name, const std::string &reason)
-{
-	t_rplContext	context;
-	Channel			*channel = NULL;
-
-	if(_channelExists(name))
-		channel = &(_channels.at(name));
-	_fillContext(context, client.getNick(), name, "PART", reason);
-
-	if (name.empty())														//Not enough params
-		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
-	else if (!channel)														//Channel does NOT exit
-		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
-	else if (channel && !channel->isMember(client.getFd()))					//Channel exists but client is not a member
-		_handleReply(client, AReply::getNReply(ERR_NOTONCHANNEL, *this, client, context));
-	else
-	{
-		_handleReplyChannel(*channel, AReply::getReply(PART, client, context), -1);
-		channel->removeUser(client.getFd());
-		if (channel->getUserCount() < 1) _deleteChannel(*channel);
-	}
-}
 
 std::string	Server::getChannelTopic(const std::string& channelName) const
 {
@@ -344,7 +98,255 @@ std::string	Server::getChannelMembers(const std::string& channelName) const
 	return list;
 }
 
-void		Server::sendMessage(Client& client, const std::string& target, const std::string& message)
+//----------------------------------------------------------------------MESSAGES
+
+void	Server::inviteUser(Client &client, const std::string& nick, const std::string& channelName)
+{
+	int											userFd = _getClientFd(nick);
+	std::map<std::string, Channel>::iterator	channelIt = _channels.find(channelName);
+	t_rplContext								context;
+
+	_fillContext(context, client.getNick(), channelName, "INVITE", "");
+	if (channelIt == _channels.end())
+		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
+	else if (!channelIt->second.isMember(client.getFd()))
+		_handleReply(client, AReply::getNReply(ERR_NOTONCHANNEL, *this, client, context));
+	else if (channelIt->second.isInviteOnly() && !channelIt->second.isOperator(client.getFd())) //test
+		_handleReply(client, AReply::getNReply(ERR_CHANOPRIVSNEEDED, *this, client, context));
+	else if (channelIt->second.isMember(userFd))
+	{
+		context.target = nick;
+		_handleReply(client, AReply::getNReply(ERR_USERONCHANNEL, *this, client, context));
+	}
+	else if (_clients.find(userFd) != _clients.end())
+	{
+		context.target = nick;
+		channelIt->second.setInvitedUser(userFd);
+		_handleReply(client, AReply::getNReply(RPL_INVITING, *this, client, context));
+		_handleReply(_clients.find(userFd)->second, AReply::getReply(INVITE, client, context));
+	}
+}
+
+void	Server::joinChannel(Client& client, const std::string& name, const std::string& key)
+{
+	t_rplContext	context;
+	Channel			*channel = NULL;
+	bool		invited;
+
+	if(_channelExists(name))
+	{
+		channel = &(_channels.at(name));
+		if (channel->isMember(client.getFd()))
+			return ;
+	}
+	invited = channel && channel->isInvited(client.getFd());
+	_fillContext(context, client.getNick(), name, "JOIN", "");
+
+	if (name.empty())
+		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
+	else if(name[0] != '#')
+		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
+	else if (channel && !invited && !channel->isKeyOk(key))
+		_handleReply(client, AReply::getNReply(ERR_BADCHANNELKEY, *this, client, context));
+	else if (channel && !invited && channel->isInviteOnly())
+		_handleReply(client, AReply::getNReply(ERR_INVITEONLYCHAN, *this, client, context));
+	else if (channel && !invited && channel->isFull())
+		_handleReply(client, AReply::getNReply(ERR_CHANNELISFULL, *this, client, context));
+	else
+	{
+		if (!channel)
+		{
+			_addChannel(Channel(name, client.getFd()));
+			channel = &(_channels.at(name));
+		}
+		else
+			channel->addUser(client.getFd());
+		_handleReplyChannel(*channel, AReply::getReply(JOIN, client, context), -1);
+		if (!channel->getTopic().empty())
+			_handleReply(client, AReply::getNReply(RPL_TOPIC, *this, client, context));
+		_handleReply(client, AReply::getNReply(RPL_NAMREPLY, *this, client, context));
+		_handleReply(client, AReply::getNReply(RPL_ENDOFNAMES, *this, client, context));
+	}
+}
+
+void	Server::kickUser(Client& client, const std::string& chanName, const std::string& nick, const std::string& reason)
+{
+	t_rplContext	context;
+	Channel			*channel = NULL;
+
+	_fillContext(context, nick, chanName, "KICK", reason);
+	if (chanName.empty())
+		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
+	else if(!_channelExists(chanName))
+	{
+		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
+		return;
+	}
+	channel = &(_channels.at(chanName));
+
+	if(!channel->isMember(client.getFd()))
+		_handleReply(client, AReply::getNReply(ERR_NOTONCHANNEL, *this, client, context));
+	if(!channel->isOperator(client.getFd()))
+		_handleReply(client, AReply::getNReply(ERR_CHANOPRIVSNEEDED, *this, client, context));
+	else if (!channel->isMember(_getClientFd(nick)))
+		_handleReply(client, AReply::getNReply(ERR_USERNOTINCHANNEL, *this, client, context));
+	else
+	{
+		_handleReplyChannel(*channel, AReply::getReply(KICK, client, context), -1);
+		channel->removeUser(_getClientFd(nick));
+		if (channel->getUserCount() < 1) _deleteChannel(*channel);
+	}
+}
+
+void	Server::getMode(Client& client, std::string channel_name)
+{
+	t_rplContext	context;
+
+	_fillContext(context, client.getNick(), channel_name, "MODE", "");
+	if (channel_name.empty())
+		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
+	else if (!_channelExists(channel_name))
+		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
+	else
+	{
+		_fillContext(context, client.getNick(), channel_name, "MODE", _channels.at(channel_name).getModes());
+		_handleReply(client, AReply::getNReply(RPL_CHANNELMODEIS, *this, client, context));
+	}
+}
+
+void	Server::setMode(Client& client, std::string channel_name, bool add, char type, std::string parameter)
+{
+	t_rplContext		context;
+	Channel				*channel = NULL;
+	bool			changes = false;
+	std::stringstream	ss;
+	int					n;
+
+	_fillContext(context, client.getNick(), channel_name, "MODE", std::string(1, type));
+	if (channel_name.empty())
+		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
+	else if (!_channelExists(channel_name))
+		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
+	else
+	{
+		channel = &(_channels.at(channel_name));
+		if (!channel->isMember(client.getFd()))
+			_handleReply(client, AReply::getNReply(ERR_NOTONCHANNEL, *this, client, context));
+		else if (!channel->isOperator(client.getFd()))
+			_handleReply(client, AReply::getNReply(ERR_CHANOPRIVSNEEDED, *this, client, context));
+		else
+		{
+			switch (type)
+			{
+			case 'i':
+				changes = channel->setInviteOnly(add);
+				_fillContext(context, client.getNick(), channel_name, "MODE", (add ? "+i" : "-i"));
+				break;
+			case 'k':
+				if (!(add && parameter.empty()) && channel->setKey(parameter))
+				{
+					changes = true;
+					_fillContext(context, client.getNick(), channel_name, "MODE", (add ? "+k " : "-k ") + parameter);
+				}
+				break;
+			case 'l':
+				n = channel->setUserLimit(parameter);
+				ss << n;
+				changes = n >= 0;
+				if (n > 0)
+					_fillContext(context, client.getNick(), channel_name, "MODE", "+l " + ss.str());
+				if (n == 0)
+					_fillContext(context, client.getNick(), channel_name, "MODE", "-l" );
+				break;
+			case 'o':
+				changes = channel->changeOperator(_getClientFd(parameter), add);
+				_fillContext(context, client.getNick(), channel_name, "MODE", (add ? "+o " : "-o ") + parameter);
+				break;
+			case 't':
+				changes = channel->setTopicRestricted(add);
+				_fillContext(context, client.getNick(), channel_name, "MODE", (add ? "+t" : "-t"));
+				break;
+			default:
+				_handleReply(client, AReply::getNReply(ERR_UNKNOWNMODE, *this, client, context));
+				break;
+			}
+		}
+	}
+	if (changes)
+		_handleReplyChannel(*channel, AReply::getReply(MODE, client, context), -1);
+}
+
+void	Server::setClientNick(Client& client, const std::string& nick)
+{
+	t_rplContext	context;
+	_fillContext(context, nick, "", "NICK", "");
+
+	if (nick.empty())
+		_handleReply(client, AReply::getNReply(ERR_NONICKNAMEGIVEN, *this, client, context));
+	else if (isReservedChar(nick[0]))
+		_handleReply(client, AReply::getNReply(ERR_ERRONEUSNICKNAME, *this, client, context));
+	else if (_nickInUse(nick))
+		_handleReply(client, AReply::getNReply(ERR_NICKNAMEINUSE, *this, client, context));
+	else if (client.getNick().empty())
+	{
+		client.setNick(nick);
+		_handleReply(client, AReply::getNReply(RPL_WELCOME, *this, client, context));
+		_handleReply(client, AReply::getNReply(RPL_ISUPPORT, *this, client, context));
+		if (!client.getUser().empty())
+			client.setRegistered();
+	}
+	else
+	{
+		context.target = client.getNick();
+		client.setNick(nick);
+		_handleReply(client, AReply::getReply(NICK, client, context));
+
+		std::map<std::string, Channel>::iterator it = _channels.begin();
+		std::map<std::string, Channel>::iterator end = _channels.end();
+		for (; it != end; it++)
+			_handleReplyChannel(it->second, AReply::getReply(NICK, client, context), client.getFd());
+	}
+}
+
+void	Server::partChannel(Client &client, const std::string &name, const std::string &reason)
+{
+	t_rplContext	context;
+	Channel			*channel = NULL;
+
+	if(_channelExists(name))
+		channel = &(_channels.at(name));
+	_fillContext(context, client.getNick(), name, "PART", reason);
+
+	if (name.empty())														//Not enough params
+		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
+	else if (!channel)														//Channel does NOT exit
+		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
+	else if (channel && !channel->isMember(client.getFd()))					//Channel exists but client is not a member
+		_handleReply(client, AReply::getNReply(ERR_NOTONCHANNEL, *this, client, context));
+	else
+	{
+		_handleReplyChannel(*channel, AReply::getReply(PART, client, context), -1);
+		channel->removeUser(client.getFd());
+		if (channel->getUserCount() < 1) _deleteChannel(*channel);
+	}
+}
+
+void	Server::authClient(Client& client, const std::string& pass)
+{
+	t_rplContext	context;
+	_fillContext(context, "", "", "PASS", "");
+
+	if (client.isAuthenticated())
+		_handleReply(client, AReply::getNReply(ERR_ALREADYREGISTERED, *this, client, context));
+	else if (pass.empty())
+		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
+	else if (pass != _password)
+		_handleReply(client, AReply::getNReply(ERR_PASSWDMISMATCH, *this, client, context));
+	else
+		client.setAuthenticated(true);
+}
+
+void	Server::sendMessage(Client& client, const std::string& target, const std::string& message)
 {
 	t_rplContext	context;
 	int targetFd = _getClientFd(target);
@@ -362,84 +364,84 @@ void		Server::sendMessage(Client& client, const std::string& target, const std::
 		_handleReply(client, AReply::getNReply(ERR_NOSUCHNICK, *this, client, context));
 }
 
-void		Server::setMode(Client& client, std::string channel_name, bool add, char type, std::string parameter)
-{
-	t_rplContext		context;
-	Channel				*channel = NULL;
-	bool				changes = false;
-	std::stringstream	ss;
-	int					n;
-
-	_fillContext(context, client.getNick(), channel_name, "MODE", std::string(1, type));
-	if (channel_name.empty())
-		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
-	else if (!_channelExists(channel_name))
-		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
-	else
-	{
-		channel = &(_channels.at(channel_name));
-		if (!channel->isMember(client.getFd()))
-			_handleReply(client, AReply::getNReply(ERR_NOTONCHANNEL, *this, client, context));
-		else if (!channel->isOperator(client.getFd()))
-			_handleReply(client, AReply::getNReply(ERR_CHANOPRIVSNEEDED, *this, client, context));
-		switch (type)
-		{
-		case 'i':
-			changes = channel->setInviteOnly(add);
-			_fillContext(context, client.getNick(), channel_name, "MODE", (add ? "+i" : "-i"));
-			break;
-		case 'k':
-			if (!(add && parameter.empty()) && channel->setKey(parameter))
-			{
-				changes = true;
-				_fillContext(context, client.getNick(), channel_name, "MODE", (add ? "+k " : "-k ") + parameter);
-			}
-			break;
-		case 'l':
-			n = channel->setUserLimit(parameter);
-			ss << n;
-			changes = n >= 0;
-			if (n > 0)
-				_fillContext(context, client.getNick(), channel_name, "MODE", "+l " + ss.str());
-			if (n == 0)
-				_fillContext(context, client.getNick(), channel_name, "MODE", "-l" );
-			break;
-		case 'o':
-			changes = channel->changeOperator(_getClientFd(parameter), add);
-			_fillContext(context, client.getNick(), channel_name, "MODE", (add ? "+o " : "-o ") + parameter);
-			break;
-		case 't':
-			changes = channel->setTopicRestricted(add);
-			_fillContext(context, client.getNick(), channel_name, "MODE", (add ? "+t" : "-t"));
-			break;
-		default:
-			_handleReply(client, AReply::getNReply(ERR_UNKNOWNMODE, *this, client, context));
-			break;
-		}
-	}
-	if (changes)
-		_handleReplyChannel(*channel, AReply::getReply(MODE, client, context), -1);
-}
-
-void		Server::getMode(Client& client, std::string channel_name)
+void	Server::quitClient(Client& client, const std::string& msg)
 {
 	t_rplContext	context;
 
-	_fillContext(context, client.getNick(), channel_name, "MODE", "");
-	if (channel_name.empty())
-		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
-	else if (!_channelExists(channel_name))
+	_fillContext(context, "", "", "QUIT", msg);
+
+	std::map<std::string, Channel>::iterator it = _channels.begin();
+	std::map<std::string, Channel>::iterator end = _channels.end();
+
+	for (; it != end; it++)
+		_handleReplyChannel(it->second, AReply::getReply(QUIT, client, context), -1);
+	_disconnectClient(client);
+}
+
+void	Server::displayChannelTopic(Client& client, const std::string& channelName)
+{
+	std::map<std::string, Channel>::iterator	channelIt = _channels.find(channelName);
+	Channel&									channel = channelIt->second;
+	t_rplContext								context;
+
+	_fillContext(context, "", channelName, "TOPIC", "");
+	if (channelIt == _channels.end())
 		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
+	else if (!channel.isMember(client.getFd()))
+		_handleReply(client, AReply::getNReply(ERR_NOTONCHANNEL, *this, client, context));
+	else if (channel.getTopic().empty())
+		_handleReply(client, AReply::getNReply(RPL_NOTOPIC, *this, client, context));
+	else
+		_handleReply(client, AReply::getNReply(RPL_TOPIC, *this, client, context));
+}
+
+void	Server::setChannelTopic(Client& client, const std::string& channelName, const std::string& topic)
+{
+	std::map<std::string, Channel>::iterator	channelIt = _channels.find(channelName);
+	Channel&									channel = channelIt->second;
+	t_rplContext								context;
+
+	_fillContext(context, "", channelName, "TOPIC", topic);
+	if (channelIt == _channels.end())
+		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
+	else if (!channel.isMember(client.getFd()))
+		_handleReply(client, AReply::getNReply(ERR_NOTONCHANNEL, *this, client, context));
+	else if (channel.isTopicRestricted() && !channel.isOperator(client.getFd()))
+		_handleReply(client, AReply::getNReply(ERR_CHANOPRIVSNEEDED, *this, client, context));
 	else
 	{
-		_fillContext(context, client.getNick(), channel_name, "MODE", _channels.at(channel_name).getModes());
-		_handleReply(client, AReply::getNReply(RPL_CHANNELMODEIS, *this, client, context));
+		_handleReplyChannel(channel, AReply::getReply(TOPIC, client, context), -1);
+		channel.setTopic(topic);
 	}
+}
+
+void	Server::setClientName(Client& client, const std::string& name)
+{
+	client.setName(name);
+}
+
+bool	Server::setClientUser(Client& client, const std::string& user)
+{
+	t_rplContext	context;
+	_fillContext(context, "", "", "USER", "");
+
+	if (client.isRegistered())
+		_handleReply(client, AReply::getNReply(ERR_ALREADYREGISTERED, *this, client, context));
+	else if (user.empty())
+		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
+	else
+	{
+		client.setUser(user);
+		if (!client.getNick().empty())
+			client.setRegistered();
+		return true;
+	}
+	return false;
 }
 
 // ---------------------------------------------------- PRIVATE MEMBER FUNCTIONS
 
-void		Server::_setup(char* port)
+void	Server::_setup(char* port)
 {
 	struct addrinfo	hints, *info; //NOTE: dont know if we need to free hints
 
@@ -466,7 +468,7 @@ void		Server::_setup(char* port)
 	std::cout << BLUE << "---------------- THISCORD RUNNING ----------------" << RESET << std::endl;
 }
 
-bool		Server::_createSocket(struct addrinfo *info)
+bool	Server::_createSocket(struct addrinfo *info)
 {
 	for(struct addrinfo *it = info;it != NULL; it = it->ai_next)
 	{
@@ -482,7 +484,7 @@ bool		Server::_createSocket(struct addrinfo *info)
 	return false;
 }
 
-void		Server::_initEpoll()
+void	Server::_initEpoll()
 {
 	_epoll = epoll_create1(0);
 	if (_epoll < 0) throw std::runtime_error("Error creating epoll");
@@ -495,7 +497,7 @@ void		Server::_initEpoll()
 	epoll_ctl(_epoll, EPOLL_CTL_ADD, _fd, &sock_ev);
 }
 
-void		Server::_eventLoop()
+void	Server::_eventLoop()
 {
 	while (_isRunning)
 	{
@@ -526,7 +528,7 @@ void		Server::_eventLoop()
 	}
 }
 
-void		Server::_acceptClient()
+void	Server::_acceptClient()
 {
 	struct sockaddr_storage	addr;
 	socklen_t				addrlen = sizeof(addr);
@@ -549,7 +551,7 @@ void		Server::_acceptClient()
 	}
 }
 
-void		Server::_createSignal(int signo, void (*handler)(int))
+void	Server::_createSignal(int signo, void (*handler)(int))
 {
 	struct sigaction sa;
 	memset(&sa, 0, sizeof(sa));
@@ -561,13 +563,13 @@ void		Server::_createSignal(int signo, void (*handler)(int))
 		throw std::runtime_error("Sigaction failed");
 }
 
-void		Server::_handlesigint(int signo)
+void	Server::_handlesigint(int signo)
 {
 	(void)signo;
 	throw std::runtime_error("");
 }
 
-void		Server::_readFd(const int fd)
+void	Server::_readFd(const int fd)
 {
 	char	buf[BUFFERSIZE];
 	std::map<int, Client>::iterator it = _clients.find(fd);
@@ -586,7 +588,7 @@ void		Server::_readFd(const int fd)
 	}
 }
 
-void		Server::_handleLine(Client& client, char* line, int data)
+void	Server::_handleLine(Client& client, char* line, int data)
 {
 	client.appendBuffer(line, data, IN);
 	while (client.hasFullLine(IN))
@@ -601,14 +603,14 @@ void		Server::_handleLine(Client& client, char* line, int data)
 	}
 }
 
-void		Server::_handleReply(Client& client, const std::string& message)
+void	Server::_handleReply(Client& client, const std::string& message)
 {
 	client.appendBuffer(message.c_str(), message.size(), OUT);
 	struct epoll_event client_ev = newEvent(client.getFd(), EPOLLOUT | EPOLLIN);
 	epoll_ctl(_epoll, EPOLL_CTL_MOD, client.getFd(), &client_ev);
 }
 
-void		Server::_handleReplyChannel(const Channel& channel, const std::string message, int client_fd)
+void	Server::_handleReplyChannel(const Channel& channel, const std::string message, int client_fd)
 {
 	std::set<int>	clients = channel.getUsersList();
 	for (std::set<int>::iterator it = clients.begin(); it != clients.end(); it++)
@@ -619,7 +621,7 @@ void		Server::_handleReplyChannel(const Channel& channel, const std::string mess
 	}
 }
 
-void		Server::_writeFd(const int fd)
+void	Server::_writeFd(const int fd)
 {
 	std::map<int, Client>::iterator it = _clients.find(fd);
 	if (it == _clients.end()) return;
@@ -650,7 +652,7 @@ void		Server::_writeFd(const int fd)
 	}
 }
 
-void		Server::_fillContext(t_rplContext& context, const std::string& target, const std::string& channel, const std::string& command, const std::string& message) const
+void	Server::_fillContext(t_rplContext& context, const std::string& target, const std::string& channel, const std::string& command, const std::string& message) const
 {
 	context.target = target;
 	context.channel = channel;
@@ -658,7 +660,7 @@ void		Server::_fillContext(t_rplContext& context, const std::string& target, con
 	context.message = message;
 }
 
-void		Server::_addClient(const int fd)
+void	Server::_addClient(const int fd)
 {
 	struct epoll_event client_ev = newEvent(fd, EPOLLIN);
 	epoll_ctl(_epoll, EPOLL_CTL_ADD, fd, &client_ev);
@@ -668,7 +670,7 @@ void		Server::_addClient(const int fd)
 	std::cout << GREEN << "Client " << fd << " connected" << RESET << std::endl;
 }
 
-void		Server::_disconnectClient(Client& client)
+void	Server::_disconnectClient(Client& client)
 {
 	int fd = client.getFd();
 	std::map<int, Client>::iterator it = _clients.find(fd);
@@ -693,24 +695,24 @@ void		Server::_disconnectClient(Client& client)
 	close(fd);
 }
 
-void		Server::_addChannel(const Channel& channel)
+void	Server::_addChannel(const Channel& channel)
 {
 	_channels.insert(std::pair<std::string, Channel>(channel.getName(), channel));
 }
 
-void		Server::_deleteChannel(Channel& channel)
+void	Server::_deleteChannel(Channel& channel)
 {
 	_channels.erase(_channels.find(channel.getName()));
 }
 
-bool		Server::_nickInUse(const std::string nick) const
+bool	Server::_nickInUse(const std::string nick) const
 {
 	for (std::map<int, Client>::const_iterator it = _clients.begin(); it != _clients.end();it++)
 		if (it->second.getNick().compare(nick) == 0) return true;
 	return false;
 }
 
-bool		Server::_channelExists(const std::string name) const { return _channels.find(name) != _channels.end(); }
+bool	Server::_channelExists(const std::string name) const { return _channels.find(name) != _channels.end(); }
 
 int			Server::_getClientFd(const std::string& nick) const
 {
@@ -733,13 +735,13 @@ epoll_event	newEvent(int fd, int flags)
 	return ev;
 }
 
-bool		isReservedChar(char c)
+bool	isReservedChar(char c)
 {
 	std::string reserved = "#& =";
 	return reserved.find(c) != std::string::npos;
 }
 
-bool		setFdNonBlocking(int fd)
+bool	setFdNonBlocking(int fd)
 {
 	int flags = fcntl(fd, F_GETFL);
 	if (flags < 0 || fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0)

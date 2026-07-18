@@ -121,26 +121,20 @@ std::string	AReply::getReply(int command, const Client& client, const t_rplConte
 
 	switch (command)
 	{
-		case ERROR:
-			reply << "ERROR :" << context.message;
-			break;
-		case QUIT:
-			reply << ":" << client.getNick() << " QUIT :Quit: " << context.message;
-			break;
-		case NICK:
-			reply << ":" << context.target << " NICK " << client.getNick();
+		case INVITE:
+			reply << ":" << client.getNick() << " INVITE " << context.target << " " << context.channel;
 			break;
 		case JOIN:
 			reply << ":" << client.getNick() << " JOIN " << context.channel;
 			break;
-		case INVITE:
-			reply << ":" << client.getNick() << " INVITE " << context.target << " " << context.channel;
-			break;
-		case TOPIC:
-			reply << ":" << client.getNick() << " TOPIC " << context.channel << " :" << context.message;
-			break;
 		case KICK:
 			reply << ":" << client.getNick() << " KICK " << context.channel << " " << context.target << " :" << context.message;
+			break;
+		case MODE:
+			reply << ":" << client.getNick() << " MODE " << context.channel << " " << context.message;
+			break;
+		case NICK:
+			reply << ":" << context.target << " NICK " << client.getNick();
 			break;
 		case PART:
 			reply << ":" << client.getNick() << " PART " << context.channel << " :" << context.message;
@@ -148,8 +142,14 @@ std::string	AReply::getReply(int command, const Client& client, const t_rplConte
 		case PRIVMSG:
 			reply << ":" << client.getNick() << " PRIVMSG " << context.target << " :" << context.message;
 			break;
-		case MODE:
-			reply << ":" << client.getNick() << " MODE " << context.channel << " " << context.message;
+		case QUIT:
+			reply << ":" << client.getNick() << " QUIT :Quit: " << context.message;
+			break;
+		case TOPIC:
+			reply << ":" << client.getNick() << " TOPIC " << context.channel << " :" << context.message;
+			break;
+		case ERROR:
+			reply << "ERROR :" << context.message;
 			break;
 	}
 	reply << "\r\n";

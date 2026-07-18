@@ -52,23 +52,29 @@ class Server
 		void		start(char* port);
 		void		stop();
 
+		//---------------------------------------------------------------GETTERS
+
 		std::string	getName() const;
-		void		authClient(Client& client, const std::string& pass);
-		void		quitClient(Client& client, const std::string& msg);
-		void		setClientNick(Client& client, const std::string& nick);
-		bool		setClientUser(Client& client, const std::string& user);
-		void		setClientName(Client& client, const std::string& name);
-		void		joinChannel(Client& client, const std::string& channel, const std::string& key);
-		void		inviteUser(Client& client, const std::string& nick, const std::string& channelName);
-		void		setChannelTopic(Client& client, const std::string& channelName, const std::string& topic);
-		void		displayChannelTopic(Client& client, const std::string& channelName);
-		void		kickUser(Client& client, const std::string& channel, const std::string& nick, const std::string& reason);
-		void		partChannel(Client& client, const std::string& name, const std::string& reason);
-		std::string	getChannelTopic(const std::string& channelName) const;
 		std::string	getChannelMembers(const std::string& channelName) const;
-		void		sendMessage(Client& client, const std::string& target, const std::string& message);
-		void		setMode(Client& client, std::string channel_name, bool add, char type, std::string parameter);
+		std::string	getChannelTopic(const std::string& channelName) const;
+
+		//--------------------------------------------------------------MESSAGES
+
+		void		inviteUser(Client& client, const std::string& nick, const std::string& channelName);
+		void		joinChannel(Client& client, const std::string& channel, const std::string& key);
+		void		kickUser(Client& client, const std::string& channel, const std::string& nick, const std::string& reason);
 		void		getMode(Client& client, std::string channel_name);
+		void		setMode(Client& client, std::string channel_name, bool add, char type, std::string parameter);
+		void		setClientNick(Client& client, const std::string& nick);
+		void		partChannel(Client& client, const std::string& name, const std::string& reason);
+		void		authClient(Client& client, const std::string& pass);
+		void		sendMessage(Client& client, const std::string& target, const std::string& message);
+		void		quitClient(Client& client, const std::string& msg);
+		void		displayChannelTopic(Client& client, const std::string& channelName);
+		void		setChannelTopic(Client& client, const std::string& channelName, const std::string& topic);
+		void		setClientName(Client& client, const std::string& name);
+		bool		setClientUser(Client& client, const std::string& user);
+
 };
 
 epoll_event	newEvent(int fd, int flags);

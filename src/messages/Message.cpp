@@ -80,17 +80,17 @@ const std::vector<std::string>&	Message::getParams() const { return _params; }
 t_comnum	getCommand(std::string word)
 {
 	std::transform(word.begin(), word.end(), word.begin(), ::toupper);
-	if (word == "PASS") return PASS;
-	if (word == "NICK") return NICK;
-	if (word == "USER") return USER;
-	if (word == "JOIN") return JOIN;
-	if (word == "PRIVMSG") return PRIVMSG;
-	if (word == "TOPIC") return TOPIC;
-	if (word == "MODE") return MODE;
 	if (word == "INVITE") return INVITE;
-	if (word == "PART") return PART;
+	if (word == "JOIN") return JOIN;
 	if (word == "KICK") return KICK;
+	if (word == "MODE") return MODE;
+	if (word == "NICK") return NICK;
+	if (word == "PART") return PART;
+	if (word == "PASS") return PASS;
+	if (word == "PRIVMSG") return PRIVMSG;
 	if (word == "QUIT") return QUIT;
+	if (word == "TOPIC") return TOPIC;
+	if (word == "USER") return USER;
 	return NONE;
 }
 

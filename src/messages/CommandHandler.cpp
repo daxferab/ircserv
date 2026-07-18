@@ -20,38 +20,38 @@ bool	CommandHandler::execCommand(Message& command, Client& client, Server& serve
 		return false;
 	switch (command.getCommand())
 	{
-		case PASS:
-			_pass(command, client, server);
-			break;
-		case NICK:
-			_nick(command, client, server);
-			break;
-		case USER:
-			_user(command, client, server);
+		case INVITE:
+			_invite(command, client, server);
 			break;
 		case JOIN:
 			_join(command, client, server);
 			break;
-		case PRIVMSG:
-			_privmsg(command, client, server);
-			break;
-		case TOPIC:
-			_topic(command, client, server);
+		case KICK:
+			_kick(command, client, server);
 			break;
 		case MODE:
 			_mode(command, client, server);
 			break;
-		case INVITE:
-			_invite(command, client, server);
+		case NICK:
+			_nick(command, client, server);
 			break;
 		case PART:
 			_part(command, client, server);
 			break;
-		case KICK:
-			_kick(command, client, server);
+		case PASS:
+			_pass(command, client, server);
+			break;
+		case PRIVMSG:
+			_privmsg(command, client, server);
 			break;
 		case QUIT:
 			_quit(command, client, server);
+			break;
+		case TOPIC:
+			_topic(command, client, server);
+			break;
+		case USER:
+			_user(command, client, server);
 			break;
 		default:
 			break;
@@ -61,32 +61,11 @@ bool	CommandHandler::execCommand(Message& command, Client& client, Server& serve
 
 //------------------------------------------------------------ PRIVATE FUNCTIONS
 
-void	CommandHandler::_pass(const Message& command, Client& client, Server& server)
+void	CommandHandler::_invite(const Message& command, Client& client, Server& server)
 {
-	if (command.getParams().empty())
-		server.authClient(client, "");
-	else
-		server.authClient(client, command.getParams()[0]);
-}
+	std::string	channel = command.getParams()[1].empty() ? "" : command.getParams()[1];
 
-void	CommandHandler::_nick(const Message& command, Client& client, Server& server)
-{
-	if (command.getParams().empty())
-		server.setClientNick(client, "");
-	else
-		server.setClientNick(client, command.getParams()[0]);
-}
-
-void	CommandHandler::_user(const Message& command, Client& client, Server& server)
-{
-	bool	success;
-
-	if (command.getParams().empty())
-		success = server.setClientUser(client, ""); // need more params (false)
-	else
-		success = server.setClientUser(client, command.getParams()[0]); //check if already registered, if it is, return false
-	if (success && command.getParams().size() == 4)
-		server.setClientName(client, command.getParams()[3]);
+	server.inviteUser(client, command.getParams()[0], channel);
 }
 
 void	CommandHandler::_join(const Message& command, Client& client, Server& server)
@@ -110,25 +89,13 @@ void	CommandHandler::_join(const Message& command, Client& client, Server& serve
 	}
 }
 
-void	CommandHandler::_privmsg(const Message& command, Client& client, Server& server)
+void	CommandHandler::_kick(const Message& command, Client& client, Server& server)
 {
-	std::vector<std::string>	clients;
-	std::string					message = command.getParams()[1].empty() ? "" : command.getParams()[1];
+	std::vector<std::string>	users = split(command.getParams()[1], ',');
+	std::string					reason = command.getParams()[2].empty() ? "" : command.getParams()[2];
 
-	clients = split(command.getParams()[0], ',');
-	for (size_t i = 0; i < clients.size(); ++i)
-		server.sendMessage(client, clients[i], message);
-}
-
-void	CommandHandler::_topic(const Message& command, Client& client, Server& server)
-{
-	if (command.getParams().size() == 1)
-		server.displayChannelTopic(client, command.getParams()[0]);
-	else
-	{
-		if (command.getParams()[1].empty()) server.setChannelTopic(client, command.getParams()[0], "");
-		else server.setChannelTopic(client, command.getParams()[0], command.getParams()[1]);
-	}
+	for (size_t i = 0; i < users.size(); ++i)
+		server.kickUser(client, command.getParams()[0], users[i], reason);
 }
 
 void	CommandHandler::_mode(const Message& command, Client& client, Server& server)
@@ -166,11 +133,12 @@ void	CommandHandler::_mode(const Message& command, Client& client, Server& serve
 	}
 }
 
-void	CommandHandler::_invite(const Message& command, Client& client, Server& server)
+void	CommandHandler::_nick(const Message& command, Client& client, Server& server)
 {
-	std::string	channel = command.getParams()[1].empty() ? "" : command.getParams()[1];
-
-	server.inviteUser(client, command.getParams()[0], channel);
+	if (command.getParams().empty())
+		server.setClientNick(client, "");
+	else
+		server.setClientNick(client, command.getParams()[0]);
 }
 
 void	CommandHandler::_part(const Message &command, Client &client, Server &server)
@@ -181,13 +149,22 @@ void	CommandHandler::_part(const Message &command, Client &client, Server &serve
 		server.partChannel(client, channels[i], command.getParams()[1]);
 }
 
-void	CommandHandler::_kick(const Message& command, Client& client, Server& server)
+void	CommandHandler::_pass(const Message& command, Client& client, Server& server)
 {
-	std::vector<std::string>	users = split(command.getParams()[1], ',');
-	std::string					reason = command.getParams()[2].empty() ? "" : command.getParams()[2];
+	if (command.getParams().empty())
+		server.authClient(client, "");
+	else
+		server.authClient(client, command.getParams()[0]);
+}
 
-	for (size_t i = 0; i < users.size(); ++i)
-		server.kickUser(client, command.getParams()[0], users[i], reason);
+void	CommandHandler::_privmsg(const Message& command, Client& client, Server& server)
+{
+	std::vector<std::string>	clients;
+	std::string					message = command.getParams()[1].empty() ? "" : command.getParams()[1];
+
+	clients = split(command.getParams()[0], ',');
+	for (size_t i = 0; i < clients.size(); ++i)
+		server.sendMessage(client, clients[i], message);
 }
 
 void	CommandHandler::_quit(const Message& command, Client& client, Server& server)
@@ -195,6 +172,29 @@ void	CommandHandler::_quit(const Message& command, Client& client, Server& serve
 	if (command.getParams().empty())
 		server.quitClient(client, "");
 	server.quitClient(client, command.getParams()[0]);
+}
+
+void	CommandHandler::_topic(const Message& command, Client& client, Server& server)
+{
+	if (command.getParams().size() == 1)
+		server.displayChannelTopic(client, command.getParams()[0]);
+	else
+	{
+		if (command.getParams()[1].empty()) server.setChannelTopic(client, command.getParams()[0], "");
+		else server.setChannelTopic(client, command.getParams()[0], command.getParams()[1]);
+	}
+}
+
+void	CommandHandler::_user(const Message& command, Client& client, Server& server)
+{
+	bool	success;
+
+	if (command.getParams().empty())
+		success = server.setClientUser(client, ""); // need more params (false)
+	else
+		success = server.setClientUser(client, command.getParams()[0]); //check if already registered, if it is, return false
+	if (success && command.getParams().size() == 4)
+		server.setClientName(client, command.getParams()[3]);
 }
 
 //------------------------------------------------------- OUT OF SCOPE FUNCTIONS
