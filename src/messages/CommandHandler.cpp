@@ -63,9 +63,10 @@ bool	CommandHandler::execCommand(Message& command, Client& client, Server& serve
 
 void	CommandHandler::_invite(const Message& command, Client& client, Server& server)
 {
+	std::string	user = command.getParams()[0].empty() ? "" : command.getParams()[0];
 	std::string	channel = command.getParams()[1].empty() ? "" : command.getParams()[1];
 
-	server.inviteUser(client, command.getParams()[0], channel);
+	server.inviteUser(client, user, channel);
 }
 
 void	CommandHandler::_join(const Message& command, Client& client, Server& server)
