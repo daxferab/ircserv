@@ -15,8 +15,8 @@ int	main(int ac, char* av[])
 	try {
 		server.start(av[1]);
 	} catch (std::exception& e) {
-		server.stop();
 		std::cerr << RED << e.what() << std::endl;
+		server.stop();
 	}
 
 	return 0;

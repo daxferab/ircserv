@@ -61,7 +61,7 @@ void	Server::stop()
 		close(_epoll);
 	}
 	if (_fd >= 0) close(_fd);
-	std::cout << std::endl << RED << "------------- THISCORD SERVER CLOSED! ------------" << RESET << std::endl;
+	std::cout << RED << "------------- THISCORD SERVER CLOSED! ------------" << RESET << std::endl;
 }
 
 //-----------------------------------------------------------------------GETTERS
@@ -553,6 +553,7 @@ void	Server::_createSignal(int signo, void (*handler)(int))
 void	Server::_handlesigint(int signo)
 {
 	(void)signo;
+	std::cout << std::endl;
 	throw std::runtime_error("");
 }
 
