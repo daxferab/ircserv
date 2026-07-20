@@ -527,10 +527,7 @@ void	Server::_acceptClient()
 	{
 		client_fd = accept(_fd, (struct sockaddr *)&addr, &addrlen);
 		if (client_fd < 0)
-		{
-			if (errno == EAGAIN || errno == EWOULDBLOCK) break;
-			throw std::runtime_error("Error accepting client");
-		}
+			break;
 		if (!setFdNonBlocking(client_fd))
 		{
 			close(client_fd);
@@ -632,7 +629,7 @@ void	Server::_writeFd(const int fd)
 			client.consumeOut((size_t)s);
 			continue;
 		}
-		else if (s == -1 && (errno == EAGAIN || errno == EWOULDBLOCK))
+		else if (s == -1)
 			break;
 		else
 		{
