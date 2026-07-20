@@ -70,20 +70,20 @@ void	CommandHandler::_join(const Message& command, Client& client, Server& serve
 {
 	std::vector<std::string>	clients, keys;
 
-	if (command.getParams().size() >= 2)
+	if (command.getParams()[1].empty())
+	{
+		clients = split(command.getParams()[0], ',');
+
+		for (size_t i = 0; i < clients.size(); ++i)
+			server.joinChannel(client, clients[i], "");
+	}
+	else
 	{
 		clients = split(command.getParams()[0], ',');
 		keys = split(command.getParams()[1], ',');
 
 		for (size_t i = 0; i < clients.size(); ++i)
 			server.joinChannel(client, clients[i], keys[i]);
-	}
-	else if (command.getParams().size() == 1)
-	{
-		clients = split(command.getParams()[0], ',');
-
-		for (size_t i = 0; i < clients.size(); ++i)
-			server.joinChannel(client, clients[i], "");
 	}
 }
 
@@ -103,11 +103,11 @@ void	CommandHandler::_mode(const Message& command, Client& client, Server& serve
 	char			c;
 	std::set<char>	seen;
 
-	if (command.getParams().size() == 0)
+	if (command.getParams()[0].empty())
 		server.setMode(client, "", add, '\0', "");
-	else if (command.getParams().size() == 1)
+	else if (command.getParams()[1].empty())
 		server.getMode(client, command.getParams()[0]);
-	else if (command.getParams().size() > 1)
+	else
 	{
 		for (size_t i = 0; i < command.getParams()[1].size(); i++)
 		{
@@ -119,7 +119,7 @@ void	CommandHandler::_mode(const Message& command, Client& client, Server& serve
 				if (seen.find(c) != seen.end())
 					continue ;
 				seen.insert(c);
-				if ((c == 'o' || (c == 'k' && add) || (c == 'l' && add)) && command.getParams().size() > param_iter)
+				if ((c == 'o' || (c == 'k' && add) || (c == 'l' && add)))
 					server.setMode(client, command.getParams()[0], add, c, command.getParams()[param_iter++]);
 				else
 					server.setMode(client, command.getParams()[0], add, c, "");
