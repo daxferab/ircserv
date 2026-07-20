@@ -44,6 +44,7 @@ class Server
 
 		bool		_nickInUse(const std::string nick) const;
 		bool		_channelExists(const std::string name) const;
+		Channel*	_getChannel(const std::string& name);
 		int			_getClientFd(const std::string& nick) const;
 
 	public:
