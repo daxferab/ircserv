@@ -111,7 +111,7 @@ std::string	AReply::getNReply(int n, const Server& server, const Client& client,
 			break;
 	}
 	reply << "\r\n";
-	std::cout << MAGENTA << reply.str() << RESET << std::endl;
+	std::cout << MAGENTA << reply.str() << RESET;
 	return reply.str();
 }
 
@@ -153,7 +153,7 @@ std::string	AReply::getReply(int command, const Client& client, const t_rplConte
 			break;
 	}
 	reply << "\r\n";
-	std::cout << MAGENTA << reply.str() << RESET << std::endl;
+	std::cout << MAGENTA << reply.str() << RESET;
 	return reply.str();
 }
 

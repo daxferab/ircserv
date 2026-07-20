@@ -61,7 +61,7 @@ void	Server::stop()
 		close(_epoll);
 	}
 	if (_fd >= 0) close(_fd);
-	std::cout << RED << "------------- THISCORD SERVER CLOSED! ------------" << RESET << std::endl;
+	std::cout << RED << "------------- THISCORD SERVER CLOSED! ------------" << RESET;
 }
 
 //-----------------------------------------------------------------------GETTERS
