@@ -137,10 +137,9 @@ void	CommandHandler::_mode(const Message& command, Client& client, Server& serve
 
 void	CommandHandler::_nick(const Message& command, Client& client, Server& server)
 {
-	if (command.getParams().empty())
-		server.setClientNick(client, "");
-	else
-		server.setClientNick(client, command.getParams()[0]);
+	std::string	nick = command.getParams()[0].empty() ? "" : command.getParams()[0];
+
+	server.setClientNick(client, nick);
 }
 
 void	CommandHandler::_part(const Message &command, Client &client, Server &server)
