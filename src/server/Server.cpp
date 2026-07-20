@@ -107,7 +107,9 @@ void	Server::inviteUser(Client &client, const std::string& nick, const std::stri
 	t_rplContext								context;
 
 	_fillContext(context, client.getNick(), channelName, "INVITE", "");
-	if (channelIt == _channels.end())
+	if (nick.empty() || channelName.empty())
+		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
+	else if (channelIt == _channels.end())
 		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
 	else if (!channelIt->second.isMember(client.getFd()))
 		_handleReply(client, AReply::getNReply(ERR_NOTONCHANNEL, *this, client, context));
