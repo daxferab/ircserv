@@ -1,5 +1,6 @@
 #include "Server.hpp"
 #include "colors.h"
+#include "utils/colors.h"
 #include <exception>
 #include <iostream>
 
@@ -7,7 +8,7 @@ int	main(int ac, char* av[])
 {
 	if (ac != 3)
 	{
-		std::cerr << RED << "Usage: ./ircserv <port> <password>" << std::endl;
+		std::cerr << RED << "Usage: ./ircserv <port> <password>" << RESET << std::endl;
 		return 1;
 	}
 
@@ -15,7 +16,7 @@ int	main(int ac, char* av[])
 	try {
 		server.start(av[1]);
 	} catch (std::exception& e) {
-		std::cerr << RED << e.what() << std::endl;
+		if (!e.what()) std::cerr << RED << e.what() << RESET << std::endl;
 		server.stop();
 	}
 
