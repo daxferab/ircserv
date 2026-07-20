@@ -43,6 +43,7 @@ class Channel
 		void					setTopic(const std::string topic);
 		bool					setKey(const std::string key);
 		void					setInvitedUser(int clientFd);
+		void					unsetInvitedUser(int clientFd);
 		bool					setOperator(int clientFd);
 		bool					unsetOperator(int clientFd);
 		bool					setInviteOnly(bool opt);

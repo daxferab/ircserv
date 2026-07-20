@@ -34,6 +34,7 @@ int						Channel::getUserCount() const { return _users.size(); }
 void					Channel::setTopic(const std::string topic) { _topic = topic; }
 bool					Channel::setKey(const std::string key) { if (_key == key) return false; _key = key; return true; }
 void					Channel::setInvitedUser(int clientFd) { _invitedUsers.insert(clientFd); }
+void					Channel::unsetInvitedUser(int clientFd) { _invitedUsers.erase(clientFd); }
 bool					Channel::setOperator(int clientFd) { return _users.find(clientFd) != _users.end() && _operators.insert(clientFd).second; }
 bool					Channel::unsetOperator(int clientFd)
 {
@@ -71,7 +72,10 @@ int						Channel::setUserLimit(const std::string limit)
 
 bool					Channel::isFull() const { return _userLimit > 0 && _userLimit >= getUserCount(); }
 bool					Channel::isKeyOk(std::string key) const { return key == _key || _key.empty(); }
-void					Channel::addUser(int fd) { _users.insert(fd); }
+void					Channel::addUser(int fd) {
+	_users.insert(fd);
+	unsetInvitedUser(fd);
+}
 bool					Channel::isMember(int fd) const { return _users.find(fd) != _users.end(); }
 void					Channel::removeUser(int fd)
 {
