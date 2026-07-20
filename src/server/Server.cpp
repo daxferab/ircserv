@@ -337,7 +337,8 @@ void	Server::authClient(Client& client, const std::string& pass)
 void	Server::sendMessage(Client& client, const std::string& target, const std::string& message)
 {
 	t_rplContext	context;
-	int targetFd = _getClientFd(target);
+	int 			targetFd = _getClientFd(target);
+	Channel*		channel = _getChannel(target);
 
 	_fillContext(context, target, "", "PRIVMSG", message);
 	if (target.empty())
@@ -346,8 +347,13 @@ void	Server::sendMessage(Client& client, const std::string& target, const std::s
 		_handleReply(client, AReply::getNReply(ERR_NOTEXTTOSEND, *this, client, context));
 	else if (targetFd > 0)
 		_handleReply(_clients.find(targetFd)->second, AReply::getReply(PRIVMSG, client, context));
-	else if(_channelExists(target))
-		_handleReplyChannel(_channels.find(target)->second, AReply::getReply(PRIVMSG, client, context), client.getFd());
+	else if(channel)
+	{
+		if (channel->isMember(client.getFd())) 
+			_handleReplyChannel(_channels.find(target)->second, AReply::getReply(PRIVMSG, client, context), client.getFd());
+		else
+			_handleReply(client, AReply::getNReply(ERR_CANNOTSENDTOCHAN, *this, client, context));
+	}
 	else
 		_handleReply(client, AReply::getNReply(ERR_NOSUCHNICK, *this, client, context));
 }

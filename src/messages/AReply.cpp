@@ -56,7 +56,7 @@ std::string	AReply::getNReply(int n, const Server& server, const Client& client,
 			reply << context.channel << " :No such channel";
 			break;
 		case ERR_CANNOTSENDTOCHAN:
-			reply << context.channel << " :Cannot send to channel";
+			reply << context.target << " :Cannot send to channel";
 			break;
 		case ERR_NORECIPIENT:
 			reply << context.target << " :No recipient given (" << context.command << ")";
