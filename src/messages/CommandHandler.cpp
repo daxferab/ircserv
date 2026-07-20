@@ -92,11 +92,12 @@ void	CommandHandler::_join(const Message& command, Client& client, Server& serve
 
 void	CommandHandler::_kick(const Message& command, Client& client, Server& server)
 {
+	std::string					channel = command.getParams()[0].empty() ? "" : command.getParams()[0];
 	std::vector<std::string>	users = split(command.getParams()[1], ',');
 	std::string					reason = command.getParams()[2].empty() ? "" : command.getParams()[2];
 
 	for (size_t i = 0; i < users.size(); ++i)
-		server.kickUser(client, command.getParams()[0], users[i], reason);
+		server.kickUser(client, channel, users[i], reason);
 }
 
 void	CommandHandler::_mode(const Message& command, Client& client, Server& server)
