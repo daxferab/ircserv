@@ -291,12 +291,11 @@ void	Server::setClientNick(Client& client, const std::string& nick)
 	{
 		context.target = client.getNick();
 		client.setNick(nick);
-		_handleReply(client, AReply::getReply(NICK, client, context));
 
-		std::map<std::string, Channel>::iterator it = _channels.begin();
-		std::map<std::string, Channel>::iterator end = _channels.end();
+		std::map<int, Client>::iterator it = _clients.begin();
+		std::map<int, Client>::iterator end = _clients.end();
 		for (; it != end; it++)
-			_handleReplyChannel(it->second, AReply::getReply(NICK, client, context), client.getFd());
+			_handleReply(it->second, AReply::getReply(NICK, client, context));
 	}
 }
 
