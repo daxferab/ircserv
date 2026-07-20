@@ -207,5 +207,9 @@ std::vector<std::string>	split(const std::string& str, char delimiter)
 
 	while (getline(iss, token, delimiter))
 		tokens.push_back(token);
+	if (str.empty())
+		tokens.push_back("");
+	else if (str[str.length() - 1] == delimiter)
+		tokens.push_back("");
 	return tokens;
 }
