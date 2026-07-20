@@ -172,7 +172,7 @@ void	Server::kickUser(Client& client, const std::string& chanName, const std::st
 	Channel			*channel = _getChannel(chanName);
 
 	_fillContext(context, nick, chanName, "KICK", reason);
-	if (chanName.empty())
+	if (nick.empty() || chanName.empty())
 		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
 	else if(!channel)
 		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
