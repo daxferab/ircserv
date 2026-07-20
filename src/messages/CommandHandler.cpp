@@ -163,7 +163,7 @@ void	CommandHandler::_quit(const Message& command, Client& client, Server& serve
 
 void	CommandHandler::_topic(const Message& command, Client& client, Server& server)
 {
-	if (command.getParams().size() == 1)
+	if (command.getParams()[1].empty())
 		server.displayChannelTopic(client, command.getParams()[0]);
 	else
 		server.setChannelTopic(client, command.getParams()[0], command.getParams()[1]);
