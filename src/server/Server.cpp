@@ -111,7 +111,7 @@ void	Server::inviteUser(Client &client, const std::string& nick, const std::stri
 		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
 	else if (!channelIt->second.isMember(client.getFd()))
 		_handleReply(client, AReply::getNReply(ERR_NOTONCHANNEL, *this, client, context));
-	else if (channelIt->second.isInviteOnly() && !channelIt->second.isOperator(client.getFd())) //test
+	else if (!channelIt->second.isOperator(client.getFd()))
 		_handleReply(client, AReply::getNReply(ERR_CHANOPRIVSNEEDED, *this, client, context));
 	else if (channelIt->second.isMember(userFd))
 	{
