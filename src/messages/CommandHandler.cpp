@@ -63,9 +63,7 @@ bool	CommandHandler::execCommand(Message& command, Client& client, Server& serve
 
 void	CommandHandler::_invite(const Message& command, Client& client, Server& server)
 {
-	std::string	channel = command.getParams()[1].empty() ? "" : command.getParams()[1];
-
-	server.inviteUser(client, command.getParams()[0], channel);
+	server.inviteUser(client, command.getParams()[0], command.getParams()[1]);
 }
 
 void	CommandHandler::_join(const Message& command, Client& client, Server& server)
@@ -92,10 +90,9 @@ void	CommandHandler::_join(const Message& command, Client& client, Server& serve
 void	CommandHandler::_kick(const Message& command, Client& client, Server& server)
 {
 	std::vector<std::string>	users = split(command.getParams()[1], ',');
-	std::string					reason = command.getParams()[2].empty() ? "" : command.getParams()[2];
 
 	for (size_t i = 0; i < users.size(); ++i)
-		server.kickUser(client, command.getParams()[0], users[i], reason);
+		server.kickUser(client, command.getParams()[0], users[i], command.getParams()[2]);
 }
 
 void	CommandHandler::_mode(const Message& command, Client& client, Server& server)
@@ -135,10 +132,7 @@ void	CommandHandler::_mode(const Message& command, Client& client, Server& serve
 
 void	CommandHandler::_nick(const Message& command, Client& client, Server& server)
 {
-	if (command.getParams().empty())
-		server.setClientNick(client, "");
-	else
-		server.setClientNick(client, command.getParams()[0]);
+	server.setClientNick(client, command.getParams()[0]);
 }
 
 void	CommandHandler::_part(const Message &command, Client &client, Server &server)
@@ -151,26 +145,19 @@ void	CommandHandler::_part(const Message &command, Client &client, Server &serve
 
 void	CommandHandler::_pass(const Message& command, Client& client, Server& server)
 {
-	if (command.getParams().empty())
-		server.authClient(client, "");
-	else
-		server.authClient(client, command.getParams()[0]);
+	server.authClient(client, command.getParams()[0]);
 }
 
 void	CommandHandler::_privmsg(const Message& command, Client& client, Server& server)
 {
-	std::vector<std::string>	clients;
-	std::string					message = command.getParams()[1].empty() ? "" : command.getParams()[1];
+	std::vector<std::string>	clients = split(command.getParams()[0], ',');
 
-	clients = split(command.getParams()[0], ',');
 	for (size_t i = 0; i < clients.size(); ++i)
-		server.sendMessage(client, clients[i], message);
+		server.sendMessage(client, clients[i], command.getParams()[1]);
 }
 
 void	CommandHandler::_quit(const Message& command, Client& client, Server& server)
 {
-	if (command.getParams().empty())
-		server.quitClient(client, "");
 	server.quitClient(client, command.getParams()[0]);
 }
 
@@ -179,20 +166,13 @@ void	CommandHandler::_topic(const Message& command, Client& client, Server& serv
 	if (command.getParams().size() == 1)
 		server.displayChannelTopic(client, command.getParams()[0]);
 	else
-	{
-		if (command.getParams()[1].empty()) server.setChannelTopic(client, command.getParams()[0], "");
-		else server.setChannelTopic(client, command.getParams()[0], command.getParams()[1]);
-	}
+		server.setChannelTopic(client, command.getParams()[0], command.getParams()[1]);
 }
 
 void	CommandHandler::_user(const Message& command, Client& client, Server& server)
 {
-	bool	success;
+	bool	success = server.setClientUser(client, command.getParams()[0]);
 
-	if (command.getParams().empty())
-		success = server.setClientUser(client, ""); // need more params (false)
-	else
-		success = server.setClientUser(client, command.getParams()[0]); //check if already registered, if it is, return false
 	if (success && command.getParams().size() == 4)
 		server.setClientName(client, command.getParams()[3]);
 }

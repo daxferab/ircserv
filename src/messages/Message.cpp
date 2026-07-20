@@ -2,6 +2,7 @@
 #include "colors.h"
 
 #include <algorithm>
+#include <cstring>
 #include <ios>
 #include <iostream>
 #include <sstream>
@@ -38,8 +39,8 @@ bool							Message::_parse(std::string& line)
 
 std::vector<std::string>		Message::_parseParams(std::stringstream& ss)
 {
-	std::vector<std::string> params;
-	std::string word;
+	std::string					word;
+	std::vector<std::string>	params;
 
 	while (ss >> word)
 	{
@@ -65,6 +66,8 @@ std::vector<std::string>		Message::_parseParams(std::stringstream& ss)
 		}
 		params.push_back(word);
 	}
+	for (int i = params.size(); i <= 5; i++)
+		params.push_back("");
 	return params;
 }
 
