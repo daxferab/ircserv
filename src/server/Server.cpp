@@ -372,7 +372,9 @@ void	Server::displayChannelTopic(Client& client, const std::string& channelName)
 	Channel*		channel = _getChannel(channelName);
 
 	_fillContext(context, "", channelName, "TOPIC", "");
-	if (!channel)
+	if (channelName.empty())
+		_handleReply(client, AReply::getNReply(ERR_NEEDMOREPARAMS, *this, client, context));
+	else if (!channel)
 		_handleReply(client, AReply::getNReply(ERR_NOSUCHCHANNEL, *this, client, context));
 	else if (channel->getTopic().empty())
 		_handleReply(client, AReply::getNReply(RPL_NOTOPIC, *this, client, context));
