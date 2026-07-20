@@ -292,10 +292,12 @@ void	Server::setClientNick(Client& client, const std::string& nick)
 	else if (client.getNick().empty())
 	{
 		client.setNick(nick);
-		_handleReply(client, AReply::getNReply(RPL_WELCOME, *this, client, context));
-		_handleReply(client, AReply::getNReply(RPL_ISUPPORT, *this, client, context));
 		if (!client.getUser().empty())
+		{
+			_handleReply(client, AReply::getNReply(RPL_WELCOME, *this, client, context));
+			_handleReply(client, AReply::getNReply(RPL_ISUPPORT, *this, client, context));
 			client.setRegistered();
+		}
 	}
 	else
 	{
@@ -435,7 +437,11 @@ bool	Server::setClientUser(Client& client, const std::string& user)
 	{
 		client.setUser(user);
 		if (!client.getNick().empty())
+		{
 			client.setRegistered();
+			_handleReply(client, AReply::getNReply(RPL_WELCOME, *this, client, context));
+			_handleReply(client, AReply::getNReply(RPL_ISUPPORT, *this, client, context));	
+		}
 		return true;
 	}
 	return false;
