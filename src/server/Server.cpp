@@ -738,8 +738,7 @@ bool	isReservedChar(char c)
 
 bool	setFdNonBlocking(int fd)
 {
-	int flags = fcntl(fd, F_GETFL);
-	if (flags < 0 || fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0)
+	if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0)
 		return false;
 	return true;
 }
