@@ -30,6 +30,8 @@ class CommandHandler
 		static bool	execCommand(Message& command, Client& client, Server& server);
 };
 
-std::vector<std::string> split(const std::string& str, char delimiter);
+std::vector<std::string>	split(const std::string& str, char delimiter);
+bool						isDcc(const std::string& message);
+bool						isChecksum(const std::string& message);
 
 #endif

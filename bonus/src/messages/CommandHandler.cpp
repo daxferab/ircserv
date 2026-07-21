@@ -151,28 +151,14 @@ void	CommandHandler::_pass(const Message& command, Client& client, Server& serve
 void	CommandHandler::_privmsg(const Message& command, Client& client, Server& server)
 {
 	std::vector<std::string>	clients = split(command.getParams()[0], ',');
+	const std::string			target = command.getParams()[0];
 	const std::string			message = command.getParams()[1];
-	const std::string			dccPrefix = std::string(1, '\x01') + "DCC SEND ";
-	std::string					fileName;
 
-	// if (message.find("SHA-256 checksum"))
-	// 	return ;
-	if (message.compare(0, dccPrefix.size(), dccPrefix) == 0)
-	{
-		size_t end = message.find('\x01', dccPrefix.size());
-		std::string payload = message.substr(dccPrefix.size(), end == std::string::npos ? std::string::npos : end - dccPrefix.size());
-		std::istringstream iss(payload);
-
-
-		if (iss >> fileName)
-		{
-			server.dccSendFile(client, command.getParams()[0], command.getParams()[1]);
-			return ;
-		}
-	}
-
-	for (size_t i = 0; i < clients.size(); ++i)
-		server.sendMessage(client, clients[i], command.getParams()[1]);
+	if (!isDcc(message) && !isChecksum(message))
+		for (size_t i = 0; i < clients.size(); ++i)
+			server.sendMessage(client, clients[i], command.getParams()[1]);
+	else
+		server.dccSendFile(client, command.getParams()[0], command.getParams()[1], isChecksum(message));
 }
 
 void	CommandHandler::_quit(const Message& command, Client& client, Server& server)
@@ -211,4 +197,26 @@ std::vector<std::string>	split(const std::string& str, char delimiter)
 	else if (str[str.length() - 1] == delimiter)
 		tokens.push_back("");
 	return tokens;
+}
+
+
+bool	isDcc(const std::string& message)
+{
+	const std::string	dccPrefix = std::string(1, '\x01') + "DCC SEND ";
+	std::string			fileName;
+
+	if (message.compare(0, dccPrefix.size(), dccPrefix) == 0)
+	{
+		size_t end = message.find('\x01', dccPrefix.size());
+		std::string payload = message.substr(dccPrefix.size(), end == std::string::npos ? std::string::npos : end - dccPrefix.size());
+		std::istringstream iss(payload);
+		
+		return (iss >> fileName);
+	}
+	return false;
+}
+
+bool	isChecksum(const std::string& message)
+{
+	return (message.find("SHA-256 checksum for") != std::string::npos);
 }

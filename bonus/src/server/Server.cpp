@@ -436,15 +436,15 @@ bool	Server::setClientUser(Client& client, const std::string& user)
 	return false;
 }
 
-void	Server::dccSendFile(Client& client, const std::string& target, const std::string& message)
+void	Server::dccSendFile(Client& client, const std::string& target, const std::string& message, bool isChecksum)
 {
 	t_rplContext	context;
 	int				targetFd = _getClientFd(target);
 
 	_fillContext(context, target, "", "PRIVMSG", message);
 
-		_handleReply(_clients.find(targetFd)->second, AReply::getReply(PRIVMSG, client, context));
-return;
+	if (isChecksum && _getClientFd(target) == -1)
+		return ;
 
 	if (target.empty())
 		_handleReply(client, AReply::getNReply(ERR_NORECIPIENT, *this, client, context));

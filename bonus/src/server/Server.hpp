@@ -75,7 +75,7 @@ class Server
 		void		setChannelTopic(Client& client, const std::string& channelName, const std::string& topic);
 		void		setClientName(Client& client, const std::string& name);
 		bool		setClientUser(Client& client, const std::string& user);
-		void		dccSendFile(Client& client, const std::string& target, const std::string& message);
+		void		dccSendFile(Client& client, const std::string& target, const std::string& message, bool isChecksum);
 
 };
 
