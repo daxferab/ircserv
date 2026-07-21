@@ -36,6 +36,7 @@ SOURCES +=	\
 			CommandHandler.cpp\
 			Message.cpp\
 			Server.cpp\
+			Bot.cpp\
 
 OBJECTS := $(addprefix $(OBJ_DIR), $(SOURCES:.cpp=.o))
 

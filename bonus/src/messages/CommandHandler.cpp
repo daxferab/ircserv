@@ -2,6 +2,7 @@
 #include "AReply.hpp"
 #include "Message.hpp"
 #include "Server.hpp"
+#include "Bot.hpp"
 
 #include <cstring>
 #include <sstream>
@@ -153,6 +154,12 @@ void	CommandHandler::_privmsg(const Message& command, Client& client, Server& se
 	std::vector<std::string>	clients = split(command.getParams()[0], ',');
 	const std::string			target = command.getParams()[0];
 	const std::string			message = command.getParams()[1];
+
+	if (server.getBot().isTarget(target))
+	{
+		server.getBot().handleCommand(message, client, server);
+		return ;
+	}
 
 	if (!isDcc(message) && !isChecksum(message))
 		for (size_t i = 0; i < clients.size(); ++i)

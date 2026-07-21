@@ -98,6 +98,11 @@ std::string	Server::getChannelMembers(const std::string& channelName) const
 	return list;
 }
 
+const Bot&	Server::getBot() const
+{
+	return _bot;
+}
+
 //----------------------------------------------------------------------MESSAGES
 
 void	Server::inviteUser(Client &client, const std::string& nick, const std::string& channelName)
@@ -454,6 +459,17 @@ void	Server::dccSendFile(Client& client, const std::string& target, const std::s
 		_handleReply(_clients.find(targetFd)->second, AReply::getReply(PRIVMSG, client, context));
 	else
 		_handleReply(client, AReply::getNReply(ERR_NOSUCHNICK, *this, client, context));
+}
+
+void Server::botResponse(const std::string response, Client& target)
+{
+	t_rplContext	context;
+	std::stringstream reply;
+
+	_fillContext(context, target.getNick(), "", "PRIVMSG", response);
+
+	reply << ":" << _bot.getName() << " PRIVMSG " << context.target << " :" << context.message << "\r\n";
+	_handleReply(target, reply.str());
 }
 
 // ---------------------------------------------------- PRIVATE MEMBER FUNCTIONS

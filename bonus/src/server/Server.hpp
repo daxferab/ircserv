@@ -4,6 +4,7 @@
 #include "AReply.hpp"
 #include "Channel.hpp"
 #include "Client.hpp"
+#include "Bot.hpp"
 
 #include <map>
 #include <netdb.h>
@@ -20,7 +21,8 @@ class Server
 		std::map<int, Client>			_clients;
 		std::map<std::string, Channel>	_channels;
 		const std::string				_password;
-
+		Bot								_bot;
+		
 		void		_setup(char* port);
 		bool		_createSocket(struct addrinfo *info);
 		void		_initEpoll();
@@ -58,6 +60,7 @@ class Server
 		std::string	getName() const;
 		std::string	getChannelMembers(const std::string& channelName) const;
 		std::string	getChannelTopic(const std::string& channelName) const;
+		const Bot&		getBot() const;
 
 		//--------------------------------------------------------------MESSAGES
 
@@ -76,6 +79,7 @@ class Server
 		void		setClientName(Client& client, const std::string& name);
 		bool		setClientUser(Client& client, const std::string& user);
 		void		dccSendFile(Client& client, const std::string& target, const std::string& message, bool isChecksum);
+		void		botResponse(const std::string response, Client& target);
 
 };
 
