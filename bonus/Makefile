@@ -17,7 +17,7 @@ DIRECTORIES = $(SRC_DIR) $(addprefix $(SRC_DIR), \
 INCLUDES = $(addprefix -I , $(DIRECTORIES))
 
 CXX= c++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g3 $(INCLUDES)
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 $(INCLUDES)
 
 #FILES
 
