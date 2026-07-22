@@ -4,27 +4,21 @@
 
 #include <iostream>
 
-Bot::Bot() : _name("Bot")
-{
-}
+//----------------------------------------------------------------- CONSTRUCTORS
 
-Bot::Bot(std::string name) : _name(name)
-{
-}
+Bot::Bot() : _name("Bot") {}
 
-Bot::~Bot()
-{
-}
+Bot::Bot(std::string name) : _name(name) {}
 
-std::string Bot::getName()
-{
-	return _name;
-}
+Bot::~Bot() {}
 
-bool Bot::isTarget(const std::string targetName) const
-{
-	return _name == targetName;
-}
+//------------------------------------------------------------ GETTERS / SETTERS
+
+std::string Bot::getName() const { return _name; }
+
+//------------------------------------------------------------- MEMBER FUNCTIONS
+
+bool Bot::isTarget(const std::string targetName) const { return _name == targetName; }
 
 void Bot::handleCommand(const std::string message, Client& target, Server& server) const
 {
@@ -33,12 +27,11 @@ void Bot::handleCommand(const std::string message, Client& target, Server& serve
 
 	if (firstWord[0] != '!')
 		return ;
-	
+
 	if (firstWord == "!Art")		response = "8====D";
 	else if (firstWord == "!Hello")	response = "Hola =3";
 	else if (firstWord == "!Bye")	response = "Bye =3";
 	else							response = "Try a valid command";
-	
+
 	server.botResponse(response, target);
-	
 }

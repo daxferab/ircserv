@@ -16,7 +16,7 @@ class Bot
 		Bot(std::string name);
 		~Bot();
 
-		std::string	getName();
+		std::string	getName() const;
 
 		bool		isTarget(const std::string targetName) const;
 		void		handleCommand(const std::string message, Client& target, Server& server) const;

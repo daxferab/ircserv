@@ -60,7 +60,7 @@ class Server
 		std::string	getName() const;
 		std::string	getChannelMembers(const std::string& channelName) const;
 		std::string	getChannelTopic(const std::string& channelName) const;
-		const Bot&		getBot() const;
+		const Bot&	getBot() const;
 
 		//--------------------------------------------------------------MESSAGES
 

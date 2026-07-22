@@ -98,10 +98,7 @@ std::string	Server::getChannelMembers(const std::string& channelName) const
 	return list;
 }
 
-const Bot&	Server::getBot() const
-{
-	return _bot;
-}
+const Bot&	Server::getBot() const { return _bot; }
 
 //----------------------------------------------------------------------MESSAGES
 
