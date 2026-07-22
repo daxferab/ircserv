@@ -737,6 +737,7 @@ bool	Server::_nickInUse(const std::string nick) const
 {
 	for (std::map<int, Client>::const_iterator it = _clients.begin(); it != _clients.end();it++)
 		if (it->second.getNick().compare(nick) == 0) return true;
+	if (_bot.getName().compare(nick) == 0) return true;
 	return false;
 }
 
